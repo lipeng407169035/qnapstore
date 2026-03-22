@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QNAP 產品圖片下載助手</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    h1 { color: #006ebd; }
+    .product-list { list-style: none; padding: 0; }
+    .product-list li { margin: 10px 0; }
+    .product-list a { display: block; padding: 15px; background: white; border-radius: 8px; text-decoration: none; color: #333; border: 1px solid #ddd; transition: all 0.3s; }
+    .product-list a:hover { border-color: #006ebd; box-shadow: 0 2px 8px rgba(0,110,189,0.2); }
+    .product-list a strong { color: #006ebd; }
+    .instructions { background: #e8f3fb; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .instructions h2 { margin-top: 0; color: #005097; }
+    .step { margin: 10px 0; padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <h1>📥 QNAP 產品圖片下載助手</h1>
+  
+  <div class="instructions">
+    <h2>使用方法：</h2>
+    <p class="step">1. 點擊下面的產品連結打開 QNAP 官網產品頁面</p>
+    <p class="step">2. 在頁面上找到產品圖片（通常在頁面頂部）</p>
+    <p class="step">3. 右鍵點擊圖片，選擇「另存圖片」</p>
+    <p class="step">4. 將圖片保存到對應的資料夾：</p>
+    <p style="margin-left: 40px; font-family: monospace; background: #fff; padding: 10px; border-radius: 4px;">
+      您的項目目錄/public/images/products/[產品型號]/1.jpg
+    </p>
+    <p class="step">5. 每個產品需要下載 6 張圖片（代號 1.jpg ~ 6.jpg）</p>
+    <p style="color: #666; margin-top: 15px;">💡 提示：圖片 1=正面圖，2=背面圖，3=側面圖，4=內部圖，5=包裝圖，6=配件圖</p>
+  </div>
+
+  <h2>產品列表（點擊下載）：</h2>
+  <ul class="product-list">
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-264" target="_blank"><strong>TS-264</strong> - 雙槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-464" target="_blank"><strong>TS-464</strong> - 四槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-233" target="_blank"><strong>TS-233</strong> - 雙槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-364" target="_blank"><strong>TS-364</strong> - 三槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-873a" target="_blank"><strong>TS-873A</strong> - 八槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-673a" target="_blank"><strong>TS-673A</strong> - 六槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/tvs-h874" target="_blank"><strong>TVS-h874</strong> - 八槽 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-1683xu-rp" target="_blank"><strong>TS-1683XU-RP</strong> - 機架式 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ts-832px" target="_blank"><strong>TS-832PX</strong> - 機架式 NAS</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/qsw-1105-5t" target="_blank"><strong>QSW-1105-5T</strong> - 5埠 2.5GbE 交換器</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/qsw-m408s" target="_blank"><strong>QSW-M408S</strong> - 網管交換器</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/qsw-m2116p" target="_blank"><strong>QSW-M2116P</strong> - PoE 交換器</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/ux-1200u-rp" target="_blank"><strong>UX-1200U-RP</strong> - 擴充設備</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/qxg-10g1t" target="_blank"><strong>QXG-10G1T</strong> - 10GbE 網卡</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/product/qxg-25g2sf" target="_blank"><strong>QXG-25G2SF</strong> - 25GbE 網卡</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/software/qvr-pro" target="_blank"><strong>LIC-NVR-4CH</strong> - QVR Pro 監控授權</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/software/vjbod-cloud" target="_blank"><strong>LIC-VJBOD-1Y</strong> - VJBOD Cloud</a></li>
+    <li><a href="https://www.qnap.com/zh-tw/warranty-extension" target="_blank"><strong>QEWS-2Y</strong> - 延長保固</a></li>
+  </ul>
+
+  <h2>圖片存放位置說明：</h2>
+  <pre style="background: #fff; padding: 15px; border-radius: 8px; overflow-x: auto;">
+項目目錄/public/images/products/
+├── TS-264/
+│   ├── 1.jpg  (正面)
+│   ├── 2.jpg  (背面)
+│   ├── 3.jpg  (側面)
+│   ├── 4.jpg  (內部)
+│   ├── 5.jpg  (包裝)
+│   └── 6.jpg  (配件)
+├── TS-464/
+│   └── ...
+  </pre>
+</body>
+</html>
