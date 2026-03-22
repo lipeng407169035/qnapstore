@@ -83,9 +83,9 @@ const defaultData = {
     { id: 'rev_5', productId: 'prod_10', userName: '黄建宏', rating: 5, comment: '即插即用，速度真的快很多！', createdAt: '2025-03-12' },
   ],
   banners: [
-    { id: 1, title: 'TS-464 四槽 NAS 热销中', subtitle: 'Intel N5095 四核心 · PCIe 扩展 · 2.5GbE × 2，家用旗舰首选', btnText: '立即购买 ¥ 4,399', link: 'TS-464', gradient: 'linear-gradient(135deg, #0d2137 0%, #006ebd 100%)', active: true, sort: 1 },
-    { id: 2, title: 'QSW-1105-5T 全口 2.5GbE', subtitle: '无风扇静音 · 即插即用 · 5 口全升速，轻松打造高速家庭网络', btnText: '立即购买 ¥ 662', link: 'QSW-1105-5T', gradient: 'linear-gradient(135deg, #0d2a0d 0%, #0a7c3e 100%)', active: true, sort: 2 },
-    { id: 3, title: '春季特卖，折扣最高 30%', subtitle: '精选 NAS、交换机、内存限时优惠，加购延长质保更划算！', btnText: '查看特卖商品', link: '?badge=sale', gradient: 'linear-gradient(135deg, #1d3557 0%, #4a0080 100%)', active: true, sort: 3 },
+    { id: 1, title: 'TS-464 四槽 NAS 热销中', subtitle: 'Intel N5095 四核心 · PCIe 扩展 · 2.5GbE × 2，家用旗舰首选', btnText: '立即购买 ¥ 4,399', link: 'TS-464', gradient: 'linear-gradient(135deg, #0d2137 0%, #006ebd 100%)', image: '', active: true, sort: 1 },
+    { id: 2, title: 'QSW-1105-5T 全口 2.5GbE', subtitle: '无风扇静音 · 即插即用 · 5 口全升速，轻松打造高速家庭网络', btnText: '立即购买 ¥ 662', link: 'QSW-1105-5T', gradient: 'linear-gradient(135deg, #0d2a0d 0%, #0a7c3e 100%)', image: '', active: true, sort: 2 },
+    { id: 3, title: '春季特卖，折扣最高 30%', subtitle: '精选 NAS、交换机、内存限时优惠，加购延长质保更划算！', btnText: '查看特卖商品', link: '?badge=sale', gradient: 'linear-gradient(135deg, #1d3557 0%, #4a0080 100%)', image: '', active: true, sort: 3 },
   ],
   announcements: [
     { id: 1, text: '🚚 全国包邮（订单满 ¥299）', active: true, sort: 1 },

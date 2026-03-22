@@ -117,6 +117,29 @@ app.delete('/api/admin/banners/:id', (req, res) => {
   res.json({ success: true });
 });
 
+const bannerUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dir = path.join(process.cwd(), 'public', 'images', 'banners');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(svg|png|jpg|jpeg|webp)$/i;
+    cb(null, allowed.test(file.originalname));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+app.post('/api/admin/banners/upload', bannerUpload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  res.json({ url: `/images/banners/${req.file.filename}` });
+});
+
 // ============ Announcements ============
 
 app.get('/api/announcements', (req, res) => {
