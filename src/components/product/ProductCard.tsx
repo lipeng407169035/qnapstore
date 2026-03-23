@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import { Product } from '@/types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, memo } from 'react';
 import { useCartStore, useWishlistStore } from '@/store';
 import { toast } from '@/components/ui/Toast';
@@ -12,6 +13,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard = memo(function ProductCard({ product, onAddToCart, imageUrl }: ProductCardProps) {
+  const router = useRouter();
   const [imageSrc, setImageSrc] = useState(imageUrl || '');
   const [loaded, setLoaded] = useState(!!imageUrl);
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
@@ -24,8 +26,6 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
       setLoaded(true);
       return;
     }
-    setLoaded(false);
-    setImageSrc('');
     fetch(`/api/images/${product.sku}`)
       .then(r => r.json())
       .then((files: { url: string }[]) => {
@@ -66,8 +66,8 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
       toast.warning('最多只能对比4个商品');
       return;
     }
-    window.location.href = `/compare${params.toString() ? '?' + params.toString() : ''}`;
-  }, [product.sku]);
+    router.push(`/compare${params.toString() ? '?' + params.toString() : ''}`);
+  }, [product.sku, router]);
 
   const inWishlist = isInWishlist(product.id);
 

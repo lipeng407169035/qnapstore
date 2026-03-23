@@ -81,14 +81,14 @@ export default function CartPage() {
                   <p className="font-barlow font-bold text-orange text-sm md:hidden">¥ {(item.product.price * item.quantity).toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-                  <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} className="w-7 h-7 md:w-8 md:h-8 bg-gray-100 rounded font-bold hover:bg-gray-200">-</button>
-                  <span className="w-6 md:w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.productId, item.quantity + 1)} className="w-7 h-7 md:w-8 md:h-8 bg-gray-100 rounded font-bold hover:bg-gray-200">+</button>
+                  <button onClick={() => updateQuantity(item.productId, item.quantity - 1)} className="w-7 h-7 md:w-8 md:h-8 bg-gray-100 rounded font-bold hover:bg-gray-200" aria-label="减少数量">-</button>
+                  <span className="w-6 md:w-8 text-center font-semibold text-sm" aria-label={`数量: ${item.quantity}`}>{item.quantity}</span>
+                  <button onClick={() => updateQuantity(item.productId, item.quantity + 1)} className="w-7 h-7 md:w-8 md:h-8 bg-gray-100 rounded font-bold hover:bg-gray-200" aria-label="增加数量">+</button>
                 </div>
                 <div className="text-right w-24 md:w-28 flex-shrink-0 hidden md:block">
                   <p className="font-barlow font-bold text-orange">¥ {(item.product.price * item.quantity).toLocaleString()}</p>
                 </div>
-                <button onClick={() => removeItem(item.productId)} className="text-muted hover:text-red-500 p-1 flex-shrink-0">✕</button>
+                <button onClick={() => removeItem(item.productId)} className="text-muted hover:text-red-500 p-1 flex-shrink-0" aria-label="移除商品">✕</button>
               </div>
             ))}
           </div>

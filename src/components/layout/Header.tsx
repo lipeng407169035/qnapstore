@@ -99,7 +99,7 @@ export function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 border-none bg-transparent px-3 md:px-4 py-2 text-sm outline-none"
                 />
-                <button type="submit" className="bg-blue text-white px-3 md:px-5 py-2 text-sm hover:bg-blue-dark transition-colors">
+                <button type="submit" aria-label="搜索" className="bg-blue text-white px-3 md:px-5 py-2 text-sm hover:bg-blue-dark transition-colors">
                   🔍
                 </button>
               </div>

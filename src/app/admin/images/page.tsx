@@ -113,7 +113,7 @@ export default function AdminImagesPage() {
         await fetchImages(selectedSku);
       }
     } catch (err) {
-      console.error('Upload failed:', err);
+      toast.error('上传失败，请重试');
     }
     setUploading(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -126,7 +126,7 @@ export default function AdminImagesPage() {
       await fetch(`/api/admin/images/${selectedSku}/${filename}`, { method: 'DELETE' });
       setImages(prev => prev.filter(img => img.name !== filename));
     } catch (err) {
-      console.error('Delete failed:', err);
+      toast.error('删除失败，请重试');
     }
     setDeleting(null);
   };

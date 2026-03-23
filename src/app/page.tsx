@@ -308,8 +308,8 @@ export default function HomePage() {
             <h2 className="font-barlow text-2xl md:text-3xl font-extrabold mb-3">订阅电子报</h2>
             <p className="text-white/70 mb-6 max-w-md mx-auto text-sm">第一时间获得新产品发布、限时优惠与技术文章的独家资讯</p>
             <form className="flex gap-3 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="输入您的电子邮件" className="flex-1 px-5 py-3 rounded-xl text-gray-900 text-sm outline-none" />
-              <button type="submit" className="bg-orange text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-dark transition-colors whitespace-nowrap">订阅</button>
+              <input type="email" placeholder="输入您的电子邮件" aria-label="电子邮件地址" className="flex-1 px-5 py-3 rounded-xl text-gray-900 text-sm outline-none" />
+              <button type="submit" aria-label="订阅电子报" className="bg-orange text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-dark transition-colors whitespace-nowrap">订阅</button>
             </form>
             <p className="text-white/40 text-xs mt-3">我们重视您的隐私，不会发送垃圾邮件</p>
           </div>

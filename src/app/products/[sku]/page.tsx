@@ -137,7 +137,7 @@ export default function ProductDetailPage() {
             <span>/</span>
             <Link href="/products" className="hover:text-blue">商品列表</Link>
             <span>/</span>
-            <Link href={`/products?category=${(product as any).categorySlug}`} className="hover:text-blue">{(product as any).categoryName}</Link>
+            <Link href={`/products?category=${product.categorySlug}`} className="hover:text-blue">{product.categoryName}</Link>
             <span>/</span>
             <span className="text-gray-700">{product.name}</span>
           </div>
@@ -170,7 +170,7 @@ export default function ProductDetailPage() {
           </div>
 
           <div>
-            <span className="text-xs text-blue font-semibold uppercase tracking-wide">{(product as any).categoryName || product.series}</span>
+            <span className="text-xs text-blue font-semibold uppercase tracking-wide">{product.categoryName || product.series}</span>
             <h1 className="font-barlow text-3xl font-extrabold text-gray-900 mt-1 mb-4">{product.name}</h1>
             
             <div className="flex items-center gap-3 mb-4">
@@ -291,8 +291,9 @@ export default function ProductDetailPage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">您的姓名</label>
+                      <label htmlFor="review-name" className="block text-sm font-medium mb-2">您的姓名</label>
                       <input
+                        id="review-name"
                         type="text"
                         value={reviewName}
                         onChange={e => setReviewName(e.target.value)}
@@ -301,7 +302,7 @@ export default function ProductDetailPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">评分</label>
+                      <span className="block text-sm font-medium mb-2">评分</span>
                       <div className="flex gap-2">
                         {[1, 2, 3, 4, 5].map(star => (
                           <button
@@ -318,8 +319,9 @@ export default function ProductDetailPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-2">评论内容</label>
+                      <label htmlFor="review-comment" className="block text-sm font-medium mb-2">评论内容</label>
                       <textarea
+                        id="review-comment"
                         value={reviewComment}
                         onChange={e => setReviewComment(e.target.value)}
                         placeholder="分享您的使用心得..."
