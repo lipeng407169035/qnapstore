@@ -123,7 +123,7 @@ export default function AdminSettingsPage() {
           <h2 className="text-lg font-bold mb-4">运费设置</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">免运费门槛 (NT$)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">免运费门槛 (¥)</label>
               <input
                 type="number"
                 value={settings.freeShippingAmount}
@@ -133,7 +133,7 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">运费 (NT$)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">运费 (¥)</label>
               <input
                 type="number"
                 value={settings.shippingFee}

@@ -320,7 +320,7 @@ export default function AdminProductsPage() {
                   <input type="text" value={formData.series || ''} onChange={(e) => setFormData({ ...formData, series: e.target.value })} className="w-full px-4 py-2 border rounded-xl text-sm" />
                 </div>
                 <div className="col-span-2">
-                  <label className="text-sm text-gray-500 block mb-1">商品名稱</label>
+                  <label className="text-sm text-gray-500 block mb-1">商品名称</label>
                   <input type="text" value={formData.name || ''} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border rounded-xl text-sm" />
                 </div>
                 <div>
@@ -332,7 +332,7 @@ export default function AdminProductsPage() {
                   <input type="number" value={formData.originalPrice || ''} onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value ? parseInt(e.target.value) : null })} className="w-full px-4 py-2 border rounded-xl text-sm" />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500 block mb-1">分類</label>
+                  <label className="text-sm text-gray-500 block mb-1">分类</label>
                   <select value={formData.categorySlug || 'home-nas'} onChange={(e) => {
                     const cat = CATEGORIES.find(c => c.slug === e.target.value);
                     setFormData({ ...formData, categorySlug: e.target.value, categoryName: cat?.name || '' });
@@ -369,7 +369,7 @@ export default function AdminProductsPage() {
               </div>
 
               <div>
-                <label className="text-sm text-gray-500 block mb-2">商品規格</label>
+                <label className="text-sm text-gray-500 block mb-2">商品规格</label>
                 <div className="space-y-2">
                   {specEntries.map((entry, index) => (
                     <div key={index} className="flex gap-2">
@@ -377,20 +377,20 @@ export default function AdminProductsPage() {
                         type="text"
                         value={entry.key}
                         onChange={(e) => handleSpecChange(index, 'key', e.target.value)}
-                        placeholder="規格名稱 (如：CPU)"
+                        placeholder="规格名称 (如：CPU)"
                         className="flex-1 px-4 py-2 border rounded-xl text-sm"
                       />
                       <input
                         type="text"
                         value={entry.value}
                         onChange={(e) => handleSpecChange(index, 'value', e.target.value)}
-                        placeholder="規格值 (如：Intel Celeron N5105)"
+                        placeholder="规格值 (如：Intel Celeron N5105)"
                         className="flex-1 px-4 py-2 border rounded-xl text-sm"
                       />
                       <button onClick={() => handleRemoveSpec(index)} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm">✕</button>
                     </div>
                   ))}
-                  <button onClick={handleAddSpec} className="text-sm text-blue hover:underline">+ 新增規格</button>
+                  <button onClick={handleAddSpec} className="text-sm text-blue hover:underline">+ 新增规格</button>
                 </div>
               </div>
 

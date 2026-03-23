@@ -949,30 +949,6 @@ app.put('/api/admin/email-templates/:key', requireAdmin, (req, res) => {
   res.json(db.emailTemplates[key]);
 });
 
-// ============ Popular Searches ============
-
-app.get('/api/admin/popular-searches', requireAdmin, (req, res) => {
-  const db = loadDB();
-  res.json(db.popularSearches || []);
-});
-
-app.put('/api/admin/popular-searches', requireAdmin, (req, res) => {
-  const db = loadDB();
-  db.popularSearches = req.body;
-  saveDB(db);
-  res.json(db.popularSearches);
-});
-
-app.delete('/api/admin/activities/:id', requireAdmin, (req, res) => {
-  const db = loadDB();
-  if (!db.activities) return res.status(404).json({ error: 'No activities found' });
-  const index = db.activities.findIndex(a => a.id === req.params.id);
-  if (index === -1) return res.status(404).json({ error: 'Activity not found' });
-  db.activities.splice(index, 1);
-  saveDB(db);
-  res.json({ success: true });
-});
-
 app.get('/api/activities', (req, res) => {
   const db = loadDB();
   const now = new Date();
@@ -983,22 +959,6 @@ app.get('/api/activities', (req, res) => {
     return true;
   });
   res.json(active);
-});
-
-// ============ Email Templates ============
-
-app.get('/api/admin/email-templates', requireAdmin, (req, res) => {
-  const db = loadDB();
-  res.json(db.settings.emailTemplates || {});
-});
-
-app.put('/api/admin/email-templates/:type', requireAdmin, (req, res) => {
-  const db = loadDB();
-  const { type } = req.params;
-  if (!db.settings.emailTemplates) db.settings.emailTemplates = {};
-  db.settings.emailTemplates[type] = { ...db.settings.emailTemplates[type], ...req.body };
-  saveDB(db);
-  res.json(db.settings.emailTemplates[type]);
 });
 
 // ============ Product Review Recalculate ============

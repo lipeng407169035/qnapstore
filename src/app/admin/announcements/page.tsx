@@ -139,7 +139,7 @@ export default function AdminAnnouncementsPage() {
                   onChange={(e) => setFormData({...formData, text: e.target.value})}
                   className="w-full px-4 py-2 border rounded-xl text-sm"
                   rows={3}
-                  placeholder="例如：🚚 全国包邮（订单满 NT$3,000）"
+                  placeholder="例如：🚚 全国包邮（订单满 ¥3,000）"
                 />
               </div>
               <div>
