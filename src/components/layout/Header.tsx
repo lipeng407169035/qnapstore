@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCartStore, useUserStore, useWishlistStore } from '@/store';
 
 export function Header() {
@@ -11,11 +11,14 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { getCount } = useCartStore();
   const { user } = useUserStore();
   const { getCount: getWishlistCount } = useWishlistStore();
-  const cartCount = getCount();
-  const wishlistCount = getWishlistCount();
+  const cartCount = mounted ? getCount() : 0;
+  const wishlistCount = mounted ? getWishlistCount() : 0;
+
+  useEffect(() => { setMounted(true); }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +112,7 @@ export function Header() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span className="hidden sm:inline">{user ? user.name : '登录'}</span>
+                <span className="hidden sm:inline" suppressHydrationWarning>{mounted && user ? user.name : '登录'}</span>
               </Link>
               <Link href="/wishlist" className="flex flex-col items-center gap-0.5 text-gray-500 hover:text-blue transition-colors text-[10px] md:text-[11px] p-1 relative">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

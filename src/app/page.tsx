@@ -16,8 +16,11 @@ export default function HomePage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [popularSearches, setPopularSearches] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const { addItem } = useCartStore();
   const { items: recentItems } = useRecentlyViewedStore();
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     Promise.all([
@@ -356,7 +359,7 @@ export default function HomePage() {
       )}
 
       {/* Recently Viewed */}
-      {recentItems.length > 0 && (
+      {mounted && recentItems.length > 0 && (
         <section className="py-8 bg-gray-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex items-center justify-between mb-4">
