@@ -299,7 +299,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="text-center md:text-left flex-1">
               <span className="text-white/50 text-sm">关于 QNAP</span>
-              <h2 className="font-barlow text-2xl md:text-3xl font-extrabold mt-2 mb-4">二十年专注，存储无界</h2>
+              <h2 className="font-barlow text-2xl md:text-3xl font-extrabold mt-2 mb-4">二十二年专注，存储无界</h2>
               <p className="text-white/70 text-sm md:text-base leading-relaxed mb-6">
                 QNAP 成立于 2004 年，专注于网络存储设备的研发与制造。我们的 NAS 产品畅销全球 180+ 国家与地区，为超过 100 万用户提供安全可靠的数据存储解决方案。
               </p>
