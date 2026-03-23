@@ -33,7 +33,7 @@ export default function AdminBatchShipPage() {
       });
     }
     toast.success(`已为 ${selected.length} 个订单批量发货！`);
-    setOrders(orders.map(o => selected.includes(o.id) ? { ...o, status: 'shipped' } : o));
+    setOrders(prev => prev.map(o => selected.includes(o.id) ? { ...o, status: 'shipped' } : o));
     setSelected([]);
   };
 

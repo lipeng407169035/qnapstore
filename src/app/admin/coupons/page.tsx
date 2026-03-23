@@ -69,7 +69,7 @@ export default function AdminCouponsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      setCoupons(coupons.map(c => c.id === formData.id ? { ...c, ...formData } as Coupon : c));
+      setCoupons(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData } as Coupon : c));
     } else {
       const res = await fetch('/api/admin/coupons', {
         method: 'POST',
@@ -77,7 +77,7 @@ export default function AdminCouponsPage() {
         body: JSON.stringify(formData),
       });
       const newCoupon = await res.json();
-      setCoupons([...coupons, newCoupon]);
+      setCoupons(prev => [...prev, newCoupon]);
     }
     setIsEditing(false);
   };
@@ -85,7 +85,7 @@ export default function AdminCouponsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除此优惠券吗？')) return;
     await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
-    setCoupons(coupons.filter(c => c.id !== id));
+    setCoupons(prev => prev.filter(c => c.id !== id));
   };
 
   const handleToggle = async (coupon: Coupon) => {
@@ -95,7 +95,7 @@ export default function AdminCouponsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
     });
-    setCoupons(coupons.map(c => c.id === coupon.id ? updated : c));
+    setCoupons(prev => prev.map(c => c.id === coupon.id ? updated : c));
   };
 
   const isExpired = (coupon: Coupon) => new Date(coupon.endDate) < new Date();
@@ -154,7 +154,7 @@ export default function AdminCouponsPage() {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">{getDiscountDisplay(coupon)}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {coupon.minOrderAmount > 0 ? `NT$ ${coupon.minOrderAmount.toLocaleString()}` : '无限制'}
+                    {coupon.minOrderAmount > 0 ? `¥ ${coupon.minOrderAmount.toLocaleString()}` : '无限制'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     <div>{coupon.startDate}</div>
@@ -212,12 +212,12 @@ export default function AdminCouponsPage() {
                     className="w-full px-4 py-2 border rounded-xl text-sm"
                   >
                     <option value="percentage">百分比 (%)</option>
-                    <option value="fixed">固定金额 (NT$)</option>
+                    <option value="fixed">固定金额 (¥)</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-sm text-gray-500 block mb-1">
-                    {formData.discountType === 'percentage' ? '折扣百分比 (%)' : '折扣金额 (NT$)'}
+                    {formData.discountType === 'percentage' ? '折扣百分比 (%)' : '折扣金额 (¥)'}
                   </label>
                   <input
                     type="number"
@@ -228,7 +228,7 @@ export default function AdminCouponsPage() {
                 </div>
               </div>
               <div>
-                <label className="text-sm text-gray-500 block mb-1">最高折扣金额 (NT$)</label>
+                  <label className="text-sm text-gray-500 block mb-1">最高折扣金额 (¥)</label>
                 <input
                   type="number"
                   value={formData.maxDiscount || ''}
@@ -238,7 +238,7 @@ export default function AdminCouponsPage() {
                 />
               </div>
               <div>
-                <label className="text-sm text-gray-500 block mb-1">最低消费金额 (NT$)</label>
+                  <label className="text-sm text-gray-500 block mb-1">最低消费金额 (¥)</label>
                 <input
                   type="number"
                   value={formData.minOrderAmount || 0}

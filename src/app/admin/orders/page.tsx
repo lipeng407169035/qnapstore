@@ -53,7 +53,7 @@ function OrdersContent() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
     });
-    setOrders(orders.map(o => o.id === orderId ? { ...o, status } : o));
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
     setSelectedOrder(null);
   };
 

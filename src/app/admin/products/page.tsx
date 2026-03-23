@@ -72,7 +72,7 @@ export default function AdminProductsPage() {
   const handleDelete = async (productId: string) => {
     if (!confirm('确定要删除此商品吗？')) return;
     await fetch(`/api/admin/products/${productId}`, { method: 'DELETE' });
-    setProducts(products.filter(p => p.id !== productId));
+    setProducts(prev => prev.filter(p => p.id !== productId));
   };
 
   const handleSave = async () => {
@@ -88,7 +88,7 @@ export default function AdminProductsPage() {
     });
 
     const updated = await res.json();
-    setProducts(products.map(p => p.id === updated.id ? { ...updated, specs: JSON.stringify(specs) } : p));
+    setProducts(prev => prev.map(p => p.id === updated.id ? { ...updated, specs: JSON.stringify(specs) } : p));
     setIsEditing(false);
     setSelectedProduct(null);
   };

@@ -61,9 +61,9 @@ export default function AdminBannersPage() {
     });
     const updated = await res.json();
     if (editItem.id) {
-      setBanners(banners.map(b => b.id === updated.id ? updated : b));
+      setBanners(prev => prev.map(b => b.id === updated.id ? updated : b));
     } else {
-      setBanners([...banners, updated]);
+      setBanners(prev => [...prev, updated]);
     }
     setShowModal(false);
   }
@@ -71,7 +71,7 @@ export default function AdminBannersPage() {
   async function handleDelete(id: number) {
     if (!confirm('确定删除？')) return;
     await fetch(`/api/admin/banners/${id}`, { method: 'DELETE' });
-    setBanners(banners.filter(b => b.id !== id));
+    setBanners(prev => prev.filter(b => b.id !== id));
   }
 
   async function handleLocalUpload(e: React.ChangeEvent<HTMLInputElement>) {

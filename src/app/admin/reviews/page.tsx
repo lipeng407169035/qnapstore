@@ -31,7 +31,7 @@ export default function AdminReviewsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ approved: true }),
     });
-    setReviews(reviews.map(r => r.id === id ? { ...r, approved: true } : r));
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: true } : r));
   };
 
   const handleReject = async (id: string) => {
@@ -40,13 +40,13 @@ export default function AdminReviewsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ approved: false }),
     });
-    setReviews(reviews.map(r => r.id === id ? { ...r, approved: false } : r));
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: false } : r));
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除此评论吗？')) return;
     await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
-    setReviews(reviews.filter(r => r.id !== id));
+    setReviews(prev => prev.filter(r => r.id !== id));
   };
 
   const pending = reviews.filter(r => !r.approved);

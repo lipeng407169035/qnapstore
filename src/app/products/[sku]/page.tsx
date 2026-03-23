@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
     }).catch(() => {
       router.push('/products');
     });
-  }, [sku, router, addToRecent]);
+  }, [sku, router]);
 
   const handleAddToCart = () => {
     if (product) {
