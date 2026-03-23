@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { User } from '@/types';
 
@@ -8,7 +9,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/users')
+    adminFetch('/api/admin/users')
       .then(res => res.json())
       .then(data => {
         setUsers(data);

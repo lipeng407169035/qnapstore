@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 
 interface Submission {
@@ -27,12 +28,12 @@ export default function AdminWarrantyPage() {
   function fetchSubs() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/warranty-submissions?status=${statusFilter}` : '/api/admin/warranty-submissions';
-    fetch(url).then(r => r.json()).then(data => { setSubs(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
+    adminFetch(url).then(r => r.json()).then(data => { setSubs(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
   }
 
   async function handleUpdate() {
     if (!detail) return;
-    await fetch(`/api/admin/warranty-submissions/${detail.id}`, {
+    await adminFetch(`/api/admin/warranty-submissions/${detail.id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, notes }),
     });

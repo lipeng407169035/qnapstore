@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ImageFile } from '@/types';
@@ -24,7 +25,7 @@ export default function AdminImagesPage() {
   const [confirmDelete, setConfirmDelete] = useState<{ sku: string; name: string } | null>(null);
 
   const fetchProducts = useCallback(() => {
-    fetch('/api/admin/products')
+    adminFetch('/api/admin/products')
       .then(res => res.json())
       .then(data => {
         setProducts(data);
@@ -33,7 +34,7 @@ export default function AdminImagesPage() {
   }, []);
 
   const fetchImages = useCallback((sku: string) => {
-    fetch(`/api/images/${sku}`)
+    adminFetch(`/api/images/${sku}`)
       .then(res => res.json())
       .then(data => setImages(data))
       .catch(() => setImages([]));
@@ -58,7 +59,7 @@ export default function AdminImagesPage() {
     }
     setAddingSku(true);
     const sku = newSku.trim().toUpperCase();
-    await fetch('/api/admin/products', {
+    await adminFetch('/api/admin/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -87,7 +88,7 @@ export default function AdminImagesPage() {
   };
 
   const handleDeleteSku = async (sku: string) => {
-    await fetch(`/api/admin/products/${products.find(p => p.sku === sku)?.id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/products/${products.find(p => p.sku === sku)?.id}`, { method: 'DELETE' });
     fetchProducts();
     if (selectedSku === sku) setSelectedSku('');
     setConfirmDelete(null);
@@ -105,7 +106,7 @@ export default function AdminImagesPage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/images/${selectedSku}`, {
+      const res = await adminFetch(`/api/admin/images/${selectedSku}`, {
         method: 'POST',
         body: formData,
       });
@@ -123,7 +124,7 @@ export default function AdminImagesPage() {
     if (!confirm(`确定要删除 ${filename} 吗？`)) return;
     setDeleting(filename);
     try {
-      await fetch(`/api/admin/images/${selectedSku}/${filename}`, { method: 'DELETE' });
+      await adminFetch(`/api/admin/images/${selectedSku}/${filename}`, { method: 'DELETE' });
       setImages(prev => prev.filter(img => img.name !== filename));
     } catch (err) {
       toast.error('删除失败，请重试');

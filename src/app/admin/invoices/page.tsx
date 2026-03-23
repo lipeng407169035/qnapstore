@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { Invoice } from '@/types';
 
 export default function AdminInvoicesPage() {
@@ -9,7 +10,7 @@ export default function AdminInvoicesPage() {
   const [form, setForm] = useState({ orderNo: '', type: '电子发票', title: '个人', taxNo: '', email: '', amount: '' });
 
   useEffect(() => {
-    fetch('/api/admin/invoices').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/invoices').then(r => r.json()).then(data => {
       setInvoices(data);
       setLoading(false);
     });
@@ -58,11 +59,11 @@ export default function AdminInvoicesPage() {
                     {inv.status === '申请中' && (
                       <div className="flex gap-2">
                         <button onClick={async () => {
-                          await fetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已开票' }) });
+                          await adminFetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已开票' }) });
                           setInvoices(invoices.map(i => i.id === inv.id ? { ...i, status: '已开票' } : i));
                         }} className="text-green-600 text-sm hover:underline">开票</button>
                         <button onClick={async () => {
-                          await fetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已作废' }) });
+                          await adminFetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已作废' }) });
                           setInvoices(invoices.map(i => i.id === inv.id ? { ...i, status: '已作废' } : i));
                         }} className="text-red-500 text-sm hover:underline">作废</button>
                       </div>

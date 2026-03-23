@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 
 interface FAQItem { id: number; category: string; question: string; answer: string; sortOrder: number; }
@@ -16,7 +17,7 @@ export default function AdminFAQPage() {
 
   function fetchFaq() {
     setLoading(true);
-    fetch('/api/admin/faq').then(r => r.json()).then(data => { setFaq(data); setLoading(false); });
+    adminFetch('/api/admin/faq').then(r => r.json()).then(data => { setFaq(data); setLoading(false); });
   }
 
   function openAdd() { setEditItem({ category: '产品使用', sortOrder: 1 }); setShowModal(true); }
@@ -26,14 +27,14 @@ export default function AdminFAQPage() {
     if (!editItem.question || !editItem.answer) return;
     const method = editItem.id ? 'PUT' : 'POST';
     const url = editItem.id ? `/api/admin/faq/${editItem.id}` : '/api/admin/faq';
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editItem) });
+    await adminFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editItem) });
     setShowModal(false);
     fetchFaq();
   }
 
   async function handleDelete(id: number) {
     if (!confirm('确定删除？')) return;
-    await fetch(`/api/admin/faq/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/faq/${id}`, { method: 'DELETE' });
     fetchFaq();
   }
 

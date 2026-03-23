@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { toast } from '@/components/ui/Toast';
 
 export default function AdminPopularSearchesPage() {
@@ -8,14 +9,14 @@ export default function AdminPopularSearchesPage() {
   const [newWord, setNewWord] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/popular-searches').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/popular-searches').then(r => r.json()).then(data => {
       setSearches(data);
       setLoading(false);
     });
   }, []);
 
   const handleSave = async () => {
-    await fetch('/api/admin/popular-searches', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ searches }) });
+    await adminFetch('/api/admin/popular-searches', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ searches }) });
     toast.success('保存成功！');
   };
 

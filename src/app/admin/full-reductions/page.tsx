@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { toast } from '@/components/ui/Toast';
 
 interface FullReduction {
@@ -21,7 +22,7 @@ export default function AdminFullReductionsPage() {
   const [form, setForm] = useState({ name: '', threshold: 0, discount: 0, type: 'fixed' as 'fixed' | 'percentage', startDate: '', endDate: '', active: true });
 
   const loadActivities = () => {
-    fetch('/api/admin/full-reductions')
+    adminFetch('/api/admin/full-reductions')
       .then(r => r.json())
       .then(data => { setActivities(data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -47,7 +48,7 @@ export default function AdminFullReductionsPage() {
 
     try {
       if (editing) {
-        const res = await fetch(`/api/admin/full-reductions/${editing.id}`, {
+        const res = await adminFetch(`/api/admin/full-reductions/${editing.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),
@@ -55,7 +56,7 @@ export default function AdminFullReductionsPage() {
         const updated = await res.json();
         setActivities(activities.map(a => a.id === editing.id ? updated : a));
       } else {
-        const res = await fetch('/api/admin/full-reductions', {
+        const res = await adminFetch('/api/admin/full-reductions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(form),
@@ -69,7 +70,7 @@ export default function AdminFullReductionsPage() {
 
   const handleToggle = async (a: FullReduction) => {
     try {
-      const res = await fetch(`/api/admin/full-reductions/${a.id}`, {
+      const res = await adminFetch(`/api/admin/full-reductions/${a.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...a, active: !a.active }),
@@ -82,7 +83,7 @@ export default function AdminFullReductionsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除此活动？')) return;
     try {
-      await fetch(`/api/admin/full-reductions/${id}`, { method: 'DELETE' });
+      await adminFetch(`/api/admin/full-reductions/${id}`, { method: 'DELETE' });
       setActivities(activities.filter(a => a.id !== id));
     } catch { toast.error('删除失败'); }
   };

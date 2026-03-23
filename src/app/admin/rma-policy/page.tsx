@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/Toast';
 
@@ -8,14 +9,14 @@ export default function AdminRmaPolicyPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/settings/rma-policy')
+    adminFetch('/api/admin/settings/rma-policy')
       .then(r => r.json())
       .then(data => setContent(data.content || ''));
   }, []);
 
   async function handleSave() {
     setSaving(true);
-    await fetch('/api/admin/settings/rma-policy', {
+    await adminFetch('/api/admin/settings/rma-policy', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content }),
     });

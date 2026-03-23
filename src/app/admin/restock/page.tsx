@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 
 export default function AdminRestockPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -7,7 +8,7 @@ export default function AdminRestockPage() {
   const [threshold, setThreshold] = useState(20);
 
   useEffect(() => {
-    fetch('/api/admin/restock-notifications').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/restock-notifications').then(r => r.json()).then(data => {
       setProducts(data);
       setLoading(false);
     });

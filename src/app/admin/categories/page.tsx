@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { Category } from '@/types';
 
@@ -10,7 +11,7 @@ export default function AdminCategoriesPage() {
   const [formData, setFormData] = useState<Partial<Category>>({});
 
   useEffect(() => {
-    fetch('/api/admin/categories')
+    adminFetch('/api/admin/categories')
       .then(res => res.json())
       .then(data => {
         setCategories(data);
@@ -37,14 +38,14 @@ export default function AdminCategoriesPage() {
 
   const handleSave = async () => {
     if (formData.id) {
-      await fetch(`/api/admin/categories/${formData.id}`, {
+      await adminFetch(`/api/admin/categories/${formData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       setCategories(categories.map(c => c.id === formData.id ? { ...c, ...formData } as Category : c));
     } else {
-      const res = await fetch('/api/admin/categories', {
+      const res = await adminFetch('/api/admin/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -57,7 +58,7 @@ export default function AdminCategoriesPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要停用此分类吗？')) return;
-    await fetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
     setCategories(categories.map(c => c.id === id ? { ...c, active: false } : c));
   };
 

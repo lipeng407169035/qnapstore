@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { Product } from '@/types';
 
@@ -34,8 +35,8 @@ export default function ActivitiesPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/admin/activities').then(r => r.json()),
-      fetch('/api/admin/products').then(r => r.json()),
+      adminFetch('/api/admin/activities').then(r => r.json()),
+      adminFetch('/api/admin/products').then(r => r.json()),
     ]).then(([acts, prods]) => {
       setActivities(Array.isArray(acts) ? acts : (acts.data || []));
       setProducts(Array.isArray(prods) ? prods : (prods.data || []));
@@ -61,7 +62,7 @@ export default function ActivitiesPage() {
   const handleSave = async () => {
     const url = editing ? `/api/admin/activities/${editing.id}` : '/api/admin/activities';
     const method = editing ? 'PUT' : 'POST';
-    const res = await fetch(url, {
+    const res = await adminFetch(url, {
       method, headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
@@ -76,12 +77,12 @@ export default function ActivitiesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定删除此活动？')) return;
-    await fetch(`/api/admin/activities/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/activities/${id}`, { method: 'DELETE' });
     setActivities(prev => prev.filter(a => a.id !== id));
   };
 
   const toggleActive = async (act: Activity) => {
-    const res = await fetch(`/api/admin/activities/${act.id}`, {
+    const res = await adminFetch(`/api/admin/activities/${act.id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...act, active: !act.active }),
     });

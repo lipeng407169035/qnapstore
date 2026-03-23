@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
 
@@ -15,7 +16,7 @@ export default function EmailTemplatesPage() {
   const [form, setForm] = useState<Record<string, EmailTemplate>>({});
 
   useEffect(() => {
-    fetch('/api/admin/email-templates')
+    adminFetch('/api/admin/email-templates')
       .then(r => r.json())
       .then(data => {
         setTemplates(data);
@@ -26,7 +27,7 @@ export default function EmailTemplatesPage() {
 
   const handleSave = async (type: string) => {
     setSaving(type);
-    await fetch(`/api/admin/email-templates/${type}`, {
+    await adminFetch(`/api/admin/email-templates/${type}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form[type]),

@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -17,7 +18,7 @@ export default function ProductViewsPage() {
   const [sortBy, setSortBy] = useState<'views' | 'stock'>('views');
 
   useEffect(() => {
-    fetch('/api/admin/product-views')
+    adminFetch('/api/admin/product-views')
       .then(r => r.json())
       .then(data => {
         setProducts(data);

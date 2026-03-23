@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { StaffMember } from '@/types';
 
 export default function AdminStaffPage() {
@@ -9,7 +10,7 @@ export default function AdminStaffPage() {
   const [form, setForm] = useState({ name: '', email: '', role: 'operator', phone: '' });
 
   useEffect(() => {
-    fetch('/api/admin/staff').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/staff').then(r => r.json()).then(data => {
       setStaff(data);
       setLoading(false);
     });
@@ -28,7 +29,7 @@ export default function AdminStaffPage() {
   };
 
   const handleSave = async () => {
-    const res = await fetch('/api/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+    const res = await adminFetch('/api/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
     const newStaff = await res.json();
     setStaff([...staff, newStaff]);
     setModalOpen(false);
@@ -37,7 +38,7 @@ export default function AdminStaffPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除该员工账号吗？')) return;
-    await fetch(`/api/admin/staff/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/staff/${id}`, { method: 'DELETE' });
     setStaff(staff.filter(s => s.id !== id));
   };
 

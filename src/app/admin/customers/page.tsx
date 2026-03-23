@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { Customer } from '@/types';
 
 export default function AdminCustomersPage() {
@@ -9,7 +10,7 @@ export default function AdminCustomersPage() {
   const [levelFilter, setLevelFilter] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/customers').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/customers').then(r => r.json()).then(data => {
       setCustomers(Array.isArray(data) ? data : (data.data || []));
       setLoading(false);
     });

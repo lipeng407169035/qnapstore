@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { toast } from '@/components/ui/Toast';
@@ -19,7 +20,7 @@ export default function ProductImportPage() {
     formData.append('file', file);
 
     try {
-      const res = await fetch('/api/admin/products/import', { method: 'POST', body: formData });
+      const res = await adminFetch('/api/admin/products/import', { method: 'POST', body: formData });
       const data = await res.json();
       setResult(data);
     } catch {

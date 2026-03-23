@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 
 interface SEOData {
@@ -21,7 +22,7 @@ export default function AdminSEOPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/seo')
+    adminFetch('/api/admin/seo')
       .then(res => res.json())
       .then(data => {
         setSeo(data);
@@ -31,7 +32,7 @@ export default function AdminSEOPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await fetch('/api/admin/seo', {
+    await adminFetch('/api/admin/seo', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(seo),

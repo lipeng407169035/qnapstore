@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 
 export default function RFMPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/customers/rfm').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/customers/rfm').then(r => r.json()).then(data => {
       setCustomers(data);
       setLoading(false);
     });

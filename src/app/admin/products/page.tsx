@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { Product } from '@/types';
@@ -54,7 +55,7 @@ export default function AdminProductsPage() {
   const [specEntries, setSpecEntries] = useState<SpecEntry[]>([{ key: '', value: '' }]);
 
   useEffect(() => {
-    fetch('/api/admin/products')
+    adminFetch('/api/admin/products')
       .then(res => res.json())
       .then(data => {
         setProducts(Array.isArray(data) ? data : (data.data || []));
@@ -71,7 +72,7 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (productId: string) => {
     if (!confirm('确定要删除此商品吗？')) return;
-    await fetch(`/api/admin/products/${productId}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/products/${productId}`, { method: 'DELETE' });
     setProducts(prev => prev.filter(p => p.id !== productId));
   };
 
@@ -81,7 +82,7 @@ export default function AdminProductsPage() {
     const specs = buildSpecs(specEntries);
     const payload = { ...formData, specs };
 
-    const res = await fetch(`/api/admin/products/${selectedProduct.id}`, {
+    const res = await adminFetch(`/api/admin/products/${selectedProduct.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -151,12 +152,12 @@ export default function AdminProductsPage() {
   const submitBatchStock = async () => {
     const adjustments = batchItems.filter(i => i.change !== 0).map(i => ({ productId: i.productId, stockChange: i.change }));
     if (adjustments.length === 0) return;
-    await fetch('/api/admin/products/batch-stock', {
+    await adminFetch('/api/admin/products/batch-stock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adjustments }),
     });
-    const res = await fetch('/api/admin/products').then(r => r.json());
+    const res = await adminFetch('/api/admin/products').then(r => r.json());
     setProducts(Array.isArray(res) ? res : (res.data || []));
     setBatchItems([]);
     setBatchModalOpen(false);

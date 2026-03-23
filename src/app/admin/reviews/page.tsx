@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 
 interface Review {
@@ -17,7 +18,7 @@ export default function AdminReviewsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/admin/reviews')
+    adminFetch('/api/admin/reviews')
       .then(r => r.json())
       .then(data => {
         setReviews(Array.isArray(data) ? data : (data.data || []));
@@ -26,7 +27,7 @@ export default function AdminReviewsPage() {
   }, []);
 
   const handleApprove = async (id: string) => {
-    await fetch(`/api/admin/reviews/${id}`, {
+    await adminFetch(`/api/admin/reviews/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ approved: true }),
@@ -35,7 +36,7 @@ export default function AdminReviewsPage() {
   };
 
   const handleReject = async (id: string) => {
-    await fetch(`/api/admin/reviews/${id}`, {
+    await adminFetch(`/api/admin/reviews/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ approved: false }),
@@ -45,7 +46,7 @@ export default function AdminReviewsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除此评论吗？')) return;
-    await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
     setReviews(prev => prev.filter(r => r.id !== id));
   };
 

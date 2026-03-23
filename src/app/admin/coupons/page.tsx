@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
 
@@ -24,7 +25,7 @@ export default function AdminCouponsPage() {
   const [formData, setFormData] = useState<Partial<Coupon>>({});
 
   useEffect(() => {
-    fetch('/api/admin/coupons')
+    adminFetch('/api/admin/coupons')
       .then(res => res.json())
       .then(data => {
         setCoupons(data);
@@ -64,14 +65,14 @@ export default function AdminCouponsPage() {
     }
 
     if (formData.id) {
-      await fetch(`/api/admin/coupons/${formData.id}`, {
+      await adminFetch(`/api/admin/coupons/${formData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       setCoupons(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData } as Coupon : c));
     } else {
-      const res = await fetch('/api/admin/coupons', {
+      const res = await adminFetch('/api/admin/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -84,13 +85,13 @@ export default function AdminCouponsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除此优惠券吗？')) return;
-    await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
     setCoupons(prev => prev.filter(c => c.id !== id));
   };
 
   const handleToggle = async (coupon: Coupon) => {
     const updated = { ...coupon, active: !coupon.active };
-    await fetch(`/api/admin/coupons/${coupon.id}`, {
+    await adminFetch(`/api/admin/coupons/${coupon.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),

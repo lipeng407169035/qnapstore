@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
 
@@ -17,7 +18,7 @@ export default function AdminAnnouncementsPage() {
   const [formData, setFormData] = useState<Partial<Announcement>>({});
 
   useEffect(() => {
-    fetch('/api/admin/announcements')
+    adminFetch('/api/admin/announcements')
       .then(res => res.json())
       .then(data => {
         setAnnouncements(data);
@@ -41,14 +42,14 @@ export default function AdminAnnouncementsPage() {
       return;
     }
     if (formData.id) {
-      await fetch(`/api/admin/announcements/${formData.id}`, {
+      await adminFetch(`/api/admin/announcements/${formData.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       setAnnouncements(announcements.map(a => a.id === formData.id ? { ...a, ...formData } as Announcement : a));
     } else {
-      const res = await fetch('/api/admin/announcements', {
+      const res = await adminFetch('/api/admin/announcements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -61,13 +62,13 @@ export default function AdminAnnouncementsPage() {
 
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除此公告吗？')) return;
-    await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
     setAnnouncements(announcements.filter(a => a.id !== id));
   };
 
   const handleToggle = async (ann: Announcement) => {
     const updated = { ...ann, active: !ann.active };
-    await fetch(`/api/admin/announcements/${ann.id}`, {
+    await adminFetch(`/api/admin/announcements/${ann.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),

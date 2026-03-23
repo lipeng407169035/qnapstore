@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -36,7 +37,7 @@ function OrdersContent() {
     params.set('page', String(page));
     params.set('limit', String(limit));
     const query = params.toString() ? `?${params.toString()}` : '';
-    fetch(`/api/admin/orders${query}`)
+    adminFetch(`/api/admin/orders${query}`)
       .then(res => res.json())
       .then(data => {
         setOrders(Array.isArray(data) ? data : (data.data || []));
@@ -48,7 +49,7 @@ function OrdersContent() {
   const totalPages = Math.ceil(total / limit);
 
   const updateOrderStatus = async (orderId: string, status: string) => {
-    await fetch(`/api/admin/orders/${orderId}`, {
+    await adminFetch(`/api/admin/orders/${orderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),

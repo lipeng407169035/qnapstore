@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { SalesReport } from '@/types';
 
@@ -15,7 +16,7 @@ export default function AdminReportsPage() {
     if (start) params.set('start', start);
     if (end) params.set('end', end);
     const query = params.toString() ? `?${params.toString()}` : '';
-    fetch(`/api/admin/reports/sales${query}`)
+    adminFetch(`/api/admin/reports/sales${query}`)
       .then(r => r.json())
       .then(data => {
         setReport(data);

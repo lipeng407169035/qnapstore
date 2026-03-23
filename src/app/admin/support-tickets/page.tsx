@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 
 interface Ticket {
@@ -28,12 +29,12 @@ export default function AdminSupportPage() {
   function fetchTickets() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/support-tickets?status=${statusFilter}` : '/api/admin/support-tickets';
-    fetch(url).then(r => r.json()).then(data => { setTickets(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
+    adminFetch(url).then(r => r.json()).then(data => { setTickets(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
   }
 
   async function handleUpdate() {
     if (!detail) return;
-    await fetch(`/api/admin/support-tickets/${detail.id}`, {
+    await adminFetch(`/api/admin/support-tickets/${detail.id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });

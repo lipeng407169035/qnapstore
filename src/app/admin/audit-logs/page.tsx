@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 
 export default function AdminAuditLogsPage() {
   const [data, setData] = useState<{ logs: any[]; total: number; page: number }>({ logs: [], total: 0, page: 1 });
@@ -12,7 +13,7 @@ export default function AdminAuditLogsPage() {
     const params = new URLSearchParams({ page: String(page) });
     if (action) params.set('action', action);
     if (target) params.set('target', target);
-    fetch(`/api/admin/audit-logs?${params}`)
+    adminFetch(`/api/admin/audit-logs?${params}`)
       .then(r => r.json())
       .then(d => {
         setData(d);

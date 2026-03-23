@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 
 interface App {
@@ -49,11 +50,11 @@ export default function AdminPartnershipPage() {
   function fetchApps() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/partnership-applications?status=${statusFilter}` : '/api/admin/partnership-applications';
-    fetch(url).then(r => r.json()).then(data => { setApps(data); setLoading(false); });
+    adminFetch(url).then(r => r.json()).then(data => { setApps(data); setLoading(false); });
   }
 
   async function handleApprove(app: App) {
-    await fetch(`/api/admin/partnership-applications/${app.id}`, {
+    await adminFetch(`/api/admin/partnership-applications/${app.id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'approved', notes }),
     });
@@ -62,7 +63,7 @@ export default function AdminPartnershipPage() {
   }
 
   async function handleReject(app: App) {
-    await fetch(`/api/admin/partnership-applications/${app.id}`, {
+    await adminFetch(`/api/admin/partnership-applications/${app.id}`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'rejected', notes }),
     });

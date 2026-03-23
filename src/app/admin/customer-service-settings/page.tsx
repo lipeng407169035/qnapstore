@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/Toast';
 
@@ -8,14 +9,14 @@ export default function AdminCustomerServiceSettingsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/settings/customer-service-info')
+    adminFetch('/api/admin/settings/customer-service-info')
       .then(r => r.json())
       .then(data => setForm(data));
   }, []);
 
   async function handleSave() {
     setSaving(true);
-    await fetch('/api/admin/settings/customer-service-info', {
+    await adminFetch('/api/admin/settings/customer-service-info', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });

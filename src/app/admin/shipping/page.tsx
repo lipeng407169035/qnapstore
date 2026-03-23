@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { ShippingCompany } from '@/types';
 import { toast } from '@/components/ui/Toast';
 
@@ -9,7 +10,7 @@ export default function AdminShippingPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/shipping-companies').then(r => r.json()).then(data => {
+    adminFetch('/api/admin/shipping-companies').then(r => r.json()).then(data => {
       setCompanies(data);
       setLoading(false);
     });
@@ -17,7 +18,7 @@ export default function AdminShippingPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await fetch('/api/admin/shipping-companies', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companies }) });
+    await adminFetch('/api/admin/shipping-companies', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companies }) });
     setSaving(false);
     toast.success('保存成功！');
   };

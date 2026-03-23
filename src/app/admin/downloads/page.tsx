@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState, useRef } from 'react';
 
 interface Download {
@@ -19,7 +20,7 @@ export default function AdminDownloadsPage() {
 
   function fetchDownloads() {
     setLoading(true);
-    fetch('/api/admin/downloads').then(r => r.json()).then(data => { setDownloads(data); setLoading(false); });
+    adminFetch('/api/admin/downloads').then(r => r.json()).then(data => { setDownloads(data); setLoading(false); });
   }
 
   function openAdd() { setEditItem({}); setShowModal(true); }
@@ -33,7 +34,7 @@ export default function AdminDownloadsPage() {
     formData.append('version', editItem.version || '');
     if (fileRef.current?.files?.[0]) formData.append('file', fileRef.current.files[0]);
     setUploading(true);
-    await fetch('/api/admin/downloads', { method: 'POST', body: formData });
+    await adminFetch('/api/admin/downloads', { method: 'POST', body: formData });
     setShowModal(false);
     setUploading(false);
     fetchDownloads();
@@ -41,7 +42,7 @@ export default function AdminDownloadsPage() {
 
   async function handleDelete(id: string) {
     if (!confirm('确定删除？')) return;
-    await fetch(`/api/admin/downloads/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/downloads/${id}`, { method: 'DELETE' });
     fetchDownloads();
   }
 

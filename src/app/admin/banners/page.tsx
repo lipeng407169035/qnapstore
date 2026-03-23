@@ -1,5 +1,6 @@
 'use client';
 
+import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect, useRef } from 'react';
 
 interface Banner {
@@ -34,7 +35,7 @@ export default function AdminBannersPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/admin/banners').then(r => r.json()).then(data => { setBanners(data); setLoading(false); });
+    adminFetch('/api/admin/banners').then(r => r.json()).then(data => { setBanners(data); setLoading(false); });
   }, []);
 
   function openAdd() {
@@ -55,7 +56,7 @@ export default function AdminBannersPage() {
     if (!editItem.title) return;
     const method = editItem.id ? 'PUT' : 'POST';
     const url = editItem.id ? `/api/admin/banners/${editItem.id}` : '/api/admin/banners';
-    const res = await fetch(url, {
+    const res = await adminFetch(url, {
       method, headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(editItem),
     });
@@ -70,7 +71,7 @@ export default function AdminBannersPage() {
 
   async function handleDelete(id: number) {
     if (!confirm('确定删除？')) return;
-    await fetch(`/api/admin/banners/${id}`, { method: 'DELETE' });
+    await adminFetch(`/api/admin/banners/${id}`, { method: 'DELETE' });
     setBanners(prev => prev.filter(b => b.id !== id));
   }
 
@@ -81,7 +82,7 @@ export default function AdminBannersPage() {
     const formData = new FormData();
     formData.append('image', file);
     try {
-      const res = await fetch('/api/admin/banners/upload', { method: 'POST', body: formData });
+      const res = await adminFetch('/api/admin/banners/upload', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.url) {
         setEditItem({ ...editItem, image: data.url });

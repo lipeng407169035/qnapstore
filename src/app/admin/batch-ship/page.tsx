@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-api';
 import { toast } from '@/components/ui/Toast';
 
 export default function AdminBatchShipPage() {
@@ -11,8 +12,8 @@ export default function AdminBatchShipPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/admin/orders?status=pending').then(r => r.json()).then(d => d.data || []),
-      fetch('/api/admin/orders?status=paid').then(r => r.json()).then(d => d.data || []),
+      adminFetch('/api/admin/orders?status=pending').then(r => r.json()).then(d => d.data || []),
+      adminFetch('/api/admin/orders?status=paid').then(r => r.json()).then(d => d.data || []),
     ]).then(([pending, paid]) => {
       setOrders([...pending, ...paid].filter((o: any) => ['pending', 'paid'].includes(o.status)));
       setLoading(false);
@@ -26,7 +27,7 @@ export default function AdminBatchShipPage() {
   const handleBatchShip = async () => {
     if (selected.length === 0 || !shippingCompany) return;
     for (const orderId of selected) {
-      await fetch(`/api/admin/orders/${orderId}`, {
+      await adminFetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'shipped', trackingNo: `${shippingCompany}${trackingNo || Date.now()}` }),
