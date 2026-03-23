@@ -2,6 +2,8 @@
 
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 interface Review {
   id: string;
@@ -54,10 +56,17 @@ export default function AdminReviewsPage() {
   const pending = reviews.filter(r => !r.approved);
   const approved = reviews.filter(r => r.approved);
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">评论管理</h1>
+      <SkeletonTable rows={8} cols={6} />
+    </div>
+  );
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">评论管理</h1>

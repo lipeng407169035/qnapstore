@@ -3,6 +3,11 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { Pagination } from '@/components/ui/Pagination';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Search, X, Download } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -80,11 +85,18 @@ function OrdersContent() {
   };
 
   if (loading) {
-    return <div className="text-center py-20">加载中...</div>;
+    return (
+      <div>
+        <AdminBreadcrumb />
+        <h1 className="text-2xl font-bold mb-6">订单管理</h1>
+        <SkeletonTable rows={10} cols={8} />
+      </div>
+    );
   }
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <h1 className="text-2xl font-bold">订单管理</h1>
         <div className="flex gap-2 flex-wrap">
@@ -107,21 +119,25 @@ function OrdersContent() {
           >
             全部
           </a>
-          <a href="/api/admin/orders/export" className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700">
-            📥 导出 CSV
+          <a href="/api/admin/orders/export" className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700 flex items-center gap-1.5">
+            <Download className="w-3.5 h-3.5" />
+            导出 CSV
           </a>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl p-4 mb-4 flex gap-3">
+        <Search className="w-4 h-4 text-gray-400 flex-shrink-0 mt-3" />
         <input
           type="text"
           placeholder="搜索订单编号、客户名称或电话..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm"
+          className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:border-blue focus:ring-2 focus:ring-blue/10 outline-none"
         />
-        <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600 px-3">✕</button>
+        <button onClick={() => setSearchQuery('')} className="text-gray-400 hover:text-gray-600">
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="bg-white rounded-2xl overflow-hidden">
@@ -162,41 +178,28 @@ function OrdersContent() {
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 px-4">
-          <p className="text-sm text-gray-500">共 {total} 条</p>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-3 py-1.5 rounded-lg text-sm border disabled:opacity-40 hover:bg-gray-50"
-            >
-              上一页
-            </button>
-            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-              return (
-                <button key={p} onClick={() => setPage(p)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border ${page === p ? 'bg-blue text-white border-blue' : 'hover:bg-gray-50'}`}>
-                  {p}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-3 py-1.5 rounded-lg text-sm border disabled:opacity-40 hover:bg-gray-50"
-            >
-              下一页
-            </button>
-          </div>
+              ))}
+              {orders.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-16 text-center">
+                    <EmptyState
+                      title="暂无订单"
+                      description="还没有任何订单记录"
+                    />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+        className="mt-4"
+      />
 
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

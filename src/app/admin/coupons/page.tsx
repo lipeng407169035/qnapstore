@@ -3,6 +3,8 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 interface Coupon {
   id: number;
@@ -119,10 +121,17 @@ export default function AdminCouponsPage() {
     return `¥ ${coupon.discountValue} off`;
   };
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">优惠券管理</h1>
+      <SkeletonTable rows={8} cols={6} />
+    </div>
+  );
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">优惠券管理</h1>

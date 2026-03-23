@@ -2,6 +2,10 @@
 
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect, useRef } from 'react';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Image } from 'lucide-react';
 
 interface Banner {
   id: number;
@@ -101,19 +105,46 @@ export default function AdminBannersPage() {
     return { background: editItem.gradient || GRADIENTS[0] } as React.CSSProperties;
   }
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">轮播图管理</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-2xl overflow-hidden">
+            <Skeleton className="w-full h-40" />
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold">首页轮播图管理</h1>
+        <h1 className="text-2xl font-bold">轮播图管理</h1>
         <button onClick={openAdd} className="bg-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue/90">
           + 新增轮播图
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {banners.map(banner => (
+        {banners.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState
+              icon={Image}
+              title="暂无轮播图"
+              description="创建第一个首页轮播图吧"
+              action={{ label: '+ 新增轮播图', onClick: openAdd }}
+            />
+          </div>
+        ) : (
+          banners.map(banner => (
           <div key={banner.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
             <div className="h-36 relative" style={banner.image ? { backgroundImage: `url(${banner.image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: banner.gradient } as React.CSSProperties}>
               {!banner.image && (
@@ -137,7 +168,8 @@ export default function AdminBannersPage() {
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {showModal && (

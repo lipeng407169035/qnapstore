@@ -8,6 +8,12 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { useCartStore, useRecentlyViewedStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
+import {
+  Zap, Shield, Cloud, Brain,
+  Package, Server, HardDrive, Network, Building,
+  Tv, Box, Cpu, Globe, Router, Eye, Star,
+  Truck, ShieldCheck, CreditCard, Headphones
+} from 'lucide-react';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -200,23 +206,28 @@ export default function HomePage() {
           <h2 className="font-barlow text-xl md:text-2xl font-bold text-center mb-8">热门商品分类</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: '🗄️', name: '家用 NAS', slug: 'home-nas', desc: '2-4 槽家庭存储', color: 'from-blue-400 to-blue-600' },
-              { icon: '🏢', name: '企业 NAS', slug: 'business-nas', desc: '高性价比企业存储', color: 'from-purple-400 to-purple-600' },
-              { icon: '🚀', name: '全快闪 NAS', slug: 'all-flash', desc: 'U.2 NVMe 全闪存', color: 'from-cyan-400 to-blue-600' },
-              { icon: '📶', name: '路由器', slug: 'router', desc: 'Wi-Fi 6 / SD-WAN', color: 'from-indigo-400 to-purple-600' },
-              { icon: '📹', name: 'QVR 专用机', slug: 'nvr-hardware', desc: 'AI 智能录像机', color: 'from-red-400 to-orange-600' },
-              { icon: '💾', name: '扩展设备', slug: 'expansion', desc: 'JBOD 存储扩展', color: 'from-teal-400 to-green-600' },
-              { icon: '⚡', name: 'M.2 SSD 卡', slug: 'm2-card', desc: 'NVMe 扩展加速', color: 'from-amber-400 to-orange-600' },
-              { icon: '🌐', name: '网络交换机', slug: 'switch', desc: '2.5G/10G 高速', color: 'from-emerald-400 to-teal-600' },
-            ].map((cat) => (
+              { icon: Server, name: '家用 NAS', slug: 'home-nas', desc: '2-4 槽家庭存储', color: 'from-blue-400 to-blue-600' },
+              { icon: Building, name: '企业 NAS', slug: 'business-nas', desc: '高性价比企业存储', color: 'from-purple-400 to-purple-600' },
+              { icon: HardDrive, name: '全快闪 NAS', slug: 'all-flash', desc: 'U.2 NVMe 全闪存', color: 'from-cyan-400 to-blue-600' },
+              { icon: Router, name: '路由器', slug: 'router', desc: 'Wi-Fi 6 / SD-WAN', color: 'from-indigo-400 to-purple-600' },
+              { icon: Tv, name: 'QVR 专用机', slug: 'nvr-hardware', desc: 'AI 智能录像机', color: 'from-red-400 to-orange-600' },
+              { icon: Box, name: '扩展设备', slug: 'expansion', desc: 'JBOD 存储扩展', color: 'from-teal-400 to-green-600' },
+              { icon: Cpu, name: 'M.2 SSD 卡', slug: 'm2-card', desc: 'NVMe 扩展加速', color: 'from-amber-400 to-orange-600' },
+              { icon: Network, name: '网络交换机', slug: 'switch', desc: '2.5G/10G 高速', color: 'from-emerald-400 to-teal-600' },
+            ].map((cat) => {
+              const Icon = cat.icon;
+              return (
               <Link key={cat.slug} href={`/products?category=${cat.slug}`}
                 className={`bg-gradient-to-br ${cat.color} rounded-2xl p-6 text-white hover:shadow-lg hover:-translate-y-1 transition-all`}>
-                <div className="text-4xl mb-3">{cat.icon}</div>
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
                 <h3 className="font-bold text-lg mb-1">{cat.name}</h3>
                 <p className="text-white/80 text-sm">{cat.desc}</p>
                 <div className="mt-4 text-xs font-medium opacity-80">查看商品 →</div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -230,17 +241,22 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: '⚡', title: '极速效能', desc: 'Intel 处理器 + 2.5GbE 网络，文件传输速度提升 3 倍' },
-              { icon: '🔒', title: '军规安全', desc: 'AES-256 硬件加密，IP 封锁与 Two-Step 验证' },
-              { icon: '☁️', title: '混合云端', desc: '本地 NAS 结合云端备份，数据保护无死角' },
-              { icon: '🤖', title: 'AI 智能', desc: 'QuAI 本地 LLM 助手，智能管理照片与数据' },
-            ].map((item, i) => (
+              { icon: Zap, title: '极速效能', desc: 'Intel 处理器 + 2.5GbE 网络，文件传输速度提升 3 倍', color: 'text-orange' },
+              { icon: Shield, title: '军规安全', desc: 'AES-256 硬件加密，IP 封锁与 Two-Step 验证', color: 'text-blue' },
+              { icon: Cloud, title: '混合云端', desc: '本地 NAS 结合云端备份，数据保护无死角', color: 'text-cyan-500' },
+              { icon: Brain, title: 'AI 智能', desc: 'QuAI 本地 LLM 助手，智能管理照片与数据', color: 'text-purple-500' },
+            ].map((item, i) => {
+              const Icon = item.icon;
+              return (
               <div key={i} className="text-center p-6 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="text-4xl mb-4">{item.icon}</div>
+                <div className={`w-16 h-16 bg-blue-light rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                  <Icon className={`w-8 h-8 ${item.color}`} />
+                </div>
                 <h3 className="font-bold text-lg mb-2">{item.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -286,7 +302,11 @@ export default function HomePage() {
               { name: '王先生', role: 'IT 管理员', text: '管理 30 台 QNAP 设备，Q\'center 集中管理平台非常好用，大幅降低维护成本。', rating: 5 },
             ].map((t, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div className="flex items-center gap-1 text-amber-400 mb-3">{'★'.repeat(t.rating)}</div>
+                <div className="flex items-center gap-0.5 mb-3">
+                  {Array.from({ length: t.rating }).map((_, si) => (
+                    <Star key={si} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4 italic">「{t.text}」</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue rounded-full flex items-center justify-center text-white font-bold">{t.name.charAt(0)}</div>
@@ -322,28 +342,36 @@ export default function HomePage() {
           <h3 className="sr-only">服务特色</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center text-xl md:text-2xl flex-shrink-0">🚚</div>
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center flex-shrink-0">
+                <Truck className="w-5 h-5 md:w-6 md:h-6 text-blue" />
+              </div>
               <div>
                 <h4 className="text-xs md:text-base font-semibold text-gray-900 mb-0.5">全国包邮</h4>
                 <p className="text-[10px] md:text-sm text-muted">满 ¥3,000</p>
               </div>
             </div>
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center text-xl md:text-2xl flex-shrink-0">🛡️</div>
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-blue" />
+              </div>
               <div>
                 <h4 className="text-xs md:text-base font-semibold text-gray-900 mb-0.5">原厂质保</h4>
                 <p className="text-[10px] md:text-sm text-muted">品质有保障</p>
               </div>
             </div>
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center text-xl md:text-2xl flex-shrink-0">💳</div>
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center flex-shrink-0">
+                <CreditCard className="w-5 h-5 md:w-6 md:h-6 text-blue" />
+              </div>
               <div>
                 <h4 className="text-xs md:text-base font-semibold text-gray-900 mb-0.5">分期免息</h4>
                 <p className="text-[10px] md:text-sm text-muted">最高花呗/白条分期</p>
               </div>
             </div>
             <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center text-xl md:text-2xl flex-shrink-0">📞</div>
+              <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-light rounded-xl flex items-center justify-center flex-shrink-0">
+                <Headphones className="w-5 h-5 md:w-6 md:h-6 text-blue" />
+              </div>
               <div>
                 <h4 className="text-xs md:text-base font-semibold text-gray-900 mb-0.5">专业客服</h4>
                 <p className="text-[10px] md:text-sm text-muted">400-888-3600</p>

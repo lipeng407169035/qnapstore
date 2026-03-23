@@ -2,6 +2,8 @@
 
 import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 interface NewsItem {
   id: number;
@@ -54,8 +56,17 @@ export default function AdminNewsPage() {
 
   const filtered = news.filter(n => n.title.includes(search) || n.category.includes(search));
 
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">新闻管理</h1>
+      <SkeletonTable rows={8} cols={6} />
+    </div>
+  );
+
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold">新闻管理</h1>
         <button onClick={openAdd} className="bg-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue/90 transition-colors">

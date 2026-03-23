@@ -2,6 +2,8 @@
 
 import { adminFetch } from '@/lib/admin-api';
 import { useEffect, useState } from 'react';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 interface FAQItem { id: number; category: string; question: string; answer: string; sortOrder: number; }
 
@@ -44,8 +46,17 @@ export default function AdminFAQPage() {
     return acc;
   }, {} as Record<string, FAQItem[]>);
 
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">FAQ 管理</h1>
+      <SkeletonTable rows={8} cols={6} />
+    </div>
+  );
+
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold">FAQ 管理</h1>
         <button onClick={openAdd} className="bg-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue/90">+ 新增 FAQ</button>

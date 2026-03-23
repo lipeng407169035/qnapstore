@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/admin-api';
 import { Customer } from '@/types';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -29,8 +31,17 @@ export default function AdminCustomersPage() {
     diamond: 'bg-blue-100 text-blue-700',
   };
 
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">客户管理</h1>
+      <SkeletonTable rows={8} cols={6} />
+    </div>
+  );
+
   return (
     <div>
+      <AdminBreadcrumb />
       <h1 className="text-2xl font-bold mb-6">客户管理</h1>
       <div className="bg-white rounded-2xl p-6 shadow-sm">
         <div className="flex gap-4 mb-4 flex-wrap">

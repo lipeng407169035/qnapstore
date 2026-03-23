@@ -4,6 +4,12 @@ import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { SkeletonStatCard } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import {
+  DollarSign, TrendingUp, ShoppingCart, Package, Clock, Users,
+  AlertTriangle, AlertCircle
+} from 'lucide-react';
 
 interface Stats {
   totalProducts: number;
@@ -52,7 +58,15 @@ export default function AdminDashboard() {
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">控制台</h1>
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        {Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)}
+      </div>
+    </div>
+  );
 
   const pieData = stats ? Object.entries(stats.ordersByStatus)
     .filter(([_, count]) => count > 0)
@@ -70,31 +84,36 @@ export default function AdminDashboard() {
     })) : [];
 
   const statCards = [
-    { label: '总营收', value: `¥ ${(stats?.totalRevenue || 0).toLocaleString()}`, icon: '💰', color: 'from-orange-400 to-orange-600' },
-    { label: '本月营收', value: `¥ ${(stats?.monthlyRevenue || 0).toLocaleString()}`, icon: '📈', color: 'from-green-400 to-green-600' },
-    { label: '总订单', value: stats?.totalOrders || 0, icon: '🛒', color: 'from-blue-400 to-blue-600' },
-    { label: '本月订单', value: stats?.monthlyOrders || 0, icon: '📦', color: 'from-purple-400 to-purple-600' },
-    { label: '待处理', value: stats?.pendingOrders || 0, icon: '⏳', color: 'from-yellow-400 to-yellow-600' },
-    { label: '总用户', value: stats?.totalUsers || 0, icon: '👥', color: 'from-pink-400 to-pink-600' },
+    { label: '总营收', value: `¥ ${(stats?.totalRevenue || 0).toLocaleString()}`, icon: DollarSign, color: 'from-orange-400 to-orange-600' },
+    { label: '本月营收', value: `¥ ${(stats?.monthlyRevenue || 0).toLocaleString()}`, icon: TrendingUp, color: 'from-green-400 to-green-600' },
+    { label: '总订单', value: stats?.totalOrders || 0, icon: ShoppingCart, color: 'from-blue-400 to-blue-600' },
+    { label: '本月订单', value: stats?.monthlyOrders || 0, icon: Package, color: 'from-purple-400 to-purple-600' },
+    { label: '待处理', value: stats?.pendingOrders || 0, icon: Clock, color: 'from-yellow-400 to-yellow-600' },
+    { label: '总用户', value: stats?.totalUsers || 0, icon: Users, color: 'from-pink-400 to-pink-600' },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">仪表板</h1>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">控制台</h1>
 
       {/* Low Stock Alert */}
       {stats && (stats.lowStockProducts.length > 0 || stats.outOfStockProducts.length > 0) && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6">
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h3 className="font-bold text-red-800 mb-2">库存预警</h3>
               {stats.outOfStockProducts.length > 0 && (
-                <p className="text-red-600 text-sm mb-1">❌ 缺货商品：{stats.outOfStockProducts.map((p: any) => p.sku).join('、')}</p>
+                <p className="text-red-600 text-sm mb-1 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  缺货商品：{stats.outOfStockProducts.map((p: any) => p.sku).join('、')}
+                </p>
               )}
               {stats.lowStockProducts.length > 0 && (
-                <p className="text-orange-600 text-sm">
-                  ⚠️ 低库存（≤ {stats.stockAlertThreshold} 件）：{stats.lowStockProducts.map((p: any) => `${p.sku}(${p.stock})`).join('、')}
+                <p className="text-orange-600 text-sm flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  低库存（≤ {stats.stockAlertThreshold} 件）：{stats.lowStockProducts.map((p: any) => `${p.sku}(${p.stock})`).join('、')}
                 </p>
               )}
             </div>
@@ -106,13 +125,18 @@ export default function AdminDashboard() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-        {statCards.map((card, i) => (
-          <div key={i} className={`bg-gradient-to-br ${card.color} rounded-2xl p-5 text-white shadow-lg`}>
-            <div className="text-2xl mb-2">{card.icon}</div>
-            <p className="text-2xl font-bold">{card.value}</p>
-            <p className="text-sm text-white/80">{card.label}</p>
-          </div>
-        ))}
+        {statCards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <div key={i} className={`bg-gradient-to-br ${card.color} rounded-2xl p-5 text-white shadow-lg`}>
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-3">
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <p className="text-2xl font-bold">{card.value}</p>
+              <p className="text-sm text-white/80">{card.label}</p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

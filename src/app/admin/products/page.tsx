@@ -5,6 +5,11 @@ import { useState, useEffect } from 'react';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { Product } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { Pagination } from '@/components/ui/Pagination';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Search, X } from 'lucide-react';
 
 interface SpecEntry {
   key: string;
@@ -137,7 +142,13 @@ export default function AdminProductsPage() {
     return { label: '有货', color: 'bg-green-100 text-green-700' };
   };
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">商品管理</h1>
+      <SkeletonTable rows={10} cols={7} />
+    </div>
+  );
 
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [batchItems, setBatchItems] = useState<{ productId: string; sku: string; name: string; stock: number; change: number }[]>([]);
@@ -167,17 +178,18 @@ export default function AdminProductsPage() {
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">商品管理</h1>
         <div className="flex gap-2">
-          <a href="/api/admin/products/export" className="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-green-700 text-sm">
-            📥 导出 CSV
+          <a href="/api/admin/products/export" className="bg-green-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-green-700 text-sm flex items-center gap-1.5">
+            导出
           </a>
-          <a href="/api/admin/products/import" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-purple-700 text-sm">
-            📤 导入 CSV
+          <a href="/api/admin/products/import" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-purple-700 text-sm flex items-center gap-1.5">
+            导入
           </a>
           <button onClick={() => setBatchModalOpen(true)} className="bg-orange-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-orange-600 text-sm">
-            📦 批量库存
+            批量库存
           </button>
           <button onClick={handleAdd} className="bg-blue text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-dark">
             + 新增商品

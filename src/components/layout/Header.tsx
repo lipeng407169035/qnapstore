@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCartStore, useUserStore, useWishlistStore } from '@/store';
+import {
+  Search, Settings, User, Heart, Package, Scale,
+  Home, Building2, Newspaper, Handshake, Briefcase, Phone,
+  MapPin, ChevronDown, X as XIcon
+} from 'lucide-react';
 
 export function Header() {
   const router = useRouter();
@@ -50,13 +55,26 @@ export function Header() {
       {/* Top bar - hidden on mobile */}
       <div className="bg-[#1d3557] text-[#c5d8e8] text-xs py-1.5 hidden md:block">
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <span>🇨🇳 欢迎来到 QNAP 中国官方网上商城</span>
+          <span className="flex items-center gap-1.5">
+            <MapPin className="w-3 h-3" />
+            欢迎来到 QNAP 中国官方网上商城
+          </span>
           <div className="flex gap-4">
-            <Link href="/account" className="hover:text-white transition-colors">我的账户</Link>
-            <Link href="/orders" className="hover:text-white transition-colors">订单查询</Link>
-            <Link href="/admin/login" className="hover:text-white transition-colors">⚙️ 管理员</Link>
-            <span className="cursor-pointer hover:text-white">简体中文</span>
-            <span className="cursor-pointer hover:text-white">客服中心</span>
+            <Link href="/account" className="flex items-center gap-1 hover:text-white transition-colors">
+              <User className="w-3 h-3" />我的账户
+            </Link>
+            <Link href="/orders" className="flex items-center gap-1 hover:text-white transition-colors">
+              <Package className="w-3 h-3" />订单查询
+            </Link>
+            <Link href="/admin/login" className="flex items-center gap-1 hover:text-white transition-colors">
+              <Settings className="w-3 h-3" />管理员
+            </Link>
+            <span className="cursor-pointer hover:text-white flex items-center gap-1">
+              <span>简体中文</span>
+            </span>
+            <Link href="/support" className="flex items-center gap-1 hover:text-white transition-colors">
+              <Phone className="w-3 h-3" />客服中心
+            </Link>
           </div>
         </div>
       </div>
@@ -100,7 +118,7 @@ export function Header() {
                   className="flex-1 border-none bg-transparent px-3 md:px-4 py-2 text-sm outline-none"
                 />
                 <button type="submit" aria-label="搜索" className="bg-blue text-white px-3 md:px-5 py-2 text-sm hover:bg-blue-dark transition-colors">
-                  🔍
+                  <Search className="w-4 h-4" />
                 </button>
               </div>
             </form>
@@ -155,7 +173,7 @@ export function Header() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 border-none bg-transparent px-3 py-2 text-sm outline-none"
               />
-              <button type="submit" className="bg-blue text-white px-4 py-2 text-sm">🔍</button>
+              <button type="submit" className="bg-blue text-white px-4 py-2 text-sm"><Search className="w-4 h-4" /></button>
             </div>
           </form>
         </div>
@@ -168,11 +186,11 @@ export function Header() {
           <div className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl overflow-y-auto">
             <div className="p-4 border-b bg-blue text-white flex items-center justify-between">
               <span className="font-bold">QNAP Store</span>
-              <button onClick={() => setMobileMenuOpen(false)}>✕</button>
+              <button onClick={() => setMobileMenuOpen(false)}><XIcon className="w-5 h-5" /></button>
             </div>
             <div className="p-2">
               <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                🏠 首页
+                <Home className="w-4 h-4 text-gray-400" /> 首页
               </Link>
               <div className="px-4 py-2 text-xs text-gray-400 uppercase tracking-wide mt-2">商品分类</div>
               {navLinks.map(link => (
@@ -187,27 +205,27 @@ export function Header() {
               ))}
               <div className="border-t mt-2 pt-2">
                 <Link href="/account" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                  👤 我的账户
+                  <User className="w-4 h-4 text-gray-400" /> 我的账户
                 </Link>
                 <Link href="/orders" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                  📦 订单查询
+                  <Package className="w-4 h-4 text-gray-400" /> 订单查询
                 </Link>
                 <Link href="/wishlist" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                  ❤️ 收藏清单
+                  <Heart className="w-4 h-4 text-gray-400" /> 收藏清单
                 </Link>
                 <Link href="/compare" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                  ⚖️ 商品对比
+                  <Scale className="w-4 h-4 text-gray-400" /> 商品对比
                 </Link>
                 <div className="px-4 py-2 text-xs text-gray-400 uppercase tracking-wide mt-2">关于 QNAP</div>
                 {[
-                  { href: '/about', label: '🏢 品牌介绍' },
-                  { href: '/news', label: '📰 新闻中心' },
-                  { href: '/partnership', label: '🤝 成为合作伙伴' },
-                  { href: '/careers', label: '💼 招聘信息' },
-                  { href: '/contact', label: '📞 联系我们' },
+                  { href: '/about', label: '品牌介绍', icon: Building2 },
+                  { href: '/news', label: '新闻中心', icon: Newspaper },
+                  { href: '/partnership', label: '成为合作伙伴', icon: Handshake },
+                  { href: '/careers', label: '招聘信息', icon: Briefcase },
+                  { href: '/contact', label: '联系我们', icon: Phone },
                 ].map(item => (
                   <Link key={item.href} href={item.href} className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" onClick={() => setMobileMenuOpen(false)}>
-                    {item.label}
+                    <item.icon className="w-4 h-4 text-gray-400" /> {item.label}
                   </Link>
                 ))}
               </div>
@@ -242,9 +260,7 @@ export function Header() {
             >
               <button className={`px-4 py-3 text-[13.5px] font-medium transition-colors whitespace-nowrap flex items-center gap-1 ${aboutDropdownOpen ? 'bg-white/15 text-white' : 'text-[#d4eaf7] hover:bg-white/15 hover:text-white'}`}>
                 关于我们
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown className={`w-3 h-3 transition-transform ${aboutDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
               {aboutDropdownOpen && (
                 <div className="absolute left-0 top-full bg-white shadow-xl rounded-b-lg border-t z-50 min-w-[180px]">

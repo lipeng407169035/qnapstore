@@ -3,6 +3,8 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { Category } from '@/types';
+import { SkeletonTable } from '@/components/ui/Skeleton';
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -65,12 +67,19 @@ export default function AdminCategoriesPage() {
 
   const icons = ['🗄️', '🏢', '🖥️', '🌐', '💾', '📡', '🔑', '🛡️', '🧠', '📦', '💿', '🔧'];
 
-  if (loading) return <div className="text-center py-20">加载中...</div>;
+  if (loading) return (
+    <div>
+      <AdminBreadcrumb />
+      <h1 className="text-2xl font-bold mb-6">分类管理</h1>
+      <SkeletonTable rows={8} cols={4} />
+    </div>
+  );
 
   return (
     <div>
+      <AdminBreadcrumb />
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">商品分类管理</h1>
+        <h1 className="text-2xl font-bold">分类管理</h1>
         <button onClick={handleAdd} className="bg-blue text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-dark">
           + 新增分类
         </button>
