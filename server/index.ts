@@ -171,10 +171,15 @@ app.delete('/api/admin/banners/:id', requireAdmin, (req, res) => {
 
 // ============ Announcements
 
+ app.get('/api/announcements', (req, res) => {
+  const db = loadDB();
+  res.json(db.announcements.filter((a: any) => a.active).sort((a: any, b: any) => a.sort - b.sort));
+});
+
 app.get('/api/admin/announcements', requireAdmin, (req, res) => {
   const db = loadDB();
-  res.json(db.announcements.sort((a, b) => a.sort - b.sort));
-});
+  res.json(db.announcements.sort((a: any, b: any) => a.sort - b.sort));
+ });
 
 app.post('/api/admin/announcements', requireAdmin, (req, res) => {
   const db = loadDB();
