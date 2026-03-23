@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Product } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 function parseSpecs(specs: string | Record<string, string | number> | undefined): Record<string, string> {
   if (!specs) return {};
@@ -12,12 +14,15 @@ function parseSpecs(specs: string | Record<string, string | number> | undefined)
   return Object.fromEntries(Object.entries(specs).map(([k, v]) => [k, String(v)]));
 }
 
-export default function ComparePage() {
+function CompareInner() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const initialSkus = searchParams.getAll('s');
+    setSelected(initialSkus);
     fetch('/api/products')
       .then(r => r.json())
       .then(data => {
@@ -26,11 +31,24 @@ export default function ComparePage() {
       });
   }, []);
 
+  const updateUrl = useCallback((skus: string[]) => {
+    const params = new URLSearchParams();
+    skus.forEach(s => params.append('s', s));
+    const query = params.toString();
+    window.history.replaceState(null, '', `/compare${query ? '?' + query : ''}`);
+  }, []);
+
   const toggleProduct = (sku: string) => {
     if (selected.includes(sku)) {
-      setSelected(selected.filter(s => s !== sku));
+      const next = selected.filter(s => s !== sku);
+      setSelected(next);
+      updateUrl(next);
     } else if (selected.length < 4) {
-      setSelected([...selected, sku]);
+      const next = [...selected, sku];
+      setSelected(next);
+      updateUrl(next);
+    } else {
+      toast.warning('最多只能对比4个商品');
     }
   };
 
@@ -40,6 +58,20 @@ export default function ComparePage() {
   compareProducts.forEach(p => {
     Object.keys(parseSpecs(p.specs)).forEach(k => allSpecs.add(k));
   });
+
+  const specLabels: Record<string, string> = {
+    bays: '硬盘槽数', cpu: '处理器', ram: '内存', network: '网络',
+    ports: '连接端口', ports_sfp: 'SFP+ 连接端口', ports_rj45: 'RJ45 连接端口',
+    poe_ports: 'PoE 连接端口', uplink: '上行连接端口', total_power: 'PoE 功率',
+    interface: '接口', speed: '传输速度', connector: '连接器',
+    channels: '频道数', type: '类型', period: '期限',
+    capacity: '容量', form: '机型', wattage: '功率', watt: '功率',
+    max_capacity: '最大容量', dimensions: '尺寸', weight: '重量',
+    warranty: '质保', color: '颜色', protocols: '通讯协议',
+    Poe: 'PoE 供电', PoeBudget: 'PoE 供电瓦数', managed: '管理类型',
+    formFactor: '外型规格', bandwidth: '带宽', flash: '闪存',
+    power: '电源', ventilation: '风扇', operating: '操作系统',
+  };
 
   const formatSpecValue = (value: string | number) => String(value);
 
@@ -155,7 +187,7 @@ export default function ComparePage() {
                 </tr>
                 {Array.from(allSpecs).map(specKey => (
                   <tr key={specKey} className="border-b">
-                    <td className="p-4 text-sm font-medium text-gray-500 bg-gray-50">{specKey}</td>
+                    <td className="p-4 text-sm font-medium text-gray-500 bg-gray-50">{specLabels[specKey] || specKey}</td>
                     {compareProducts.map(p => (
                       <td key={p.id} className="p-4 text-center text-sm">
                         {formatSpecValue(parseSpecs(p.specs)[specKey] || '—')}
@@ -188,5 +220,13 @@ export default function ComparePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense fallback={<div className="text-center py-20">加载中...</div>}>
+      <CompareInner />
+    </Suspense>
   );
 }

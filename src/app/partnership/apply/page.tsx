@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/components/ui/Toast';
 
 const STEPS = ['公司信息', '合作意向', '公司简介', '确认信息', '提交结果'];
 
@@ -70,10 +71,10 @@ export default function PartnershipApplyPage() {
       if (res.ok) { setSubmitted(true); setStep(4); }
       else {
         const data = await res.json();
-        alert(data.error || '提交失败，请重试');
+        toast.error(data.error || '提交失败，请重试');
       }
     } catch {
-      alert('网络错误，请重试');
+      toast.error('网络错误，请重试');
     }
     setSubmitting(false);
   }

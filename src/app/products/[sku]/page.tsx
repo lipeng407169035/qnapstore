@@ -7,6 +7,7 @@ import { Product, Review } from '@/types';
 import { api } from '@/lib/api';
 import { useCartStore, useWishlistStore, useRecentlyViewedStore } from '@/store';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -58,8 +59,12 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (product) {
+      if (quantity > product.stock) {
+        toast.warning(`库存不足，当前库存仅剩 ${product.stock} 件`);
+        return;
+      }
       addItem(product, quantity);
-      alert('已加入购物车！');
+        toast.success('已加入购物车！');
     }
   };
 
@@ -69,13 +74,13 @@ export default function ProductDetailPage() {
       removeFromWishlist(product.id);
     } else {
       addToWishlist(product);
-      alert('已加入收藏！');
+        toast.success('已加入收藏！');
     }
   };
 
   const handleSubmitReview = async () => {
     if (!product || !reviewComment.trim() || !reviewName.trim()) {
-      alert('请填写姓名和评论内容');
+      toast.warning('请填写姓名和评论内容');
       return;
     }
     setReviewSubmitting(true);
@@ -96,7 +101,7 @@ export default function ProductDetailPage() {
       setReviewName('');
       setTimeout(() => setReviewSuccess(false), 3000);
     } catch {
-      alert('提交失败，请稍后再试');
+      toast.error('提交失败，请稍后再试');
     }
     setReviewSubmitting(false);
   };
@@ -186,7 +191,7 @@ export default function ProductDetailPage() {
               <div className="mb-4">
                 <p className="text-red-500 font-medium mb-2">缺货</p>
                 <button
-                  onClick={() => alert('到货提醒已订阅！到货后我们会通过短信和邮件通知您')}
+                  onClick={() => toast.success('到货提醒已订阅！到货后我们会通过短信和邮件通知您')}
                   className="px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
                 >
                   🔔 到货通知
@@ -207,7 +212,7 @@ export default function ProductDetailPage() {
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-12 h-10 bg-gray-50 font-bold hover:bg-gray-100 transition-colors">-</button>
                 <input type="text" value={quantity} readOnly className="w-14 h-10 text-center border-none outline-none font-semibold" />
-                <button onClick={() => setQuantity(quantity + 1)} className="w-12 h-10 bg-gray-50 font-bold hover:bg-gray-100 transition-colors">+</button>
+                <button onClick={() => setQuantity(Math.min(quantity + 1, product.stock))} className="w-12 h-10 bg-gray-50 font-bold hover:bg-gray-100 transition-colors">+</button>
               </div>
             </div>
 

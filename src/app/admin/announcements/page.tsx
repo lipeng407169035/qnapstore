@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface Announcement {
   id: number;
@@ -36,7 +37,7 @@ export default function AdminAnnouncementsPage() {
 
   const handleSave = async () => {
     if (!formData.text?.trim()) {
-      alert('请输入公告内容');
+      toast.warning('请输入公告内容');
       return;
     }
     if (formData.id) {

@@ -1,19 +1,25 @@
 import { clsx } from 'clsx';
 import { Product } from '@/types';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
+import { useCartStore, useWishlistStore } from '@/store';
+import { toast } from '@/components/ui/Toast';
 
 interface ProductCardProps {
   product: Product;
   onAddToCart?: () => void;
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [imageSrc, setImageSrc] = useState('');
   const [loaded, setLoaded] = useState(false);
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
+  const { addItem } = useCartStore();
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
+    setLoaded(false);
+    setImageSrc('');
     fetch(`/api/images/${product.sku}`)
       .then(r => r.json())
       .then((files: { url: string }[]) => {
@@ -22,6 +28,42 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       })
       .catch(() => setLoaded(true));
   }, [product.sku]);
+
+  const handleAddToCart = useCallback(() => {
+    if (product.stock === 0) {
+      toast.warning('该商品已缺货');
+      return;
+    }
+    addItem(product);
+    toast.success('已加入购物车！');
+    onAddToCart?.();
+  }, [product, addItem, onAddToCart]);
+
+  const handleWishlistToggle = useCallback(() => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+      toast.success('已加入收藏！');
+    }
+  }, [product, isInWishlist, addToWishlist, removeFromWishlist]);
+
+  const handleCompare = useCallback(() => {
+    const current = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).getAll('s') : [];
+    const sku = product.sku;
+    const params = new URLSearchParams();
+    if (current.includes(sku)) {
+      current.filter(s => s !== sku).forEach(s => params.append('s', s));
+    } else if (current.length < 4) {
+      [...current, sku].forEach(s => params.append('s', s));
+    } else {
+      toast.warning('最多只能对比4个商品');
+      return;
+    }
+    window.location.href = `/compare${params.toString() ? '?' + params.toString() : ''}`;
+  }, [product.sku]);
+
+  const inWishlist = isInWishlist(product.id);
 
   return (
     <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-blue/50 flex flex-col relative">
@@ -101,25 +143,41 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           </div>
         </div>
       </Link>
-      {product.stock === 0 ? (
-        <div className="mx-4 mb-4 bg-gray-200 text-gray-500 py-2.5 px-4 rounded-xl text-sm font-semibold text-center cursor-not-allowed">
-          缺货
-        </div>
-      ) : (
-        <>
+      <div className="px-4 pb-4 flex gap-2">
+        {product.stock === 0 ? (
+          <div className="flex-1 bg-gray-200 text-gray-500 py-2.5 px-4 rounded-xl text-sm font-semibold text-center cursor-not-allowed">
+            缺货
+          </div>
+        ) : (
           <button
-            onClick={(e) => { e.preventDefault(); onAddToCart?.(); }}
-            className="mx-4 mb-4 bg-blue text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all hover:bg-blue-dark active:scale-95 shadow-md hover:shadow-lg"
+            onClick={handleAddToCart}
+            className="flex-1 bg-blue text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all hover:bg-blue-dark active:scale-95 shadow-md hover:shadow-lg"
           >
             加入购物车
           </button>
-          {product.stock < 20 && (
-            <div className="absolute bottom-12 right-3 text-xs text-orange-600 font-medium bg-orange-50 px-2 py-0.5 rounded-full">
-              仅存 {product.stock} 件
-            </div>
-          )}
-        </>
+        )}
+        <button
+          onClick={handleWishlistToggle}
+          className={`w-11 h-11 border rounded-xl flex items-center justify-center text-lg transition-all flex-shrink-0 ${
+            inWishlist ? 'border-red-300 bg-pink-50 text-red-500' : 'border-gray-200 hover:border-red-300 text-gray-400'
+          }`}
+          title={inWishlist ? '取消收藏' : '添加收藏'}
+        >
+          {inWishlist ? '❤️' : '🤍'}
+        </button>
+        <button
+          onClick={handleCompare}
+          className="w-11 h-11 border border-gray-200 rounded-xl flex items-center justify-center text-lg hover:border-blue hover:text-blue transition-all flex-shrink-0"
+          title="商品对比"
+        >
+          ⚖️
+        </button>
+      </div>
+      {product.stock < 20 && product.stock > 0 && (
+        <div className="absolute bottom-20 right-3 text-xs text-orange-600 font-medium bg-orange-50 px-2 py-0.5 rounded-full">
+          仅存 {product.stock} 件
+        </div>
       )}
     </div>
   );
-}
+});

@@ -7,6 +7,7 @@ import { useCartStore } from '@/store';
 import { useRecentlyViewedStore } from '@/store';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 
 function WishlistContent() {
   const { items, removeItem } = useWishlistStore();
@@ -28,7 +29,7 @@ function WishlistContent() {
   const handleAddToCart = (item: any) => {
     addItem(item.product);
     removeItem(item.productId);
-    alert('已加入购物车！');
+    toast.success('已加入购物车！');
   };
 
   if (items.length === 0) {
@@ -124,7 +125,7 @@ function WishlistContent() {
               </div>
               <div className="flex gap-1 md:gap-2 flex-shrink-0">
                 {item.product.stock === 0 ? (
-                  <Button variant="outline" size="sm" onClick={() => alert('到货通知已订阅！缺货时我们会通知您')}>
+                    <Button variant="outline" size="sm" onClick={() => toast.success('到货通知已订阅！缺货时我们会通知您')}>
                     到货通知
                   </Button>
                 ) : (

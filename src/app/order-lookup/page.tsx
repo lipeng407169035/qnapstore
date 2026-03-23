@@ -35,11 +35,9 @@ export default function OrderLookupPage() {
     setSearched(true);
     try {
       const allOrders: Order[] = [];
-      for (let i = 0; i < 100; i++) {
-        const stored = localStorage.getItem(`qnap_order_${i}`);
-        if (stored) {
-          try { allOrders.push(JSON.parse(stored)); } catch {}
-        }
+      const storedOrders = localStorage.getItem('qnap_orders');
+      if (storedOrders) {
+        try { allOrders.push(...JSON.parse(storedOrders)); } catch {}
       }
       let results = allOrders;
       if (searchType === 'orderNo') {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface Coupon {
   id: number;
@@ -54,11 +55,11 @@ export default function AdminCouponsPage() {
 
   const handleSave = async () => {
     if (!formData.code?.trim()) {
-      alert('请输入优惠券');
+      toast.warning('请输入优惠券');
       return;
     }
     if (formData.discountValue === undefined || formData.discountValue <= 0) {
-      alert('请输入有效的折扣值');
+      toast.warning('请输入有效的折扣值');
       return;
     }
 

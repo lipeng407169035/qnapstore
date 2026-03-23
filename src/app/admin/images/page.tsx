@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ImageFile } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminImagesPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function AdminImagesPage() {
 
   const handleAddSku = async () => {
     if (!newSku.trim() || !newSkuName.trim()) {
-      alert('请填写型号和名称');
+      toast.warning('请填写型号和名称');
       return;
     }
     setAddingSku(true);

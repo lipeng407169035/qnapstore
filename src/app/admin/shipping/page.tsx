@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { ShippingCompany } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminShippingPage() {
   const [companies, setCompanies] = useState<ShippingCompany[]>([]);
@@ -18,7 +19,7 @@ export default function AdminShippingPage() {
     setSaving(true);
     await fetch('/api/admin/shipping-companies', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companies }) });
     setSaving(false);
-    alert('保存成功！');
+    toast.success('保存成功！');
   };
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

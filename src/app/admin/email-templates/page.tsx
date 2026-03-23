@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface EmailTemplate {
   subject: string;
@@ -31,7 +32,7 @@ export default function EmailTemplatesPage() {
       body: JSON.stringify(form[type]),
     });
     setSaving(null);
-    alert('保存成功！');
+    toast.success('保存成功！');
   };
 
   const insertVar = (type: string, field: 'subject' | 'body', variable: string) => {

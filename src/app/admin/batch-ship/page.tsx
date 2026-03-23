@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminBatchShipPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -9,9 +10,11 @@ export default function AdminBatchShipPage() {
   const [trackingNo, setTrackingNo] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/orders?status=paid').then(r => r.json()).then(async (data) => {
-      const all = await fetch('/api/admin/orders').then(r => r.json());
-      setOrders(all.filter((o: any) => ['pending', 'paid', 'processing'].includes(o.status)));
+    Promise.all([
+      fetch('/api/admin/orders?status=pending').then(r => r.json()).then(d => d.data || []),
+      fetch('/api/admin/orders?status=paid').then(r => r.json()).then(d => d.data || []),
+    ]).then(([pending, paid]) => {
+      setOrders([...pending, ...paid].filter((o: any) => ['pending', 'paid'].includes(o.status)));
       setLoading(false);
     });
   }, []);
@@ -29,7 +32,7 @@ export default function AdminBatchShipPage() {
         body: JSON.stringify({ status: 'shipped', trackingNo: `${shippingCompany}${trackingNo || Date.now()}` }),
       });
     }
-    alert(`已为 ${selected.length} 个订单批量发货！`);
+    toast.success(`已为 ${selected.length} 个订单批量发货！`);
     setOrders(orders.map(o => selected.includes(o.id) ? { ...o, status: 'shipped' } : o));
     setSelected([]);
   };
@@ -60,7 +63,7 @@ export default function AdminBatchShipPage() {
       </div>
 
       <div className="space-y-3">
-        {orders.filter(o => ['pending', 'paid', 'processing'].includes(o.status)).map(order => (
+        {orders.filter(o => ['pending', 'paid'].includes(o.status)).map(order => (
           <div key={order.id} className="bg-white rounded-xl p-4 border flex items-center gap-4">
             <input type="checkbox" checked={selected.includes(order.id)} onChange={() => toggleSelect(order.id)} className="w-5 h-5 accent-blue" />
             <div className="flex-1">
@@ -77,7 +80,7 @@ export default function AdminBatchShipPage() {
             </div>
           </div>
         ))}
-        {orders.filter(o => ['pending', 'paid', 'processing'].includes(o.status)).length === 0 && (
+        {orders.filter(o => ['pending', 'paid'].includes(o.status)).length === 0 && (
           <div className="text-center py-16 text-gray-400">暂无待发货订单</div>
         )}
       </div>

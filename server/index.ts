@@ -14,13 +14,64 @@ app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-// 管理员账户（硬编码）
+// 管理员账户
+const ADMIN_USER_NAME = process.env.ADMIN_USER || 'admin';
+const ADMIN_USER_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_USER = {
   email: 'admin@qnap.com',
   password: 'admin123',
   name: '系统管理员',
   role: 'admin'
 };
+
+// ============ Helper Functions ============
+
+function getProductImage(sku) {
+  const skuDir = path.join(imagesDir, sku);
+  if (fs.existsSync(skuDir)) {
+    const files = fs.readdirSync(skuDir).filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f)).sort();
+    if (files.length > 0) return `/images/products/${sku}/${files[0]}`;
+  }
+  return '';
+}
+
+function paginate(arr, page = 1, limit = 20, search = '', searchFields = []) {
+  let result = [...arr];
+  if (search && searchFields.length > 0) {
+    const q = search.toLowerCase();
+    result = result.filter(item =>
+      searchFields.some(field => (item[field] || '').toString().toLowerCase().includes(q))
+    );
+  }
+  const total = result.length;
+  const totalPages = Math.ceil(total / limit);
+  return {
+    data: result.slice((page - 1) * limit, page * limit),
+    total, page, limit, totalPages
+  };
+}
+
+// ============ Admin Auth Middleware ============
+
+function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization || '';
+  if (!auth.startsWith('Basic ')) {
+    return res.status(401).json({ error: 'Unauthorized - 请提供管理员凭据' });
+  }
+  try {
+    const decoded = Buffer.from(auth.slice(6), 'base64').toString();
+    const colonIdx = decoded.indexOf(':');
+    if (colonIdx === -1) return res.status(401).json({ error: 'Invalid credentials format' });
+    const user = decoded.slice(0, colonIdx);
+    const pass = decoded.slice(colonIdx + 1);
+    if (user !== ADMIN_USER_NAME || pass !== ADMIN_USER_PASS) {
+      return res.status(401).json({ error: '无效的管理员凭据' });
+    }
+  } catch {
+    return res.status(401).json({ error: 'Invalid authorization header' });
+  }
+  next();
+}
 
 // ============ Categories ============
 
@@ -29,12 +80,12 @@ app.get('/api/categories', (req, res) => {
   res.json(db.categories.filter(c => c.active !== false));
 });
 
-app.get('/api/admin/categories', (req, res) => {
+app.get('/api/admin/categories', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.categories);
 });
 
-app.post('/api/admin/categories', (req, res) => {
+app.post('/api/admin/categories', requireAdmin, (req, res) => {
   const db = loadDB();
   const { name, slug, icon, desc } = req.body;
   const newCat = {
@@ -51,7 +102,7 @@ app.post('/api/admin/categories', (req, res) => {
   res.json(newCat);
 });
 
-app.put('/api/admin/categories/:id', (req, res) => {
+app.put('/api/admin/categories/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.categories.findIndex(c => c.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Category not found' });
@@ -60,7 +111,7 @@ app.put('/api/admin/categories/:id', (req, res) => {
   res.json(db.categories[index]);
 });
 
-app.delete('/api/admin/categories/:id', (req, res) => {
+app.delete('/api/admin/categories/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.categories.findIndex(c => c.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Category not found' });
@@ -76,12 +127,12 @@ app.get('/api/banners', (req, res) => {
   res.json(db.banners.filter(b => b.active).sort((a, b) => a.sort - b.sort));
 });
 
-app.get('/api/admin/banners', (req, res) => {
+app.get('/api/admin/banners', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.banners.sort((a, b) => a.sort - b.sort));
 });
 
-app.post('/api/admin/banners', (req, res) => {
+app.post('/api/admin/banners', requireAdmin, (req, res) => {
   const db = loadDB();
   const { title, subtitle, btnText, link, gradient, image } = req.body;
   const newBanner = {
@@ -100,7 +151,7 @@ app.post('/api/admin/banners', (req, res) => {
   res.json(newBanner);
 });
 
-app.put('/api/admin/banners/:id', (req, res) => {
+app.put('/api/admin/banners/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.banners.findIndex(b => b.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Banner not found' });
@@ -109,7 +160,7 @@ app.put('/api/admin/banners/:id', (req, res) => {
   res.json(db.banners[index]);
 });
 
-app.delete('/api/admin/banners/:id', (req, res) => {
+app.delete('/api/admin/banners/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.banners.findIndex(b => b.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Banner not found' });
@@ -118,42 +169,14 @@ app.delete('/api/admin/banners/:id', (req, res) => {
   res.json({ success: true });
 });
 
-const bannerUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      const dir = path.join(process.cwd(), 'public', 'images', 'banners');
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-      cb(null, `${Date.now()}${path.extname(file.originalname)}`);
-    },
-  }),
-  fileFilter: (req, file, cb) => {
-    const allowed = /\.(svg|png|jpg|jpeg|webp)$/i;
-    cb(null, allowed.test(file.originalname));
-  },
-  limits: { fileSize: 10 * 1024 * 1024 },
-});
+// ============ Announcements
 
-app.post('/api/admin/banners/upload', bannerUpload.single('image'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-  res.json({ url: `/images/banners/${req.file.filename}` });
-});
-
-// ============ Announcements ============
-
-app.get('/api/announcements', (req, res) => {
-  const db = loadDB();
-  res.json(db.announcements.filter(a => a.active).sort((a, b) => a.sort - b.sort));
-});
-
-app.get('/api/admin/announcements', (req, res) => {
+app.get('/api/admin/announcements', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.announcements.sort((a, b) => a.sort - b.sort));
 });
 
-app.post('/api/admin/announcements', (req, res) => {
+app.post('/api/admin/announcements', requireAdmin, (req, res) => {
   const db = loadDB();
   const { text } = req.body;
   const newAnn = {
@@ -167,7 +190,7 @@ app.post('/api/admin/announcements', (req, res) => {
   res.json(newAnn);
 });
 
-app.put('/api/admin/announcements/:id', (req, res) => {
+app.put('/api/admin/announcements/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.announcements.findIndex(a => a.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Announcement not found' });
@@ -176,7 +199,7 @@ app.put('/api/admin/announcements/:id', (req, res) => {
   res.json(db.announcements[index]);
 });
 
-app.delete('/api/admin/announcements/:id', (req, res) => {
+app.delete('/api/admin/announcements/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.announcements.findIndex(a => a.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Announcement not found' });
@@ -185,19 +208,14 @@ app.delete('/api/admin/announcements/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// ============ Settings ============
+// ============ Settings
 
-app.get('/api/settings', (req, res) => {
+app.get('/api/admin/settings', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.settings);
 });
 
-app.get('/api/admin/settings', (req, res) => {
-  const db = loadDB();
-  res.json(db.settings);
-});
-
-app.put('/api/admin/settings', (req, res) => {
+app.put('/api/admin/settings', requireAdmin, (req, res) => {
   const db = loadDB();
   db.settings = { ...db.settings, ...req.body };
   saveDB(db);
@@ -211,12 +229,12 @@ app.get('/api/seo', (req, res) => {
   res.json(db.seo || {});
 });
 
-app.get('/api/admin/seo', (req, res) => {
+app.get('/api/admin/seo', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.seo || {});
 });
 
-app.put('/api/admin/seo', (req, res) => {
+app.put('/api/admin/seo', requireAdmin, (req, res) => {
   const db = loadDB();
   db.seo = { ...db.seo, ...req.body };
   saveDB(db);
@@ -249,12 +267,12 @@ app.get('/api/coupons/validate', (req, res) => {
   res.json({ valid: true, discount: Math.round(discount), coupon });
 });
 
-app.get('/api/admin/coupons', (req, res) => {
+app.get('/api/admin/coupons', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.coupons);
 });
 
-app.post('/api/admin/coupons', (req, res) => {
+app.post('/api/admin/coupons', requireAdmin, (req, res) => {
   const db = loadDB();
   const { code, discountType, discountValue, minOrderAmount, maxDiscount, startDate, endDate, usageLimit, active } = req.body;
   const newCoupon = {
@@ -275,7 +293,7 @@ app.post('/api/admin/coupons', (req, res) => {
   res.json(newCoupon);
 });
 
-app.put('/api/admin/coupons/:id', (req, res) => {
+app.put('/api/admin/coupons/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.coupons.findIndex(c => c.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Coupon not found' });
@@ -284,7 +302,7 @@ app.put('/api/admin/coupons/:id', (req, res) => {
   res.json(db.coupons[index]);
 });
 
-app.delete('/api/admin/coupons/:id', (req, res) => {
+app.delete('/api/admin/coupons/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.coupons.findIndex(c => c.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Coupon not found' });
@@ -339,9 +357,12 @@ app.get('/api/products/sku/:sku', (req, res) => {
   res.json(product);
 });
 
-app.get('/api/admin/products', (req, res) => {
+app.get('/api/admin/products', requireAdmin, (req, res) => {
+  const { page = 1, limit = 24, search = '' } = req.query;
   const db = loadDB();
-  res.json(db.products);
+  const products = db.products.map(p => ({ ...p, imageUrl: getProductImage(p.sku) }));
+  const result = paginate(products, parseInt(page as string), parseInt(limit as string), search as string, ['name', 'sku', 'categoryName']);
+  res.json(result);
 });
 
 app.post('/api/admin/products/import', upload.single('file'), (req, res) => {
@@ -488,13 +509,17 @@ app.post('/api/reviews', (req, res) => {
   res.json({ success: true, message: '评论已提交，等待审核' });
 });
 
-app.get('/api/admin/reviews', (req, res) => {
+app.get('/api/admin/reviews', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20, search = '' } = req.query;
   const db = loadDB();
-  const reviews = db.reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  res.json(reviews);
+  const result = paginate(
+    db.reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    parseInt(page as string), parseInt(limit as string), search as string, ['userName', 'comment']
+  );
+  res.json(result);
 });
 
-app.put('/api/admin/reviews/:id', (req, res) => {
+app.put('/api/admin/reviews/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.reviews.findIndex(r => r.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Review not found' });
@@ -503,7 +528,7 @@ app.put('/api/admin/reviews/:id', (req, res) => {
   res.json(db.reviews[index]);
 });
 
-app.delete('/api/admin/reviews/:id', (req, res) => {
+app.delete('/api/admin/reviews/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.reviews.findIndex(r => r.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Review not found' });
@@ -547,9 +572,9 @@ app.get('/api/orders/:userId', (req, res) => {
   res.json(orders);
 });
 
-app.get('/api/admin/orders', (req, res) => {
+app.get('/api/admin/orders', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20, search = '', status } = req.query;
   const db = loadDB();
-  const { search, status } = req.query;
   let orders = [...db.orders];
   
   if (search) {
@@ -565,10 +590,11 @@ app.get('/api/admin/orders', (req, res) => {
   }
   
   orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  res.json(orders);
+  const result = paginate(orders, parseInt(page as string), parseInt(limit as string));
+  res.json(result);
 });
 
-app.put('/api/admin/orders/:id', (req, res) => {
+app.put('/api/admin/orders/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.orders.findIndex(o => o.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Order not found' });
@@ -620,7 +646,7 @@ app.get('/api/images/:sku', (req, res) => {
   res.json(files);
 });
 
-app.get('/api/admin/images/:sku', (req, res) => {
+app.get('/api/admin/images/:sku', requireAdmin, (req, res) => {
   const skuDir = path.join(imagesDir, req.params.sku);
   if (!fs.existsSync(skuDir)) {
     return res.json([]);
@@ -637,7 +663,7 @@ app.get('/api/admin/images/:sku', (req, res) => {
   res.json(files);
 });
 
-app.post('/api/admin/images/:sku', uploadDisk.array('images', 20), (req, res) => {
+app.post('/api/admin/images/:sku', requireAdmin, uploadDisk.array('images', 20), (req, res) => {
   const skuDir = path.join(imagesDir, req.params.sku);
   if (!fs.existsSync(skuDir)) {
     fs.mkdirSync(skuDir, { recursive: true });
@@ -651,7 +677,7 @@ app.post('/api/admin/images/:sku', uploadDisk.array('images', 20), (req, res) =>
   res.json({ success: true, files });
 });
 
-app.delete('/api/admin/images/:sku/:filename', (req, res) => {
+app.delete('/api/admin/images/:sku/:filename', requireAdmin, (req, res) => {
   const filePath = path.join(imagesDir, req.params.sku, req.params.filename);
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ error: 'File not found' });
@@ -703,13 +729,12 @@ app.post('/api/auth/login', (req, res) => {
   res.json(userWithoutPassword);
 });
 
-app.get('/api/admin/users', (req, res) => {
+app.get('/api/admin/users', requireAdmin, (req, res) => {
   const db = loadDB();
-  const users = db.users.map(u => ({ ...u, password: '***' }));
-  res.json(users);
+  res.json(db.users.map(u => ({ ...u, password: '***' })));
 });
 
-app.get('/api/admin/stats', (req, res) => {
+app.get('/api/admin/stats', requireAdmin, (req, res) => {
   const db = loadDB();
   
   const now = new Date();
@@ -791,7 +816,7 @@ app.post('/api/products/:id/view', (req, res) => {
   res.json({ views: db.productViews[productId] });
 });
 
-app.get('/api/admin/product-views', (req, res) => {
+app.get('/api/admin/product-views', requireAdmin, (req, res) => {
   const db = loadDB();
   const views = db.productViews || {};
   const enriched = db.products.map(p => ({
@@ -806,7 +831,7 @@ app.get('/api/admin/product-views', (req, res) => {
 
 // ============ Batch Stock Adjustment ============
 
-app.post('/api/admin/products/batch-stock', (req, res) => {
+app.post('/api/admin/products/batch-stock', requireAdmin, (req, res) => {
   const db = loadDB();
   const { adjustments } = req.body;
   if (!Array.isArray(adjustments)) {
@@ -824,7 +849,7 @@ app.post('/api/admin/products/batch-stock', (req, res) => {
 
 // ============ CSV Import / Export ============
 
-app.get('/api/admin/products/export', (req, res) => {
+app.get('/api/admin/products/export', requireAdmin, (req, res) => {
   const db = loadDB();
   const header = ['sku', 'name', 'series', 'categorySlug', 'categoryName', 'price', 'originalPrice', 'description', 'badge', 'color', 'rating', 'reviews', 'stock'];
   const rows = db.products.map(p => [
@@ -838,27 +863,29 @@ app.get('/api/admin/products/export', (req, res) => {
   res.send('\ufeff' + csv);
 });
 
-app.get('/api/admin/orders/export', (req, res) => {
+app.get('/api/admin/orders/export', requireAdmin, (req, res) => {
   const db = loadDB();
-  const header = ['orderNo', 'shippingName', 'shippingPhone', 'shippingAddress', 'paymentMethod', 'status', 'total', 'createdAt'];
+  const header = ['orderNo', 'shippingName', 'shippingPhone', 'shippingAddress', 'total', 'status', 'paymentMethod', 'createdAt'];
   const rows = db.orders.map(o => [
-    o.orderNo, `"${o.shippingName}"`, o.shippingPhone, `"${o.shippingAddress}"`,
-    o.paymentMethod, o.status, o.total, o.createdAt
-  ].join(','));
+    o.orderNo, o.shippingName, o.shippingPhone || '', o.shippingAddress || '',
+    o.total, o.status, o.paymentMethod, o.createdAt
+  ].map(v => `"${v}"`).join(','));
   const csv = [header.join(','), ...rows].join('\n');
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
-  res.send('\ufeff' + csv);
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename=orders.csv');
+  res.send(csv);
 });
 
-// ============ Flash Sales / Activities ============
+// ============ Activities ============
 
-app.get('/api/admin/activities', (req, res) => {
+app.get('/api/admin/activities', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.activities || []);
 });
 
-app.post('/api/admin/activities', (req, res) => {
+// ============ Flash Sales / Activities ============
+
+app.post('/api/admin/activities', requireAdmin, (req, res) => {
   const db = loadDB();
   const { name, type, discountValue, startDate, endDate, productIds, active } = req.body;
   const activity = {
@@ -878,13 +905,52 @@ app.post('/api/admin/activities', (req, res) => {
   res.json(activity);
 });
 
-app.put('/api/admin/activities/:id', (req, res) => {
+app.put('/api/admin/activities/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.activities || []).findIndex(a => a.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Activity not found' });
   db.activities[index] = { ...db.activities[index], ...req.body };
   saveDB(db);
   res.json(db.activities[index]);
+});
+
+app.delete('/api/admin/activities/:id', requireAdmin, (req, res) => {
+  const db = loadDB();
+  const index = (db.activities || []).findIndex(a => a.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Activity not found' });
+  db.activities.splice(index, 1);
+  saveDB(db);
+  res.json({ success: true });
+});
+
+// ============ Email Templates ============
+
+app.get('/api/admin/email-templates', requireAdmin, (req, res) => {
+  const db = loadDB();
+  res.json(db.emailTemplates || {});
+});
+
+app.put('/api/admin/email-templates/:key', requireAdmin, (req, res) => {
+  const db = loadDB();
+  const { key } = req.params;
+  if (!db.emailTemplates) db.emailTemplates = {};
+  db.emailTemplates[key] = { ...db.emailTemplates[key], ...req.body };
+  saveDB(db);
+  res.json(db.emailTemplates[key]);
+});
+
+// ============ Popular Searches ============
+
+app.get('/api/admin/popular-searches', requireAdmin, (req, res) => {
+  const db = loadDB();
+  res.json(db.popularSearches || []);
+});
+
+app.put('/api/admin/popular-searches', requireAdmin, (req, res) => {
+  const db = loadDB();
+  db.popularSearches = req.body;
+  saveDB(db);
+  res.json(db.popularSearches);
 });
 
 app.delete('/api/admin/activities/:id', (req, res) => {
@@ -966,12 +1032,14 @@ app.put('/api/admin/popular-searches', (req, res) => {
 
 // ============ Customers ============
 
-app.get('/api/admin/customers', (req, res) => {
+app.get('/api/admin/customers', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20, search = '' } = req.query;
   const db = loadDB();
-  res.json(db.customers || []);
+  const result = paginate(db.customers || [], parseInt(page as string), parseInt(limit as string), search as string, ['name', 'email', 'phone']);
+  res.json(result);
 });
 
-app.get('/api/admin/customers/:id', (req, res) => {
+app.get('/api/admin/customers/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const customer = db.customers.find(c => c.id === req.params.id);
   if (!customer) return res.status(404).json({ error: 'Customer not found' });
@@ -979,7 +1047,7 @@ app.get('/api/admin/customers/:id', (req, res) => {
   res.json({ ...customer, orders: customerOrders });
 });
 
-app.post('/api/admin/customers', (req, res) => {
+app.post('/api/admin/customers', requireAdmin, (req, res) => {
   const db = loadDB();
   const { name, email, phone, address } = req.body;
   const customer = {
@@ -996,7 +1064,7 @@ app.post('/api/admin/customers', (req, res) => {
   res.json(customer);
 });
 
-app.put('/api/admin/customers/:id', (req, res) => {
+app.put('/api/admin/customers/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.customers.findIndex(c => c.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Customer not found' });
@@ -1005,7 +1073,7 @@ app.put('/api/admin/customers/:id', (req, res) => {
   res.json(db.customers[index]);
 });
 
-app.get('/api/admin/customers/rfm', (req, res) => {
+app.get('/api/admin/customers/rfm', requireAdmin, (req, res) => {
   const db = loadDB();
   const customers = db.customers.map(c => {
     const customerOrders = db.orders.filter(o => o.shippingPhone === c.phone && o.status === 'completed');
@@ -1048,12 +1116,12 @@ app.get('/api/admin/customers/rfm', (req, res) => {
 
 // ============ Invoices ============
 
-app.get('/api/admin/invoices', (req, res) => {
+app.get('/api/admin/invoices', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.invoices || []);
 });
 
-app.post('/api/admin/invoices', (req, res) => {
+app.post('/api/admin/invoices', requireAdmin, (req, res) => {
   const db = loadDB();
   const { orderId, orderNo, type, title, taxNo, email, amount } = req.body;
   const invoice = {
@@ -1067,7 +1135,7 @@ app.post('/api/admin/invoices', (req, res) => {
   res.json(invoice);
 });
 
-app.put('/api/admin/invoices/:id', (req, res) => {
+app.put('/api/admin/invoices/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.invoices.findIndex(i => i.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Invoice not found' });
@@ -1111,7 +1179,7 @@ app.get('/api/tracking/:trackingNo', (req, res) => {
 
 // ============ Restock Notifications ============
 
-app.get('/api/admin/restock-notifications', (req, res) => {
+app.get('/api/admin/restock-notifications', requireAdmin, (req, res) => {
   const db = loadDB();
   const outOfStock = db.products.filter(p => p.stock === 0);
   res.json(outOfStock);
@@ -1119,12 +1187,12 @@ app.get('/api/admin/restock-notifications', (req, res) => {
 
 // ============ Staff Members ============
 
-app.get('/api/admin/staff', (req, res) => {
+app.get('/api/admin/staff', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.staffMembers || []);
 });
 
-app.post('/api/admin/staff', (req, res) => {
+app.post('/api/admin/staff', requireAdmin, (req, res) => {
   const db = loadDB();
   const { name, email, role, phone } = req.body;
   const staff = {
@@ -1140,7 +1208,7 @@ app.post('/api/admin/staff', (req, res) => {
   res.json(staff);
 });
 
-app.put('/api/admin/staff/:id', (req, res) => {
+app.put('/api/admin/staff/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.staffMembers.findIndex(s => s.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Staff not found' });
@@ -1149,7 +1217,7 @@ app.put('/api/admin/staff/:id', (req, res) => {
   res.json(db.staffMembers[index]);
 });
 
-app.delete('/api/admin/staff/:id', (req, res) => {
+app.delete('/api/admin/staff/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.staffMembers.findIndex(s => s.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Staff not found' });
@@ -1160,7 +1228,7 @@ app.delete('/api/admin/staff/:id', (req, res) => {
 
 // ============ Audit Logs ============
 
-app.get('/api/admin/audit-logs', (req, res) => {
+app.get('/api/admin/audit-logs', requireAdmin, (req, res) => {
   const db = loadDB();
   const { action, target, page = 1, limit = 50 } = req.query;
   let logs = [...(db.auditLogs || [])];
@@ -1186,7 +1254,7 @@ function addAuditLog(staffId: string, staffName: string, action: string, target:
 
 // ============ Sales Reports ============
 
-app.get('/api/admin/reports/sales', (req, res) => {
+app.get('/api/admin/reports/sales', requireAdmin, (req, res) => {
   const db = loadDB();
   const { start, end } = req.query;
   let orders = db.orders.filter(o => o.status === 'completed');
@@ -1239,12 +1307,12 @@ app.get('/api/admin/reports/sales', (req, res) => {
 
 // ============ Shipping Companies ============
 
-app.get('/api/admin/shipping-companies', (req, res) => {
+app.get('/api/admin/shipping-companies', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.shippingCompanies || []);
 });
 
-app.put('/api/admin/shipping-companies', (req, res) => {
+app.put('/api/admin/shipping-companies', requireAdmin, (req, res) => {
   const db = loadDB();
   const { companies } = req.body;
   db.shippingCompanies = companies;
@@ -1254,12 +1322,12 @@ app.put('/api/admin/shipping-companies', (req, res) => {
 
 // ============ Full Reductions (满减活动) ============
 
-app.get('/api/admin/full-reductions', (req, res) => {
+app.get('/api/admin/full-reductions', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.fullReductions || []);
 });
 
-app.post('/api/admin/full-reductions', (req, res) => {
+app.post('/api/admin/full-reductions', requireAdmin, (req, res) => {
   const db = loadDB();
   const { name, threshold, discount, type, startDate, endDate, active } = req.body;
   const newAct = {
@@ -1279,7 +1347,7 @@ app.post('/api/admin/full-reductions', (req, res) => {
   res.json(newAct);
 });
 
-app.put('/api/admin/full-reductions/:id', (req, res) => {
+app.put('/api/admin/full-reductions/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   if (!db.fullReductions) db.fullReductions = [];
   const index = db.fullReductions.findIndex(a => a.id === req.params.id);
@@ -1289,7 +1357,7 @@ app.put('/api/admin/full-reductions/:id', (req, res) => {
   res.json(db.fullReductions[index]);
 });
 
-app.delete('/api/admin/full-reductions/:id', (req, res) => {
+app.delete('/api/admin/full-reductions/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   if (!db.fullReductions) db.fullReductions = [];
   const index = db.fullReductions.findIndex(a => a.id === req.params.id);
@@ -1330,12 +1398,17 @@ app.get('/api/news/:id', (req, res) => {
   res.json(item);
 });
 
-app.get('/api/admin/news', (req, res) => {
+app.get('/api/admin/news', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20, search = '' } = req.query;
   const db = loadDB();
-  res.json(db.news.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+  const result = paginate(
+    db.news.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    parseInt(page as string), parseInt(limit as string), search as string, ['title']
+  );
+  res.json(result);
 });
 
-app.post('/api/admin/news', (req, res) => {
+app.post('/api/admin/news', requireAdmin, (req, res) => {
   const db = loadDB();
   const { title, category, date, excerpt, content, image, hot, active } = req.body;
   const item = {
@@ -1350,7 +1423,7 @@ app.post('/api/admin/news', (req, res) => {
   res.json(item);
 });
 
-app.put('/api/admin/news/:id', (req, res) => {
+app.put('/api/admin/news/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.news.findIndex(n => n.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1359,7 +1432,7 @@ app.put('/api/admin/news/:id', (req, res) => {
   res.json(db.news[index]);
 });
 
-app.delete('/api/admin/news/:id', (req, res) => {
+app.delete('/api/admin/news/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.news.findIndex(n => n.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1395,7 +1468,7 @@ app.post('/api/partnership/apply', (req, res) => {
   res.json({ success: true, message: '申请已提交，QNAP 业务团队将在 3 个工作日内与您联系' });
 });
 
-app.get('/api/admin/partnership-applications', (req, res) => {
+app.get('/api/admin/partnership-applications', requireAdmin, (req, res) => {
   const db = loadDB();
   const { status } = req.query;
   let apps = db.partnershipApps || [];
@@ -1403,7 +1476,7 @@ app.get('/api/admin/partnership-applications', (req, res) => {
   res.json(apps.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
 });
 
-app.put('/api/admin/partnership-applications/:id', (req, res) => {
+app.put('/api/admin/partnership-applications/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.partnershipApps || []).findIndex(a => a.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1445,15 +1518,17 @@ app.get('/api/warranty/my-submissions', (req, res) => {
   res.json(subs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
 });
 
-app.get('/api/admin/warranty-submissions', (req, res) => {
+app.get('/api/admin/warranty-submissions', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
   const db = loadDB();
   const { status } = req.query;
   let subs = db.warrantySubs || [];
   if (status) subs = subs.filter(s => s.status === status);
-  res.json(subs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  const result = paginate(subs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), parseInt(page as string), parseInt(limit as string));
+  res.json(result);
 });
 
-app.put('/api/admin/warranty-submissions/:id', (req, res) => {
+app.put('/api/admin/warranty-submissions/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.warrantySubs || []).findIndex(s => s.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1495,15 +1570,17 @@ app.get('/api/support/my-tickets', (req, res) => {
   res.json(tickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
 });
 
-app.get('/api/admin/support-tickets', (req, res) => {
+app.get('/api/admin/support-tickets', requireAdmin, (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
   const db = loadDB();
   const { status } = req.query;
   let tickets = db.supportTickets || [];
   if (status) tickets = tickets.filter(t => t.status === status);
-  res.json(tickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  const result = paginate(tickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), parseInt(page as string), parseInt(limit as string), '', []);
+  res.json(result);
 });
 
-app.put('/api/admin/support-tickets/:id', (req, res) => {
+app.put('/api/admin/support-tickets/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.supportTickets || []).findIndex(t => t.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1541,7 +1618,7 @@ app.get('/api/downloads', (req, res) => {
   res.json(files);
 });
 
-app.post('/api/admin/downloads', uploadDownload.single('file'), (req, res) => {
+app.post('/api/admin/downloads', requireAdmin, uploadDownload.single('file'), (req, res) => {
   const db = loadDB();
   const { sku, fileName, fileType, version } = req.body;
   if (!sku || !fileName) return res.status(400).json({ error: 'sku 和 fileName 必填' });
@@ -1563,7 +1640,7 @@ app.post('/api/admin/downloads', uploadDownload.single('file'), (req, res) => {
   res.json(item);
 });
 
-app.put('/api/admin/downloads/:id', (req, res) => {
+app.put('/api/admin/downloads/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.downloads || []).findIndex(d => d.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1572,7 +1649,7 @@ app.put('/api/admin/downloads/:id', (req, res) => {
   res.json(db.downloads[index]);
 });
 
-app.delete('/api/admin/downloads/:id', (req, res) => {
+app.delete('/api/admin/downloads/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.downloads || []).findIndex(d => d.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1599,12 +1676,12 @@ app.get('/api/faq', (req, res) => {
   res.json(result);
 });
 
-app.get('/api/admin/faq', (req, res) => {
+app.get('/api/admin/faq', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json((db.faq || []).sort((a, b) => a.sortOrder - b.sortOrder));
 });
 
-app.post('/api/admin/faq', (req, res) => {
+app.post('/api/admin/faq', requireAdmin, (req, res) => {
   const db = loadDB();
   const { category, question, answer, sortOrder } = req.body;
   if (!category || !question || !answer) return res.status(400).json({ error: '请填写必填字段' });
@@ -1619,7 +1696,7 @@ app.post('/api/admin/faq', (req, res) => {
   res.json(item);
 });
 
-app.put('/api/admin/faq/:id', (req, res) => {
+app.put('/api/admin/faq/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.faq || []).findIndex(f => f.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1628,7 +1705,7 @@ app.put('/api/admin/faq/:id', (req, res) => {
   res.json(db.faq[index]);
 });
 
-app.delete('/api/admin/faq/:id', (req, res) => {
+app.delete('/api/admin/faq/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = (db.faq || []).findIndex(f => f.id === parseInt(req.params.id));
   if (index === -1) return res.status(404).json({ error: 'Not found' });
@@ -1644,7 +1721,7 @@ app.get('/api/settings/rma-policy', (req, res) => {
   res.json({ content: db.rma_policy || '' });
 });
 
-app.put('/api/admin/settings/rma-policy', (req, res) => {
+app.put('/api/admin/settings/rma-policy', requireAdmin, (req, res) => {
   const db = loadDB();
   db.rma_policy = req.body.content || '';
   saveDB(db);
@@ -1656,7 +1733,7 @@ app.get('/api/settings/customer-service-info', (req, res) => {
   res.json(db.customer_service_info || {});
 });
 
-app.put('/api/admin/settings/customer-service-info', (req, res) => {
+app.put('/api/admin/settings/customer-service-info', requireAdmin, (req, res) => {
   const db = loadDB();
   db.customer_service_info = { ...db.customer_service_info, ...req.body };
   saveDB(db);

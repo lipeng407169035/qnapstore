@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useUserStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { useCartStore } from '@/store';
+import { toast } from '@/components/ui/Toast';
 
 function InvoiceApplyContent() {
   const router = useRouter();
@@ -27,7 +28,7 @@ function InvoiceApplyContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.orderNo || !form.email) {
-      alert('请填写订单编号和邮箱');
+      toast.warning('请填写订单编号和邮箱');
       return;
     }
 
@@ -45,10 +46,10 @@ function InvoiceApplyContent() {
       if (res.ok) {
         setSubmitted(true);
       } else {
-        alert(data.error || '提交失败');
+        toast.error(data.error || '提交失败');
       }
     } catch {
-      alert('提交失败，请稍后重试');
+      toast.error('提交失败，请稍后重试');
     }
     setSubmitting(false);
   };

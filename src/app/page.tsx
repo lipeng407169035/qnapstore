@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { ProductCard } from '@/components/product/ProductCard';
 import { useCartStore, useRecentlyViewedStore } from '@/store';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,7 +53,7 @@ export default function HomePage() {
 
   const handleAddToCart = (product: Product) => {
     addItem(product);
-    alert('已加入购物车！');
+    toast.success('已加入购物车！');
   };
 
   if (banners.length === 0) {

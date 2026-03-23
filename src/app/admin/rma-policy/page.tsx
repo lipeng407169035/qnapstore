@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminRmaPolicyPage() {
   const [content, setContent] = useState('');
@@ -19,7 +20,7 @@ export default function AdminRmaPolicyPage() {
       body: JSON.stringify({ content }),
     });
     setSaving(false);
-    alert('保存成功');
+    toast.success('保存成功');
   }
 
   return (

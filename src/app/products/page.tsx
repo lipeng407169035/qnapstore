@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Product, Category } from '@/types';
 import { api } from '@/lib/api';
 import { ProductCard } from '@/components/product/ProductCard';
 import { useCartStore } from '@/store';
+import { toast } from '@/components/ui/Toast';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const category = searchParams.get('category') || '';
   const search = searchParams.get('search') || '';
   const badge = searchParams.get('badge') || '';
@@ -39,10 +41,10 @@ function ProductsContent() {
 
   const handleAddToCart = (product: Product) => {
     addItem(product);
-    alert('已加入购物车！');
+    toast.success('已加入购物车！');
   };
 
-  const buildUrl = (overrides: Record<string, string>) => {
+  const buildUrl = useCallback((overrides: Record<string, string>) => {
     const params = new URLSearchParams();
     if (category) params.set('category', category);
     if (search) params.set('search', search);
@@ -54,7 +56,11 @@ function ProductsContent() {
       else params.delete(k);
     });
     return `/products?${params.toString()}`;
-  };
+  }, [category, search, badge, sort, rating]);
+
+  const navigateTo = useCallback((url: string) => {
+    router.push(url);
+  }, [router]);
 
   const Sidebar = () => (
     <div className="space-y-5">
@@ -119,18 +125,18 @@ function ProductsContent() {
           >
             ☰ 筛选
           </button>
-          <a href={buildUrl({ sort: 'price_asc' })} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_asc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-            价格↑
-          </a>
-          <a href={buildUrl({ sort: 'price_desc' })} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_desc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-            价格↓
-          </a>
-          <a href={buildUrl({ sort: 'rating' })} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'rating' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-            ⭐评价
-          </a>
-          <a href="/products" className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${!sort ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-            默认
-          </a>
+              <button onClick={() => navigateTo(buildUrl({ sort: 'price_asc' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_asc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                价格↑
+              </button>
+              <button onClick={() => navigateTo(buildUrl({ sort: 'price_desc' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_desc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                价格↓
+              </button>
+              <button onClick={() => navigateTo(buildUrl({ sort: 'rating' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'rating' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                ⭐评价
+              </button>
+              <button onClick={() => navigateTo('/products')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${!sort ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                默认
+              </button>
         </div>
 
         <div className="flex gap-5 md:gap-7">
@@ -165,10 +171,7 @@ function ProductsContent() {
                 className="border-none text-sm text-gray-600 bg-transparent outline-none cursor-pointer"
                 value={sort}
                 onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  if (e.target.value) url.searchParams.set('sort', e.target.value);
-                  else url.searchParams.delete('sort');
-                  window.location.href = url.toString();
+                  navigateTo(buildUrl({ sort: e.target.value }));
                 }}
               >
                 <option value="">默认排序</option>

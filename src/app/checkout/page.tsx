@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore, useUserStore, usePointsStore } from '@/store';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -31,16 +32,16 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert('请先登录');
+      toast.warning('请先登录');
       router.push('/login?redirect=/checkout');
       return;
     }
     if (items.length === 0) {
-      alert('购物车是空的');
+      toast.warning('购物车是空的');
       return;
     }
     if (!form.shippingName || !form.shippingPhone || !form.shippingAddress) {
-      alert('请填写完整收件信息');
+      toast.warning('请填写完整收件信息');
       return;
     }
 
@@ -96,10 +97,10 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      alert(`✅ 订单建立成功！\n\n📧 确认信已发送至：${simulatedEmail}\n📦 订单编号：${newOrder.orderNo}\n⭐ 本次获得积分：${pointsEarned} 点\n\n💡 积分可在下次消费时折抵`);
+      toast.success(`订单建立成功！订单编号：${newOrder.orderNo}，本次获得积分：${pointsEarned} 点`);
       router.push('/orders');
     } catch (error) {
-      alert('建立订单失败，请稍后再试');
+      toast.error('建立订单失败，请稍后再试');
     } finally {
       setLoading(false);
     }

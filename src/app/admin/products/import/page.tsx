@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
+import { toast } from '@/components/ui/Toast';
 
 export default function ProductImportPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -22,7 +23,7 @@ export default function ProductImportPage() {
       const data = await res.json();
       setResult(data);
     } catch {
-      alert('匯入失敗');
+      toast.error('导入失败');
     }
     setLoading(false);
   };

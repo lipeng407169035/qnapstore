@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { ClientLayout } from '@/components/layout/ClientLayout';
 
 async function getSEO() {
   try {
@@ -39,9 +40,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="zh-CN">
       <body className="font-sans antialiased">
-        <Header />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+        <ClientLayout>
+          <Header />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </ClientLayout>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { Product } from '@/types';
+import { toast } from '@/components/ui/Toast';
 
 interface SpecEntry {
   key: string;
@@ -159,7 +160,7 @@ export default function AdminProductsPage() {
     setProducts(res);
     setBatchItems([]);
     setBatchModalOpen(false);
-    alert('库存批量调整完成！');
+    toast.success('库存批量调整完成！');
   };
 
   return (

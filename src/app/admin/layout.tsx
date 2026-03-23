@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { ToastContainer } from '@/components/ui/Toast';
+import '@/components/ui/Toast.css';
 
 const menuItems = [
   { href: '/admin/dashboard', label: '仪表板', icon: '📊' },
@@ -116,6 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Main Content */}
         <main className="flex-1 p-6">{children}</main>
       </div>
+      <ToastContainer />
     </div>
   );
 }

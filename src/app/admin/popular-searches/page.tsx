@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminPopularSearchesPage() {
   const [searches, setSearches] = useState<string[]>([]);
@@ -15,7 +16,7 @@ export default function AdminPopularSearchesPage() {
 
   const handleSave = async () => {
     await fetch('/api/admin/popular-searches', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ searches }) });
-    alert('保存成功！');
+    toast.success('保存成功！');
   };
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

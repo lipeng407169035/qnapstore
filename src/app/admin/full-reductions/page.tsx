@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface FullReduction {
   id: string;
@@ -41,8 +42,8 @@ export default function AdminFullReductionsPage() {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) { alert('请填写活动名称'); return; }
-    if (form.discount <= 0) { alert('减免金额必须大于0'); return; }
+    if (!form.name.trim()) { toast.warning('请填写活动名称'); return; }
+    if (form.discount <= 0) { toast.warning('减免金额必须大于0'); return; }
 
     try {
       if (editing) {
@@ -63,7 +64,7 @@ export default function AdminFullReductionsPage() {
         setActivities([...activities, created]);
       }
       setModalOpen(false);
-    } catch { alert('保存失败，请稍后再试'); }
+    } catch { toast.error('保存失败，请稍后再试'); }
   };
 
   const handleToggle = async (a: FullReduction) => {
@@ -75,7 +76,7 @@ export default function AdminFullReductionsPage() {
       });
       const updated = await res.json();
       setActivities(activities.map(act => act.id === a.id ? updated : act));
-    } catch { alert('操作失败'); }
+    } catch { toast.error('操作失败'); }
   };
 
   const handleDelete = async (id: string) => {
@@ -83,7 +84,7 @@ export default function AdminFullReductionsPage() {
     try {
       await fetch(`/api/admin/full-reductions/${id}`, { method: 'DELETE' });
       setActivities(activities.filter(a => a.id !== id));
-    } catch { alert('删除失败'); }
+    } catch { toast.error('删除失败'); }
   };
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

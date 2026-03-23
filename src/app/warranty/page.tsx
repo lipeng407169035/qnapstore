@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface Submission {
   id: string;
@@ -52,8 +53,8 @@ export default function WarrantyPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
       });
       if (res.ok) { setSubmitted(true); setForm({ name: '', phone: '', email: '', product: '', serial: '', purchaseDate: '', issue: '' }); }
-      else alert('提交失败');
-    } catch { alert('网络错误'); }
+      else toast.error('提交失败');
+    } catch { toast.error('网络错误'); }
     setSubmitting(false);
   }
 

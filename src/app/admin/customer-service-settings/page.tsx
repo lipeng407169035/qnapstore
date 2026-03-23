@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 export default function AdminCustomerServiceSettingsPage() {
   const [form, setForm] = useState({ phone: '', email: '', address: '', workHours: '', wechat: '' });
@@ -19,7 +20,7 @@ export default function AdminCustomerServiceSettingsPage() {
       body: JSON.stringify(form),
     });
     setSaving(false);
-    alert('保存成功');
+    toast.success('保存成功');
   }
 
   function update(k: string, v: string) { setForm({ ...form, [k]: v }); }
