@@ -83,7 +83,7 @@ app.get('/api/admin/banners', (req, res) => {
 
 app.post('/api/admin/banners', (req, res) => {
   const db = loadDB();
-  const { title, subtitle, btnText, link, gradient } = req.body;
+  const { title, subtitle, btnText, link, gradient, image } = req.body;
   const newBanner = {
     id: Date.now(),
     title,
@@ -91,6 +91,7 @@ app.post('/api/admin/banners', (req, res) => {
     btnText: btnText || '了解更多',
     link: link || '/products',
     gradient: gradient || 'linear-gradient(135deg, #1d3557 0%, #006ebd 100%)',
+    image: image || '',
     active: true,
     sort: db.banners.length + 1
   };

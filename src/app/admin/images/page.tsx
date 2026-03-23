@@ -109,8 +109,7 @@ export default function AdminImagesPage() {
         body: formData,
       });
       if (res.ok) {
-        const data = await res.json();
-        setImages(prev => [...prev, ...data.files].sort((a, b) => a.name.localeCompare(b.name)));
+        await fetchImages(selectedSku);
       }
     } catch (err) {
       console.error('Upload failed:', err);
