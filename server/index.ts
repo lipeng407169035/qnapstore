@@ -620,6 +620,23 @@ app.get('/api/images/:sku', (req, res) => {
   res.json(files);
 });
 
+app.get('/api/admin/images/:sku', (req, res) => {
+  const skuDir = path.join(imagesDir, req.params.sku);
+  if (!fs.existsSync(skuDir)) {
+    return res.json([]);
+  }
+  const files = fs.readdirSync(skuDir)
+    .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
+    .sort()
+    .map(f => ({
+      name: f,
+      url: `/images/products/${req.params.sku}/${f}`,
+      size: fs.statSync(path.join(skuDir, f)).size,
+      updatedAt: fs.statSync(path.join(skuDir, f)).mtime.toISOString(),
+    }));
+  res.json(files);
+});
+
 app.post('/api/admin/images/:sku', uploadDisk.array('images', 20), (req, res) => {
   const skuDir = path.join(imagesDir, req.params.sku);
   if (!fs.existsSync(skuDir)) {
