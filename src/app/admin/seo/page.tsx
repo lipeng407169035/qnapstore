@@ -27,7 +27,8 @@ export default function AdminSEOPage() {
       .then(data => {
         setSeo(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {

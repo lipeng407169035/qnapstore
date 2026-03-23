@@ -16,7 +16,8 @@ export default function AdminCategoriesPage() {
       .then(data => {
         setCategories(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleAdd = () => {
@@ -43,7 +44,7 @@ export default function AdminCategoriesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      setCategories(categories.map(c => c.id === formData.id ? { ...c, ...formData } as Category : c));
+      setCategories(prev => prev.map(c => c.id === formData.id ? { ...c, ...formData } as Category : c));
     } else {
       const res = await adminFetch('/api/admin/categories', {
         method: 'POST',
@@ -51,7 +52,7 @@ export default function AdminCategoriesPage() {
         body: JSON.stringify(formData),
       });
       const newCat = await res.json();
-      setCategories([...categories, newCat]);
+      setCategories(prev => [...prev, newCat]);
     }
     setIsEditing(false);
   };
@@ -59,7 +60,7 @@ export default function AdminCategoriesPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('确定要停用此分类吗？')) return;
     await adminFetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
-    setCategories(categories.map(c => c.id === id ? { ...c, active: false } : c));
+    setCategories(prev => prev.map(c => c.id === id ? { ...c, active: false } : c));
   };
 
   const icons = ['🗄️', '🏢', '🖥️', '🌐', '💾', '📡', '🔑', '🛡️', '🧠', '📦', '💿', '🔧'];

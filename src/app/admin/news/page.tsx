@@ -31,7 +31,7 @@ export default function AdminNewsPage() {
 
   function fetchNews() {
     setLoading(true);
-    adminFetch('/api/admin/news').then(r => r.json()).then(data => { setNews(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
+    adminFetch('/api/admin/news').then(r => r.json()).then(data => { setNews(Array.isArray(data) ? data : (data.data || [])); setLoading(false); }).catch(() => setLoading(false));
   }
 
   function openAdd() { setEditItem(EMPTY_FORM); setShowModal(true); }

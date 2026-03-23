@@ -2,6 +2,7 @@
 
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 interface Settings {
   siteName: string;
@@ -33,7 +34,8 @@ export default function AdminSettingsPage() {
       .then(data => {
         setSettings(data);
         setLoading(false);
-      });
+      })
+      .catch(() => { toast.error('加载失败，请重试'); setLoading(false); });
   }, []);
 
   const handleSave = async () => {

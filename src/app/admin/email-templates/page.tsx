@@ -22,7 +22,8 @@ export default function EmailTemplatesPage() {
         setTemplates(data);
         setForm(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleSave = async (type: string) => {

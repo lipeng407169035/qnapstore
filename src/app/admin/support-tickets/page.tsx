@@ -29,7 +29,7 @@ export default function AdminSupportPage() {
   function fetchTickets() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/support-tickets?status=${statusFilter}` : '/api/admin/support-tickets';
-    adminFetch(url).then(r => r.json()).then(data => { setTickets(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
+    adminFetch(url).then(r => r.json()).then(data => { setTickets(Array.isArray(data) ? data : (data.data || [])); setLoading(false); }).catch(() => setLoading(false));
   }
 
   async function handleUpdate() {

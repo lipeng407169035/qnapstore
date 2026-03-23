@@ -21,7 +21,8 @@ export default function AdminReportsPage() {
       .then(data => {
         setReport(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => { loadReport(); }, []);

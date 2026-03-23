@@ -50,7 +50,7 @@ export default function AdminPartnershipPage() {
   function fetchApps() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/partnership-applications?status=${statusFilter}` : '/api/admin/partnership-applications';
-    adminFetch(url).then(r => r.json()).then(data => { setApps(data); setLoading(false); });
+    adminFetch(url).then(r => r.json()).then(data => { setApps(data); setLoading(false); }).catch(() => setLoading(false));
   }
 
   async function handleApprove(app: App) {

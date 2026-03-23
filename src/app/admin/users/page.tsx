@@ -14,7 +14,8 @@ export default function AdminUsersPage() {
       .then(data => {
         setUsers(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   if (loading) {

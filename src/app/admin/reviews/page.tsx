@@ -23,7 +23,8 @@ export default function AdminReviewsPage() {
       .then(data => {
         setReviews(Array.isArray(data) ? data : (data.data || []));
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleApprove = async (id: string) => {

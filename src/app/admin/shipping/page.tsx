@@ -13,7 +13,7 @@ export default function AdminShippingPage() {
     adminFetch('/api/admin/shipping-companies').then(r => r.json()).then(data => {
       setCompanies(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {

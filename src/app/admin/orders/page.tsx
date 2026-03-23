@@ -43,7 +43,8 @@ function OrdersContent() {
         setOrders(Array.isArray(data) ? data : (data.data || []));
         setTotal(Array.isArray(data) ? data.length : (data.total || 0));
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [statusFilter, searchQuery, page]);
 
   const totalPages = Math.ceil(total / limit);

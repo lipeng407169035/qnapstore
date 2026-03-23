@@ -60,7 +60,8 @@ export default function AdminProductsPage() {
       .then(data => {
         setProducts(Array.isArray(data) ? data : (data.data || []));
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleEdit = (product: Product) => {

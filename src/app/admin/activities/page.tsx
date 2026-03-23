@@ -41,7 +41,7 @@ export default function ActivitiesPage() {
       setActivities(Array.isArray(acts) ? acts : (acts.data || []));
       setProducts(Array.isArray(prods) ? prods : (prods.data || []));
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const openNew = () => {

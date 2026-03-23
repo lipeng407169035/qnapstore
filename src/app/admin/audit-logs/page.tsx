@@ -18,7 +18,8 @@ export default function AdminAuditLogsPage() {
       .then(d => {
         setData(d);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);

@@ -10,7 +10,7 @@ export default function RFMPage() {
     adminFetch('/api/admin/customers/rfm').then(r => r.json()).then(data => {
       setCustomers(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const tagColors: Record<string, string> = {

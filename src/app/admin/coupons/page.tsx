@@ -30,7 +30,8 @@ export default function AdminCouponsPage() {
       .then(data => {
         setCoupons(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleAdd = () => {

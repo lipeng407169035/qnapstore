@@ -13,7 +13,7 @@ export default function AdminInvoicesPage() {
     adminFetch('/api/admin/invoices').then(r => r.json()).then(data => {
       setInvoices(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const statusColors: Record<string, string> = {
@@ -60,11 +60,11 @@ export default function AdminInvoicesPage() {
                       <div className="flex gap-2">
                         <button onClick={async () => {
                           await adminFetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已开票' }) });
-                          setInvoices(invoices.map(i => i.id === inv.id ? { ...i, status: '已开票' } : i));
+                          setInvoices(prev => prev.map(i => i.id === inv.id ? { ...i, status: '已开票' } : i));
                         }} className="text-green-600 text-sm hover:underline">开票</button>
                         <button onClick={async () => {
                           await adminFetch(`/api/admin/invoices/${inv.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: '已作废' }) });
-                          setInvoices(invoices.map(i => i.id === inv.id ? { ...i, status: '已作废' } : i));
+                          setInvoices(prev => prev.map(i => i.id === inv.id ? { ...i, status: '已作废' } : i));
                         }} className="text-red-500 text-sm hover:underline">作废</button>
                       </div>
                     )}

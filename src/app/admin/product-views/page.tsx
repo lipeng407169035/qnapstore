@@ -23,7 +23,8 @@ export default function ProductViewsPage() {
       .then(data => {
         setProducts(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const sorted = [...products].sort((a, b) => {

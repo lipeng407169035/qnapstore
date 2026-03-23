@@ -13,7 +13,7 @@ export default function AdminStaffPage() {
     adminFetch('/api/admin/staff').then(r => r.json()).then(data => {
       setStaff(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const roleLabels: Record<string, string> = {
@@ -31,7 +31,7 @@ export default function AdminStaffPage() {
   const handleSave = async () => {
     const res = await adminFetch('/api/admin/staff', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
     const newStaff = await res.json();
-    setStaff([...staff, newStaff]);
+    setStaff(prev => [...prev, newStaff]);
     setModalOpen(false);
     setForm({ name: '', email: '', role: 'operator', phone: '' });
   };
@@ -39,7 +39,7 @@ export default function AdminStaffPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('确定要删除该员工账号吗？')) return;
     await adminFetch(`/api/admin/staff/${id}`, { method: 'DELETE' });
-    setStaff(staff.filter(s => s.id !== id));
+    setStaff(prev => prev.filter(s => s.id !== id));
   };
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

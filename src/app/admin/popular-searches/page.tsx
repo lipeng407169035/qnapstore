@@ -12,7 +12,7 @@ export default function AdminPopularSearchesPage() {
     adminFetch('/api/admin/popular-searches').then(r => r.json()).then(data => {
       setSearches(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
@@ -32,15 +32,15 @@ export default function AdminPopularSearchesPage() {
             <div key={i} className="flex items-center gap-1 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full text-sm">
               <span className="text-blue-600">{i + 1}</span>
               <span>{word}</span>
-              <button onClick={() => setSearches(searches.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 ml-1">✕</button>
+              <button onClick={() => setSearches(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 ml-1">✕</button>
             </div>
           ))}
         </div>
         <div className="flex gap-2">
           <input type="text" value={newWord} onChange={e => setNewWord(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && newWord.trim()) { setSearches([...searches, newWord.trim()]); setNewWord(''); } }}
+            onKeyDown={e => { if (e.key === 'Enter' && newWord.trim()) { setSearches(prev => [...prev, newWord.trim()]); setNewWord(''); } }}
             placeholder="输入搜索词后按回车添加" className="flex-1 px-4 py-2 border rounded-xl text-sm" />
-          <button onClick={() => { if (newWord.trim()) { setSearches([...searches, newWord.trim()]); setNewWord(''); } }} className="bg-blue text-white px-6 py-2 rounded-xl text-sm">添加</button>
+          <button onClick={() => { if (newWord.trim()) { setSearches(prev => [...prev, newWord.trim()]); setNewWord(''); } }} className="bg-blue text-white px-6 py-2 rounded-xl text-sm">添加</button>
         </div>
         <button onClick={handleSave} className="mt-4 bg-blue text-white px-8 py-2.5 rounded-xl font-medium hover:bg-blue-dark">保存排序</button>
       </div>

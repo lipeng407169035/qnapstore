@@ -17,7 +17,7 @@ export default function AdminFAQPage() {
 
   function fetchFaq() {
     setLoading(true);
-    adminFetch('/api/admin/faq').then(r => r.json()).then(data => { setFaq(data); setLoading(false); });
+    adminFetch('/api/admin/faq').then(r => r.json()).then(data => { setFaq(data); setLoading(false); }).catch(() => setLoading(false));
   }
 
   function openAdd() { setEditItem({ category: '产品使用', sortOrder: 1 }); setShowModal(true); }

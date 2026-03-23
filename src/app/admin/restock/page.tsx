@@ -11,7 +11,7 @@ export default function AdminRestockPage() {
     adminFetch('/api/admin/restock-notifications').then(r => r.json()).then(data => {
       setProducts(data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

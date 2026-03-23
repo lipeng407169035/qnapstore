@@ -30,7 +30,8 @@ export default function AdminImagesPage() {
       .then(data => {
         setProducts(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const fetchImages = useCallback((sku: string) => {

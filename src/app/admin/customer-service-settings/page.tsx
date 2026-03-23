@@ -11,7 +11,8 @@ export default function AdminCustomerServiceSettingsPage() {
   useEffect(() => {
     adminFetch('/api/admin/settings/customer-service-info')
       .then(r => r.json())
-      .then(data => setForm(data));
+      .then(data => setForm(data))
+      .catch(() => toast.error('加载失败，请重试'));
   }, []);
 
   async function handleSave() {

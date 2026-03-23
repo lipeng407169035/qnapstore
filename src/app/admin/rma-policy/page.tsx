@@ -11,7 +11,8 @@ export default function AdminRmaPolicyPage() {
   useEffect(() => {
     adminFetch('/api/admin/settings/rma-policy')
       .then(r => r.json())
-      .then(data => setContent(data.content || ''));
+      .then(data => setContent(data.content || ''))
+      .catch(() => toast.error('加载失败，请重试'));
   }, []);
 
   async function handleSave() {

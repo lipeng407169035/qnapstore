@@ -20,7 +20,7 @@ export default function AdminDownloadsPage() {
 
   function fetchDownloads() {
     setLoading(true);
-    adminFetch('/api/admin/downloads').then(r => r.json()).then(data => { setDownloads(data); setLoading(false); });
+    adminFetch('/api/admin/downloads').then(r => r.json()).then(data => { setDownloads(data); setLoading(false); }).catch(() => setLoading(false));
   }
 
   function openAdd() { setEditItem({}); setShowModal(true); }

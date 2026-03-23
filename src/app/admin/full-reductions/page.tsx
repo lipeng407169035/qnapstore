@@ -54,7 +54,7 @@ export default function AdminFullReductionsPage() {
           body: JSON.stringify(form),
         });
         const updated = await res.json();
-        setActivities(activities.map(a => a.id === editing.id ? updated : a));
+        setActivities(prev => prev.map(a => a.id === editing.id ? updated : a));
       } else {
         const res = await adminFetch('/api/admin/full-reductions', {
           method: 'POST',
@@ -62,7 +62,7 @@ export default function AdminFullReductionsPage() {
           body: JSON.stringify(form),
         });
         const created = await res.json();
-        setActivities([...activities, created]);
+        setActivities(prev => [...prev, created]);
       }
       setModalOpen(false);
     } catch { toast.error('保存失败，请稍后再试'); }
@@ -76,7 +76,7 @@ export default function AdminFullReductionsPage() {
         body: JSON.stringify({ ...a, active: !a.active }),
       });
       const updated = await res.json();
-      setActivities(activities.map(act => act.id === a.id ? updated : act));
+      setActivities(prev => prev.map(act => act.id === a.id ? updated : act));
     } catch { toast.error('操作失败'); }
   };
 
@@ -84,7 +84,7 @@ export default function AdminFullReductionsPage() {
     if (!confirm('确定删除此活动？')) return;
     try {
       await adminFetch(`/api/admin/full-reductions/${id}`, { method: 'DELETE' });
-      setActivities(activities.filter(a => a.id !== id));
+      setActivities(prev => prev.filter(a => a.id !== id));
     } catch { toast.error('删除失败'); }
   };
 

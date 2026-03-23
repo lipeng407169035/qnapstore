@@ -35,7 +35,7 @@ export default function AdminBannersPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    adminFetch('/api/admin/banners').then(r => r.json()).then(data => { setBanners(data); setLoading(false); });
+    adminFetch('/api/admin/banners').then(r => r.json()).then(data => { setBanners(data); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   function openAdd() {

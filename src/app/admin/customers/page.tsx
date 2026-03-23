@@ -13,7 +13,7 @@ export default function AdminCustomersPage() {
     adminFetch('/api/admin/customers').then(r => r.json()).then(data => {
       setCustomers(Array.isArray(data) ? data : (data.data || []));
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const filtered = customers.filter(c => {

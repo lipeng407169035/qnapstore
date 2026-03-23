@@ -17,7 +17,7 @@ export default function AdminBatchShipPage() {
     ]).then(([pending, paid]) => {
       setOrders([...pending, ...paid].filter((o: any) => ['pending', 'paid'].includes(o.status)));
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const toggleSelect = (id: string) => {

@@ -48,7 +48,8 @@ export default function AdminDashboard() {
       .then(data => {
         setStats(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="text-center py-20">加载中...</div>;

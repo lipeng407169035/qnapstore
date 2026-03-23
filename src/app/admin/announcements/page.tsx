@@ -23,7 +23,8 @@ export default function AdminAnnouncementsPage() {
       .then(data => {
         setAnnouncements(data);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const handleAdd = () => {
@@ -47,7 +48,7 @@ export default function AdminAnnouncementsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      setAnnouncements(announcements.map(a => a.id === formData.id ? { ...a, ...formData } as Announcement : a));
+      setAnnouncements(prev => prev.map(a => a.id === formData.id ? { ...a, ...formData } as Announcement : a));
     } else {
       const res = await adminFetch('/api/admin/announcements', {
         method: 'POST',
@@ -55,7 +56,7 @@ export default function AdminAnnouncementsPage() {
         body: JSON.stringify(formData),
       });
       const newAnn = await res.json();
-      setAnnouncements([...announcements, newAnn]);
+      setAnnouncements(prev => [...prev, newAnn]);
     }
     setIsEditing(false);
   };
@@ -63,7 +64,7 @@ export default function AdminAnnouncementsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('确定要删除此公告吗？')) return;
     await adminFetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
-    setAnnouncements(announcements.filter(a => a.id !== id));
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
   };
 
   const handleToggle = async (ann: Announcement) => {
@@ -73,7 +74,7 @@ export default function AdminAnnouncementsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated),
     });
-    setAnnouncements(announcements.map(a => a.id === ann.id ? updated : a));
+    setAnnouncements(prev => prev.map(a => a.id === ann.id ? updated : a));
   };
 
   if (loading) return <div className="text-center py-20">加载中...</div>;
