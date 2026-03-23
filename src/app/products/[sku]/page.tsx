@@ -20,10 +20,11 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   const displayImages = productImages.length > 0
     ? productImages
-    : Array.from({ length: 6 }, (_, i) => `/images/products/${sku}/${i + 1}.svg`);
+    : imagesLoaded ? [] : Array.from({ length: 6 }, (_, i) => `/images/products/${sku}/${i + 1}.svg`);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewName, setReviewName] = useState('');
@@ -46,6 +47,7 @@ export default function ProductDetailPage() {
       const all = allProds as Product[];
       setRelatedProducts(all.filter(pr => pr.categoryId === p.categoryId && pr.sku !== sku).slice(0, 4));
       setProductImages(Array.isArray(images) ? images.map((f: { url: string }) => f.url) : []);
+      setImagesLoaded(true);
       api.getProductReviews(p.id).then((data) => setReviews(data as Review[]));
       addToRecent(p);
       setLoading(false);

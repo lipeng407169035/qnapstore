@@ -9,7 +9,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const [imageSrc, setImageSrc] = useState(`/images/products/${product.sku}/1.svg`);
+  const [imageSrc, setImageSrc] = useState('');
+  const [loaded, setLoaded] = useState(false);
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
 
   useEffect(() => {
@@ -17,8 +18,9 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       .then(r => r.json())
       .then((files: { url: string }[]) => {
         if (files.length > 0) setImageSrc(files[0].url);
+        setLoaded(true);
       })
-      .catch(() => {});
+      .catch(() => setLoaded(true));
   }, [product.sku]);
 
   return (
@@ -41,26 +43,28 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       )}
       <Link href={`/products/${product.sku}`}>
         <div className="h-48 bg-gradient-to-b from-gray-50 to-white flex items-center justify-center relative overflow-hidden p-4">
-          <img
-            src={imageSrc}
-            alt={product.name}
-            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              target.parentElement!.innerHTML = `
-                <div class="w-36 h-24 rounded-xl flex flex-col items-center justify-center gap-2" style="background: linear-gradient(145deg, ${product.color} 0%, ${product.color}cc 100%); box-shadow: 0 12px 32px rgba(0,0,0,0.25)">
-                  <div class="w-32 h-4 bg-black/20 rounded-lg flex items-center px-2 gap-2">
-                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                    <div class="flex-1 h-1.5 bg-black/20 rounded" />
-                    <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                  </div>
-                  <span class="text-[10px] text-white/40 font-mono font-bold tracking-widest">${product.sku}</span>
-                </div>
-              `;
-            }}
-          />
+          {!loaded && (
+            <div className="w-36 h-24 rounded-xl flex flex-col items-center justify-center gap-2" style={{ background: `linear-gradient(145deg, ${product.color} 0%, ${product.color}cc 100%)`, boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
+              <div className="w-32 h-4 bg-black/20 rounded-lg flex items-center px-2 gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                <div className="flex-1 h-1.5 bg-black/20 rounded" />
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+              </div>
+              <span className="text-[10px] text-white/40 font-mono font-bold tracking-widest">{product.sku}</span>
+            </div>
+          )}
+          {loaded && imageSrc && (
+            <img
+              src={imageSrc}
+              alt={product.name}
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+          )}
         </div>
         <div className="p-4 flex-1 flex flex-col">
           <span className="text-xs text-blue font-semibold uppercase tracking-wider mb-1.5">
