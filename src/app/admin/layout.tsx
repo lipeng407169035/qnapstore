@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
@@ -45,11 +45,16 @@ const menuItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [adminUser, setAdminUser] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     const admin = localStorage.getItem('admin_user');
     if (!admin) {
       router.push('/admin/login');
+    } else {
+      try { setAdminUser(JSON.parse(admin)); } catch {}
     }
   }, [router]);
 
@@ -57,8 +62,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     localStorage.removeItem('admin_user');
     router.push('/admin/login');
   };
-
-  const admin = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('admin_user') || 'null') : null;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -75,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-4">
             <Link href="/" target="_blank" className="text-sm text-blue hover:underline">查看商城</Link>
-            <span className="text-sm text-gray-500">欢迎，{admin?.name || '管理员'}</span>
+            <span className="text-sm text-gray-500" suppressHydrationWarning>欢迎，{mounted ? (adminUser?.name || '管理员') : '管理员'}</span>
             <button
               onClick={handleLogout}
               className="text-sm text-gray-500 hover:text-red-500 transition-colors"
