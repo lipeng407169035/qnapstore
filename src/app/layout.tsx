@@ -29,6 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description: seo.homeDescription,
       images: seo.ogImage ? [seo.ogImage] : [],
     },
+    icons: {
+      icon: '/favicon.svg',
+    },
   };
 }
 

@@ -45,7 +45,7 @@ export default function AdminBannersPage() {
   }
 
   function openEdit(banner: Banner) {
-    setEditItem({ ...banner });
+    setEditItem({ ...banner, image: banner.image || '' });
     setPreviewUrl(banner.image || '');
     setImageTab('url');
     setShowModal(true);

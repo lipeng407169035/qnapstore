@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import { Product } from '@/types';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -8,8 +9,17 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const [imageSrc, setImageSrc] = useState(`/images/products/${product.sku}/1.svg`);
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
-  const productImagePath = `/images/products/${product.sku}/1.svg`;
+
+  useEffect(() => {
+    fetch(`/api/images/${product.sku}`)
+      .then(r => r.json())
+      .then((files: { url: string }[]) => {
+        if (files.length > 0) setImageSrc(files[0].url);
+      })
+      .catch(() => {});
+  }, [product.sku]);
 
   return (
     <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-blue/50 flex flex-col relative">
@@ -32,7 +42,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <Link href={`/products/${product.sku}`}>
         <div className="h-48 bg-gradient-to-b from-gray-50 to-white flex items-center justify-center relative overflow-hidden p-4">
           <img
-            src={productImagePath}
+            src={imageSrc}
             alt={product.name}
             className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {

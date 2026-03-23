@@ -19,6 +19,11 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [productImages, setProductImages] = useState<string[]>([]);
+
+  const displayImages = productImages.length > 0
+    ? productImages
+    : Array.from({ length: 6 }, (_, i) => `/images/products/${sku}/${i + 1}.svg`);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewName, setReviewName] = useState('');
@@ -34,11 +39,13 @@ export default function ProductDetailPage() {
     Promise.all([
       api.getProductBySku(sku),
       api.getProducts({}),
-    ]).then(([prod, allProds]) => {
+      fetch(`/api/images/${sku}`).then(r => r.json()),
+    ]).then(([prod, allProds, images]) => {
       setProduct(prod as Product);
       const p = prod as Product;
       const all = allProds as Product[];
       setRelatedProducts(all.filter(pr => pr.categoryId === p.categoryId && pr.sku !== sku).slice(0, 4));
+      setProductImages(Array.isArray(images) ? images.map((f: { url: string }) => f.url) : []);
       api.getProductReviews(p.id).then((data) => setReviews(data as Review[]));
       addToRecent(p);
       setLoading(false);
@@ -113,7 +120,6 @@ export default function ProductDetailPage() {
     power: '电源', ventilation: '风扇', operating: '操作系统',
   };
 
-  const productImages = Array.from({ length: 6 }, (_, i) => `/images/products/${sku}/${i + 1}.svg`);
 
   return (
     <>
@@ -136,23 +142,23 @@ export default function ProductDetailPage() {
             <div className="space-y-3 md:space-y-4">
               <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-8 aspect-square flex items-center justify-center">
                 <img
-                  src={productImages[selectedImageIndex]}
+                  src={displayImages[selectedImageIndex]}
                   alt={`${product.name} - 图片 ${selectedImageIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />
               </div>
               <div className="grid grid-cols-6 gap-1.5 md:gap-2">
-                {productImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedImageIndex(idx)}
-                  className={`aspect-square rounded-lg border-2 overflow-hidden p-1 transition-all ${
-                    selectedImageIndex === idx ? 'border-blue' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <img src={img} alt={`缩图 ${idx + 1}`} className="w-full h-full object-contain" />
-                </button>
-              ))}
+                {displayImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`aspect-square rounded-lg border-2 overflow-hidden p-1 transition-all ${
+                      selectedImageIndex === idx ? 'border-blue' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <img src={img} alt={`缩图 ${idx + 1}`} className="w-full h-full object-contain" />
+                  </button>
+                ))}
             </div>
           </div>
 
