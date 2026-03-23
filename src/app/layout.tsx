@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { API_BASE } from '@/lib/api-base';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -6,7 +7,7 @@ import { ClientLayout } from '@/components/layout/ClientLayout';
 
 async function getSEO() {
   try {
-    const res = await fetch('http://localhost:3001/api/seo', { cache: 'no-store' });
+    const res = await fetch(`${API_BASE}/api/seo`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch SEO');
     return res.json();
   } catch {

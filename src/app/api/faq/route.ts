@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic';
+import { API_BASE } from '@/lib/api-base';
 export async function GET() {
-  const res = await fetch('http://localhost:3001/api/faq', { cache: 'no-store' });
+
+  const res = await fetch(`${API_BASE}/api/faq`, { cache: 'no-store' });
   return Response.json(await res.json());
 }
