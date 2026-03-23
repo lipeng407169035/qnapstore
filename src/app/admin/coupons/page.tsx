@@ -112,12 +112,12 @@ export default function AdminCouponsPage() {
 
   const getDiscountDisplay = (coupon: Coupon) => {
     if (coupon.discountType === 'percentage') {
-      return `${coupon.discountValue}% off${coupon.maxDiscount ? ` (最高 NT$ ${coupon.maxDiscount})` : ''}`;
+      return `${coupon.discountValue}% off${coupon.maxDiscount ? ` (最高 ¥ ${coupon.maxDiscount})` : ''}`;
     }
-    return `NT$ ${coupon.discountValue} off`;
+    return `¥ ${coupon.discountValue} off`;
   };
 
-  if (loading) return <div className="text-center py-20">載入中...</div>;
+  if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
     <div>

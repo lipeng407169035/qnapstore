@@ -30,7 +30,7 @@ export default function AdminNewsPage() {
 
   function fetchNews() {
     setLoading(true);
-    fetch('/api/admin/news').then(r => r.json()).then(data => { setNews(data); setLoading(false); });
+    fetch('/api/admin/news').then(r => r.json()).then(data => { setNews(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
   }
 
   function openAdd() { setEditItem(EMPTY_FORM); setShowModal(true); }

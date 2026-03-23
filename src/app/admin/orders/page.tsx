@@ -25,19 +25,27 @@ function OrdersContent() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const limit = 20;
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (statusFilter) params.set('status', statusFilter);
     if (searchQuery) params.set('search', searchQuery);
+    params.set('page', String(page));
+    params.set('limit', String(limit));
     const query = params.toString() ? `?${params.toString()}` : '';
     fetch(`/api/admin/orders${query}`)
       .then(res => res.json())
       .then(data => {
-        setOrders(data);
+        setOrders(Array.isArray(data) ? data : (data.data || []));
+        setTotal(Array.isArray(data) ? data.length : (data.total || 0));
         setLoading(false);
       });
-  }, [statusFilter, searchQuery]);
+  }, [statusFilter, searchQuery, page]);
+
+  const totalPages = Math.ceil(total / limit);
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     await fetch(`/api/admin/orders/${orderId}`, {
@@ -137,7 +145,7 @@ function OrdersContent() {
                   <div>{order.shippingPhone}</div>
                   <div className="truncate max-w-[150px]">{order.shippingAddress}</div>
                 </td>
-                <td className="p-4 font-semibold">NT$ {order.total.toLocaleString()}</td>
+                <td className="p-4 font-semibold">¥ {order.total.toLocaleString()}</td>
                 <td className="p-4 text-sm">{getPaymentBadge(order.paymentMethod)}</td>
                 <td className="p-4">{getStatusBadge(order.status)}</td>
                 <td className="p-4 text-sm text-gray-500">
@@ -148,7 +156,7 @@ function OrdersContent() {
                     onClick={() => setSelectedOrder(order)}
                     className="text-blue text-sm hover:underline"
                   >
-                    詳情
+                    详情
                   </button>
                 </td>
               </tr>
@@ -156,6 +164,37 @@ function OrdersContent() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-4 px-4">
+          <p className="text-sm text-gray-500">共 {total} 条</p>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-1.5 rounded-lg text-sm border disabled:opacity-40 hover:bg-gray-50"
+            >
+              上一页
+            </button>
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+              const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+              return (
+                <button key={p} onClick={() => setPage(p)}
+                  className={`px-3 py-1.5 rounded-lg text-sm border ${page === p ? 'bg-blue text-white border-blue' : 'hover:bg-gray-50'}`}>
+                  {p}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-1.5 rounded-lg text-sm border disabled:opacity-40 hover:bg-gray-50"
+            >
+              下一页
+            </button>
+          </div>
+        </div>
+      )}
 
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -194,7 +233,7 @@ function OrdersContent() {
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">订单金额</label>
-                  <p className="font-bold text-xl">NT$ {selectedOrder.total.toLocaleString()}</p>
+                  <p className="font-bold text-xl">¥ {selectedOrder.total.toLocaleString()}</p>
                 </div>
               </div>
 
@@ -208,7 +247,7 @@ function OrdersContent() {
                         <p className="font-medium">{item.product?.name || '商品'}</p>
                         <p className="text-sm text-gray-500">數量: {item.quantity}</p>
                       </div>
-                      <p className="font-semibold">NT$ {item.price.toLocaleString()}</p>
+                      <p className="font-semibold">¥ {item.price.toLocaleString()}</p>
                     </div>
                   ))}
                 </div>

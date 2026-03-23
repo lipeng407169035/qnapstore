@@ -8,16 +8,22 @@ import { toast } from '@/components/ui/Toast';
 interface ProductCardProps {
   product: Product;
   onAddToCart?: () => void;
+  imageUrl?: string;
 }
 
-export const ProductCard = memo(function ProductCard({ product, onAddToCart }: ProductCardProps) {
-  const [imageSrc, setImageSrc] = useState('');
-  const [loaded, setLoaded] = useState(false);
+export const ProductCard = memo(function ProductCard({ product, onAddToCart, imageUrl }: ProductCardProps) {
+  const [imageSrc, setImageSrc] = useState(imageUrl || '');
+  const [loaded, setLoaded] = useState(!!imageUrl);
   const specs = typeof product.specs === 'string' ? JSON.parse(product.specs) : (product.specs || {});
   const { addItem } = useCartStore();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
+    if (imageUrl) {
+      setImageSrc(imageUrl);
+      setLoaded(true);
+      return;
+    }
     setLoaded(false);
     setImageSrc('');
     fetch(`/api/images/${product.sku}`)
@@ -27,7 +33,7 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart }: P
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
-  }, [product.sku]);
+  }, [product.sku, imageUrl]);
 
   const handleAddToCart = useCallback(() => {
     if (product.stock === 0) {

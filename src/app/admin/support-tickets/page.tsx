@@ -28,7 +28,7 @@ export default function AdminSupportPage() {
   function fetchTickets() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/support-tickets?status=${statusFilter}` : '/api/admin/support-tickets';
-    fetch(url).then(r => r.json()).then(data => { setTickets(data); setLoading(false); });
+    fetch(url).then(r => r.json()).then(data => { setTickets(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
   }
 
   async function handleUpdate() {

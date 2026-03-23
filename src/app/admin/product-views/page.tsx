@@ -31,37 +31,37 @@ export default function ProductViewsPage() {
 
   const totalViews = products.reduce((sum, p) => sum + p.views, 0);
 
-  if (loading) return <div className="text-center py-20">載入中...</div>;
+  if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">商品瀏覽統計</h1>
+      <h1 className="text-2xl font-bold mb-6">商品浏览统计</h1>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-5 text-white">
-          <p className="text-sm text-white/80">總瀏覽量</p>
+          <p className="text-sm text-white/80">总浏览量</p>
           <p className="text-3xl font-bold mt-1">{totalViews.toLocaleString()}</p>
         </div>
         <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-5 text-white">
-          <p className="text-sm text-white/80">平均瀏覽</p>
+          <p className="text-sm text-white/80">平均浏览</p>
           <p className="text-3xl font-bold mt-1">{products.length > 0 ? Math.round(totalViews / products.length) : 0}</p>
         </div>
         <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-5 text-white">
-          <p className="text-sm text-white/80">熱門商品</p>
+          <p className="text-sm text-white/80">热门商品</p>
           <p className="text-lg font-bold mt-1 truncate">{products[0]?.name || '-'}</p>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">商品瀏覽排行</h2>
+          <h2 className="text-lg font-bold">商品浏览排行</h2>
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value as 'views' | 'stock')}
             className="px-4 py-2 border rounded-xl text-sm"
           >
-            <option value="views">按瀏覽量排序</option>
-            <option value="stock">按庫存排序</option>
+            <option value="views">按浏览量排序</option>
+            <option value="stock">按库存排序</option>
           </select>
         </div>
 
@@ -86,7 +86,7 @@ export default function ProductViewsPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         p.stock === 0 ? 'bg-red-100 text-red-600' : p.stock <= 20 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
                       }`}>
-                        庫存: {p.stock}
+                        库存: {p.stock}
                       </span>
                       <span className="text-sm font-bold text-blue w-16 text-right">{p.views.toLocaleString()}</span>
                     </div>

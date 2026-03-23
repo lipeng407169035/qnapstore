@@ -44,21 +44,21 @@ export default function AdminSEOPage() {
   const charCount = (text: string) => text.length;
   const descOptimal = charCount(seo.homeDescription) >= 50 && charCount(seo.homeDescription) <= 160;
 
-  if (loading) return <div className="text-center py-20">載入中...</div>;
+  if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">SEO 設定</h1>
-          <p className="text-sm text-gray-500 mt-1">優化網站在搜尋引擎的排名表現</p>
+          <h1 className="text-2xl font-bold">SEO 设置</h1>
+          <p className="text-sm text-gray-500 mt-1">优化网站在搜索引擎的排名表现</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
           className={`px-6 py-2 rounded-xl font-medium transition-colors ${saved ? 'bg-green text-white' : 'bg-blue text-white hover:bg-blue-dark'} disabled:opacity-50`}
         >
-          {saving ? '儲存中...' : saved ? '已儲存 ✓' : '儲存設定'}
+          {saving ? '保存中...' : saved ? '已保存 ✓' : '保存设置'}
         </button>
       </div>
 
@@ -73,10 +73,10 @@ export default function AdminSEOPage() {
                 value={seo.homeTitle}
                 onChange={(e) => setSeo({ ...seo, homeTitle: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
-                placeholder="QNAP Store Taiwan | 官方網路商城"
+                placeholder="QNAP Store 中国 | 官方网上商城"
               />
               <div className="flex items-center justify-between mt-1">
-                <p className="text-xs text-gray-400">建議 50-60 字元</p>
+                <p className="text-xs text-gray-400">建议 50-60 字符</p>
                 <p className={`text-xs ${charCount(seo.homeTitle) > 60 ? 'text-red-500' : 'text-gray-400'}`}>
                   {charCount(seo.homeTitle)} / 60
                 </p>
@@ -90,10 +90,10 @@ export default function AdminSEOPage() {
                 onChange={(e) => setSeo({ ...seo, homeDescription: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
                 rows={3}
-                placeholder="QNAP 台灣官方網路商城，提供 NAS、網路交換器..."
+                placeholder="QNAP 中国官方网上商城，提供 NAS、网络交换机..."
               />
               <div className="flex items-center justify-between mt-1">
-                <p className="text-xs text-gray-400">建議 120-158 字元</p>
+                <p className="text-xs text-gray-400">建议 120-158 字符</p>
                 <p className={`text-xs ${!descOptimal ? 'text-red-500' : 'text-gray-400'}`}>
                   {charCount(seo.homeDescription)} / 158
                 </p>
@@ -101,19 +101,19 @@ export default function AdminSEOPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">關鍵字 Keywords</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">关键字 Keywords</label>
               <input
                 type="text"
                 value={seo.homeKeywords}
                 onChange={(e) => setSeo({ ...seo, homeKeywords: e.target.value })}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
-                placeholder="QNAP, NAS, 網路儲存, 交換器, 台灣"
+                placeholder="QNAP, NAS, 网络存储, 交换机, 中国"
               />
-              <p className="text-xs text-gray-400 mt-1">多個關鍵字請用逗號分隔</p>
+              <p className="text-xs text-gray-400 mt-1">多个关键字请用逗号分隔</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">OG 圖片路徑</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">OG 图片路径</label>
               <input
                 type="text"
                 value={seo.ogImage}
@@ -121,7 +121,7 @@ export default function AdminSEOPage() {
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
                 placeholder="/images/og-default.png"
               />
-              <p className="text-xs text-gray-400 mt-1">建議尺寸 1200×630 像素</p>
+              <p className="text-xs text-gray-400 mt-1">建议尺寸 1200×630 像素</p>
             </div>
           </div>
         </div>
@@ -129,10 +129,10 @@ export default function AdminSEOPage() {
         <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
           <h3 className="font-bold text-blue mb-2">SEO 小技巧</h3>
           <ul className="text-sm text-blue space-y-1">
-            <li>• Title 應包含主要關鍵字，且每個頁面都應該不同</li>
-            <li>• Description 應該清楚描述頁面內容，鼓勵用戶點擊</li>
-            <li>• 關鍵字不需要過多，選擇與內容最相關的即可</li>
-            <li>• OG 圖片用於社群分享時的預覽圖片</li>
+            <li>• Title 应包含主要关键字，且每个页面都应该不同</li>
+            <li>• Description 应该清楚描述页面内容，鼓励用户点击</li>
+            <li>• 关键字不需要过多，选择与内容最相关的即可</li>
+            <li>• OG 图片用于社交分享时的预览图片</li>
           </ul>
         </div>
       </div>

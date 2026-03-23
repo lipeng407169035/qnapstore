@@ -54,7 +54,7 @@ export default function EmailTemplatesPage() {
     { v: '{phone}', d: '联络电话' },
   ];
 
-  if (loading) return <div className="text-center py-20">載入中...</div>;
+  if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
     <div>

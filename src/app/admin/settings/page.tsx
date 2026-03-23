@@ -84,7 +84,7 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({...settings, siteDescription: e.target.value})}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
                 rows={3}
-                placeholder="QNAP 台灣官方網路商城..."
+                 placeholder="QNAP 中国官方网站..."
               />
             </div>
           </div>

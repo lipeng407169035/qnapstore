@@ -20,7 +20,7 @@ export default function AdminReviewsPage() {
     fetch('/api/admin/reviews')
       .then(r => r.json())
       .then(data => {
-        setReviews(data);
+        setReviews(Array.isArray(data) ? data : (data.data || []));
         setLoading(false);
       });
   }, []);
@@ -44,7 +44,7 @@ export default function AdminReviewsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('確定要刪除此評論嗎？')) return;
+    if (!confirm('确定要删除此评论吗？')) return;
     await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
     setReviews(reviews.filter(r => r.id !== id));
   };
@@ -52,22 +52,22 @@ export default function AdminReviewsPage() {
   const pending = reviews.filter(r => !r.approved);
   const approved = reviews.filter(r => r.approved);
 
-  if (loading) return <div className="text-center py-20">載入中...</div>;
+  if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">評論管理</h1>
+          <h1 className="text-2xl font-bold">评论管理</h1>
           <p className="text-sm text-gray-500 mt-1">
-            待審核 {pending.length} 筆 · 已通過 {approved.length} 筆
+            待审核 {pending.length} 条 · 已通过 {approved.length} 条
           </p>
         </div>
       </div>
 
       {pending.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-bold mb-4 text-orange-600">待審核評論</h2>
+          <h2 className="text-lg font-bold mb-4 text-orange-600">待审核评论</h2>
           <div className="space-y-3">
             {pending.map(review => (
               <div key={review.id} className="bg-white rounded-2xl p-6 border-l-4 border-orange-400 shadow-sm">
@@ -82,9 +82,9 @@ export default function AdminReviewsPage() {
                     <p className="text-xs text-gray-400 mt-1">商品 ID: {review.productId}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <button onClick={() => handleApprove(review.id)} className="px-4 py-2 bg-green text-white rounded-xl text-sm font-medium hover:bg-green-600">通過</button>
-                    <button onClick={() => handleReject(review.id)} className="px-4 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-300">略過</button>
-                    <button onClick={() => handleDelete(review.id)} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200">刪除</button>
+                    <button onClick={() => handleApprove(review.id)} className="px-4 py-2 bg-green text-white rounded-xl text-sm font-medium hover:bg-green-600">通过</button>
+                    <button onClick={() => handleReject(review.id)} className="px-4 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-300">忽略</button>
+                    <button onClick={() => handleDelete(review.id)} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200">删除</button>
                   </div>
                 </div>
               </div>
@@ -94,9 +94,9 @@ export default function AdminReviewsPage() {
       )}
 
       <div>
-        <h2 className="text-lg font-bold mb-4">已通過評論</h2>
+        <h2 className="text-lg font-bold mb-4">已通过评论</h2>
         {approved.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center text-gray-400">尚無已通過的評論</div>
+          <div className="bg-white rounded-2xl p-12 text-center text-gray-400">暂无已通过的评论</div>
         ) : (
           <div className="space-y-3">
             {approved.map(review => (
@@ -107,13 +107,13 @@ export default function AdminReviewsPage() {
                       <span className="font-semibold">{review.userName}</span>
                       <span className="text-amber-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
                       <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString('zh-TW')}</span>
-                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">已通過</span>
+                      <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">已通过</span>
                     </div>
                     <p className="text-sm text-gray-700">{review.comment}</p>
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <button onClick={() => handleReject(review.id)} className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl text-sm font-medium hover:bg-yellow-200">取消通過</button>
-                    <button onClick={() => handleDelete(review.id)} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200">刪除</button>
+                      <button onClick={() => handleReject(review.id)} className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-xl text-sm font-medium hover:bg-yellow-200">取消通过</button>
+                    <button onClick={() => handleDelete(review.id)} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl text-sm font-medium hover:bg-red-200">删除</button>
                   </div>
                 </div>
               </div>

@@ -57,7 +57,7 @@ export default function AdminProductsPage() {
     fetch('/api/admin/products')
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : (data.data || []));
         setLoading(false);
       });
   }, []);
@@ -157,7 +157,7 @@ export default function AdminProductsPage() {
       body: JSON.stringify({ adjustments }),
     });
     const res = await fetch('/api/admin/products').then(r => r.json());
-    setProducts(res);
+    setProducts(Array.isArray(res) ? res : (res.data || []));
     setBatchItems([]);
     setBatchModalOpen(false);
     toast.success('库存批量调整完成！');

@@ -21,6 +21,7 @@ function ProductsContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   const { addItem } = useCartStore();
 
   const categoryName = category 
@@ -32,9 +33,24 @@ function ProductsContent() {
     Promise.all([
       api.getCategories(),
       api.getProducts({ category, search, badge, sort, rating }),
-    ]).then(([cats, prods]) => {
+    ]).then(async ([cats, prods]) => {
       setCategories(cats as Category[]);
       setProducts(prods as Product[]);
+
+      const prodsData = prods as Product[];
+      const skus = prodsData.map(p => p.sku);
+      if (skus.length > 0) {
+        try {
+          const res = await fetch('/api/images/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skus }),
+          });
+          const imgs = await res.json();
+          setProductImages(imgs);
+        } catch {}
+      }
+
       setLoading(false);
     });
   }, [category, search, badge, sort, rating]);
@@ -195,7 +211,7 @@ function ProductsContent() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} onAddToCart={() => handleAddToCart(product)} />
+                  <ProductCard key={product.id} product={product} imageUrl={productImages[product.sku]} onAddToCart={() => handleAddToCart(product)} />
                 ))}
               </div>
             )}

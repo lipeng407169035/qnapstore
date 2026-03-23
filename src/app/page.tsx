@@ -17,6 +17,7 @@ export default function HomePage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [popularSearches, setPopularSearches] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   const [mounted, setMounted] = useState(false);
   const { addItem } = useCartStore();
   const { items: recentItems } = useRecentlyViewedStore();
@@ -30,7 +31,7 @@ export default function HomePage() {
       fetch('/api/banners').then(r => r.json()),
       fetch('/api/announcements').then(r => r.json()),
       fetch('/api/popular-searches').then(r => r.json()).catch(() => []),
-    ]).then(([cats, prods, bannersData, announcementsData, searches]) => {
+    ]).then(async ([cats, prods, bannersData, announcementsData, searches]) => {
       setCategories(cats as Category[]);
       const allProducts = prods as Product[];
       setProducts(allProducts.slice(0, 8));
@@ -38,8 +39,19 @@ export default function HomePage() {
       setAnnouncements(announcementsData);
       setBanners(bannersData);
       setPopularSearches(searches as string[]);
-      setBanners(bannersData);
-      setAnnouncements(announcementsData);
+
+      const featuredSkus = [...allProducts.slice(0, 8), ...allProducts.filter(p => p.badge === '热销' || p.rating >= 4.8).slice(0, 4)].map(p => p.sku);
+      if (featuredSkus.length > 0) {
+        try {
+          const res = await fetch('/api/images/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skus: [...new Set(featuredSkus)] }),
+          });
+          const imgs = await res.json();
+          setProductImages(imgs);
+        } catch {}
+      }
     });
   }, []);
 
@@ -139,7 +151,7 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {hotProducts.map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={() => handleAddToCart(product)} />
+              <ProductCard key={product.id} product={product} imageUrl={productImages[product.sku]} onAddToCart={() => handleAddToCart(product)} />
             ))}
           </div>
         </div>
@@ -176,7 +188,7 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} onAddToCart={() => handleAddToCart(product)} />
+              <ProductCard key={product.id} product={product} imageUrl={productImages[product.sku]} onAddToCart={() => handleAddToCart(product)} />
             ))}
           </div>
         </div>

@@ -27,7 +27,7 @@ export default function AdminWarrantyPage() {
   function fetchSubs() {
     setLoading(true);
     const url = statusFilter ? `/api/admin/warranty-submissions?status=${statusFilter}` : '/api/admin/warranty-submissions';
-    fetch(url).then(r => r.json()).then(data => { setSubs(data); setLoading(false); });
+    fetch(url).then(r => r.json()).then(data => { setSubs(Array.isArray(data) ? data : (data.data || [])); setLoading(false); });
   }
 
   async function handleUpdate() {

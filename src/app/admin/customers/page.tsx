@@ -10,7 +10,7 @@ export default function AdminCustomersPage() {
 
   useEffect(() => {
     fetch('/api/admin/customers').then(r => r.json()).then(data => {
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : (data.data || []));
       setLoading(false);
     });
   }, []);

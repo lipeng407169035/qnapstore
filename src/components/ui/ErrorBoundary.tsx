@@ -33,15 +33,15 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-[300px] flex items-center justify-center p-8">
           <div className="text-center max-w-md">
             <div className="text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">發生錯誤</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">发生错误</h2>
             <p className="text-gray-500 text-sm mb-4">
-              {this.state.error?.message || '載入頁面時發生未預期的錯誤'}
+              {this.state.error?.message || '加载页面时发生未预期的错误'}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="bg-blue text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-blue-dark transition-colors"
             >
-              重新整理
+              重新加载
             </button>
           </div>
         </div>
