@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { CheckCircle2 } from 'lucide-react';
 
 interface Ticket {
   id: string;
@@ -93,7 +94,7 @@ export default function SupportPage() {
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             {submitted && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5 text-center">
-                <div className="text-3xl mb-2">✅</div>
+                <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
                 <p className="font-bold text-green-700">工单已提交！</p>
                 <p className="text-sm text-green-600 mt-1">技术支持团队将在 24 小时内响应</p>
               </div>

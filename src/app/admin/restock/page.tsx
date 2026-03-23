@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/admin-api';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function AdminRestockPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -24,7 +25,7 @@ export default function AdminRestockPage() {
       <h1 className="text-2xl font-bold mb-6">库存预警与补货</h1>
 
       <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
-        <h2 className="font-bold text-red-800 mb-3">⚠️ 缺货商品（{outOfStock.length} 项）</h2>
+        <h2 className="font-bold text-red-800 mb-3 flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> 缺货商品（{outOfStock.length} 项）</h2>
         {outOfStock.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {outOfStock.map(p => (
@@ -34,7 +35,7 @@ export default function AdminRestockPage() {
               </div>
             ))}
           </div>
-        ) : <p className="text-red-600">暂无缺货商品 ✅</p>}
+        ) : <p className="text-red-600 flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> 暂无缺货商品</p>}
       </div>
 
       <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6">
@@ -62,7 +63,7 @@ export default function AdminRestockPage() {
               </div>
             ))}
           </div>
-        ) : <p className="text-orange-600">暂无低库存商品 ✅</p>}
+        ) : <p className="text-orange-600 flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> 暂无低库存商品</p>}
       </div>
     </div>
   );

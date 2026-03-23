@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, memo } from 'react';
 import { useCartStore, useWishlistStore } from '@/store';
 import { toast } from '@/components/ui/Toast';
+import { Heart, Scale, ShoppingCart, Star, Package } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -91,7 +92,7 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
       )}
       <Link href={`/products/${product.sku}`}>
         <div className="h-48 bg-gradient-to-b from-gray-50 to-white flex items-center justify-center relative overflow-hidden p-4">
-          {!loaded && (
+          {!loaded ? (
             <div className="w-36 h-24 rounded-xl flex flex-col items-center justify-center gap-2" style={{ background: `linear-gradient(145deg, ${product.color} 0%, ${product.color}cc 100%)`, boxShadow: '0 12px 32px rgba(0,0,0,0.25)' }}>
               <div className="w-32 h-4 bg-black/20 rounded-lg flex items-center px-2 gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -101,8 +102,7 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
               </div>
               <span className="text-[10px] text-white/40 font-mono font-bold tracking-widest">{product.sku}</span>
             </div>
-          )}
-          {loaded && imageSrc && (
+          ) : imageSrc ? (
             <img
               src={imageSrc}
               alt={product.name}
@@ -112,6 +112,10 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
                 target.style.display = 'none';
               }}
             />
+          ) : (
+            <div className="w-28 h-20 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(145deg, ${product.color} 0%, ${product.color}cc 100%)`, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+              <Package className="w-8 h-8 text-white/60" />
+            </div>
           )}
         </div>
         <div className="p-4 flex-1 flex flex-col">
@@ -131,22 +135,22 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
               </span>
             ))}
           </div>
-          <div className="flex items-end justify-between gap-2">
-            <div>
-              <p className="text-2xl font-barlow font-extrabold text-orange">
-                ¥ {product.price.toLocaleString()}
-              </p>
-              {product.originalPrice && (
-                <p className="text-xs text-gray-400 line-through">
-                  ¥ {product.originalPrice.toLocaleString()}
+            <div className="flex items-end justify-between gap-2">
+              <div>
+                <p className="text-2xl font-barlow font-extrabold text-orange">
+                  ¥ {product.price.toLocaleString()}
                 </p>
-              )}
+                {product.originalPrice && (
+                  <p className="text-xs text-gray-400 line-through">
+                    ¥ {product.originalPrice.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <span className="text-gray-600 font-medium text-sm">{product.rating}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1 text-amber-500 text-sm">
-              <span>★</span>
-              <span className="text-gray-600 font-medium">{product.rating}</span>
-            </div>
-          </div>
         </div>
       </Link>
       <div className="px-4 pb-4 flex gap-2">
@@ -157,27 +161,32 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
         ) : (
           <button
             onClick={handleAddToCart}
-            className="flex-1 bg-blue text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all hover:bg-blue-dark active:scale-95 shadow-md hover:shadow-lg"
+            className="flex-1 bg-blue text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition-all hover:bg-blue-dark active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
           >
+            <ShoppingCart className="w-4 h-4" />
             加入购物车
           </button>
         )}
-        <button
-          onClick={handleWishlistToggle}
-          className={`w-11 h-11 border rounded-xl flex items-center justify-center text-lg transition-all flex-shrink-0 ${
-            inWishlist ? 'border-red-300 bg-pink-50 text-red-500' : 'border-gray-200 hover:border-red-300 text-gray-400'
-          }`}
-          title={inWishlist ? '取消收藏' : '添加收藏'}
-        >
-          {inWishlist ? '❤️' : '🤍'}
-        </button>
-        <button
-          onClick={handleCompare}
-          className="w-11 h-11 border border-gray-200 rounded-xl flex items-center justify-center text-lg hover:border-blue hover:text-blue transition-all flex-shrink-0"
-          title="商品对比"
-        >
-          ⚖️
-        </button>
+          <button
+            onClick={handleWishlistToggle}
+            className={`w-11 h-11 border rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+              inWishlist
+                ? 'border-red-300 bg-red-50 text-red-500'
+                : 'border-gray-200 hover:border-red-400 hover:text-red-500 text-gray-400'
+            }`}
+            title={inWishlist ? '取消收藏' : '添加收藏'}
+            aria-label={inWishlist ? '取消收藏' : '添加收藏'}
+          >
+            <Heart className={`w-4.5 h-4.5 ${inWishlist ? 'fill-current' : ''}`} />
+          </button>
+          <button
+            onClick={handleCompare}
+            className="w-11 h-11 border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:border-blue hover:text-blue transition-all flex-shrink-0"
+            title="商品对比"
+            aria-label="商品对比"
+          >
+            <Scale className="w-4 h-4" />
+          </button>
       </div>
       {product.stock < 20 && product.stock > 0 && (
         <div className="absolute bottom-20 right-3 text-xs text-orange-600 font-medium bg-orange-50 px-2 py-0.5 rounded-full">

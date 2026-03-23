@@ -7,6 +7,7 @@ import { useUserStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { useCartStore } from '@/store';
 import { toast } from '@/components/ui/Toast';
+import { Lightbulb, FileText, ClipboardList, Building2, Receipt } from 'lucide-react';
 
 function InvoiceApplyContent() {
   const router = useRouter();
@@ -58,7 +59,7 @@ function InvoiceApplyContent() {
     return (
       <div className="container mx-auto px-4 md:px-6 py-10 md:py-16">
         <div className="max-w-lg mx-auto text-center bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
-          <div className="text-6xl mb-4">🧾</div>
+          <div className="mb-4 flex justify-center"><Receipt className="w-16 h-16 text-blue-light" /></div>
           <h2 className="text-2xl font-bold mb-2">发票申请已提交</h2>
           <p className="text-gray-500 mb-6">我们将在 1-3 个工作日内处理您的发票申请，开票成功后会将电子发票发送至您的邮箱。</p>
           <div className="flex gap-3 justify-center">
@@ -84,8 +85,8 @@ function InvoiceApplyContent() {
 
         <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              💡 支持<strong>电子发票</strong>和<strong>增值税专用发票</strong>两种类型。电子发票将发送至您提供的邮箱，专用发票需提供完整税号信息。
+            <p className="text-sm text-blue-800 flex items-start gap-2">
+              <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-600" /> 支持<strong>电子发票</strong>和<strong>增值税专用发票</strong>两种类型。电子发票将发送至您提供的邮箱，专用发票需提供完整税号信息。
             </p>
           </div>
 
@@ -106,9 +107,9 @@ function InvoiceApplyContent() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">发票类型</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: '电子发票', label: '📄 电子发票', desc: '个人/无需报销' },
-                  { value: '增值税普通发票', label: '📋 增值税普通发票', desc: '企业可报销' },
-                  { value: '增值税专用发票', label: '🏢 增值税专用发票', desc: '企业可抵扣' },
+                  { value: '电子发票', label: '电子发票', desc: '个人/无需报销', Icon: FileText },
+                  { value: '增值税普通发票', label: '增值税普通发票', desc: '企业可报销', Icon: ClipboardList },
+                  { value: '增值税专用发票', label: '增值税专用发票', desc: '企业可抵扣', Icon: Building2 },
                 ].map(opt => (
                   <label key={opt.value} className={`border rounded-xl p-3 cursor-pointer transition-all ${form.type === opt.value ? 'border-blue bg-blue-50 ring-2 ring-blue' : 'border-gray-200 hover:border-blue'}`}>
                     <input
@@ -119,7 +120,7 @@ function InvoiceApplyContent() {
                       onChange={() => setForm({ ...form, type: opt.value })}
                       className="sr-only"
                     />
-                    <p className="text-sm font-medium">{opt.label}</p>
+                    <p className="text-sm font-medium flex items-center gap-2">{opt.Icon && <opt.Icon className="w-4 h-4" />}{opt.label}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{opt.desc}</p>
                   </label>
                 ))}

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Category } from '@/types';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { X, Package, Database, Building2, Monitor, Wifi, HardDrive, Key, Shield, Brain, Disc, Wrench, Globe } from 'lucide-react';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,7 +27,7 @@ export default function AdminCategoriesPage() {
     setFormData({
       name: '',
       slug: '',
-      icon: '📦',
+      icon: 'Package',
       desc: '',
       sort: categories.length + 1,
       active: true,
@@ -65,7 +66,17 @@ export default function AdminCategoriesPage() {
     setCategories(prev => prev.map(c => c.id === id ? { ...c, active: false } : c));
   };
 
-  const icons = ['🗄️', '🏢', '🖥️', '🌐', '💾', '📡', '🔑', '🛡️', '🧠', '📦', '💿', '🔧'];
+  const icons = ['Database', 'Building2', 'Monitor', 'Globe', 'HardDrive', 'Wifi', 'Key', 'Shield', 'Brain', 'Package', 'Disc', 'Wrench'];
+  const iconMap: Record<string, React.ElementType> = {
+    Database, Building2, Monitor, Globe, HardDrive, Wifi, Key, Shield, Brain, Package, Disc, Wrench
+  };
+  const iconLabels: Record<string, string> = {
+    Database: '🗄️', Building2: '🏢', Monitor: '🖥️', Globe: '🌐', HardDrive: '💾', Wifi: '📡', Key: '🔑', Shield: '🛡️', Brain: '🧠', Package: '📦', Disc: '💿', Wrench: '🔧'
+  };
+  function renderIcon(iconName: string) {
+    const Icon = iconMap[iconName];
+    return Icon ? <Icon className="w-5 h-5" /> : <span className="text-lg">{iconLabels[iconName] || iconName}</span>;
+  }
 
   if (loading) return (
     <div>
@@ -102,7 +113,7 @@ export default function AdminCategoriesPage() {
             {categories.map((cat) => (
               <tr key={cat.id} className="border-t hover:bg-gray-50">
                 <td className="p-4">{cat.sort}</td>
-                <td className="p-4 text-2xl">{cat.icon}</td>
+                <td className="p-4">{renderIcon(cat.icon)}</td>
                 <td className="p-4 font-medium">{cat.name}</td>
                 <td className="p-4 font-mono text-sm text-gray-500">{cat.slug}</td>
                 <td className="p-4 text-sm text-gray-500">{cat.desc}</td>
@@ -128,7 +139,7 @@ export default function AdminCategoriesPage() {
           <div className="bg-white rounded-2xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{formData.id ? '编辑分类' : '新增分类'}</h2>
-              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -143,8 +154,8 @@ export default function AdminCategoriesPage() {
                 <label className="text-sm text-gray-500 block mb-1">图标</label>
                 <div className="flex flex-wrap gap-2">
                   {icons.map(icon => (
-                    <button key={icon} type="button" onClick={() => setFormData({...formData, icon})} className={`w-10 h-10 rounded-lg text-xl ${formData.icon === icon ? 'bg-blue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
-                      {icon}
+                    <button key={icon} type="button" onClick={() => setFormData({...formData, icon})} className={`w-10 h-10 rounded-lg flex items-center justify-center ${formData.icon === icon ? 'bg-blue text-white' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                      {renderIcon(icon)}
                     </button>
                   ))}
                 </div>

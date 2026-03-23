@@ -51,11 +51,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     adminFetch('/api/admin/stats')
       .then(res => res.json())
-      .then(data => {
-        setStats(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      .then(data => { setStats(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return (
@@ -68,20 +66,24 @@ export default function AdminDashboard() {
     </div>
   );
 
-  const pieData = stats ? Object.entries(stats.ordersByStatus)
-    .filter(([_, count]) => count > 0)
-    .map(([status, count]) => ({
-      name: STATUS_LABELS[status] || status,
-      value: count,
-      color: STATUS_COLORS[status] || '#6b7280',
-    })) : [];
+  const pieData = stats?.ordersByStatus
+    ? Object.entries(stats.ordersByStatus)
+        .filter(([_, count]) => (count as number) > 0)
+        .map(([status, count]) => ({
+          name: STATUS_LABELS[status] || status,
+          value: count as number,
+          color: STATUS_COLORS[status] || '#6b7280',
+        }))
+    : [];
 
-  const barData = stats ? Object.entries(stats.revenueByDay)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([day, revenue]) => ({
-      day: day.slice(5),
-      revenue,
-    })) : [];
+  const barData = stats?.revenueByDay
+    ? Object.entries(stats.revenueByDay)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([day, revenue]) => ({
+          day: day.slice(5),
+          revenue: revenue as number,
+        }))
+    : [];
 
   const statCards = [
     { label: '总营收', value: `¥ ${(stats?.totalRevenue || 0).toLocaleString()}`, icon: DollarSign, color: 'from-orange-400 to-orange-600' },
@@ -98,22 +100,22 @@ export default function AdminDashboard() {
       <h1 className="text-2xl font-bold mb-6">控制台</h1>
 
       {/* Low Stock Alert */}
-      {stats && (stats.lowStockProducts.length > 0 || stats.outOfStockProducts.length > 0) && (
+      {stats && ((stats.lowStockProducts?.length ?? 0) > 0 || (stats.outOfStockProducts?.length ?? 0) > 0) && (
         <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h3 className="font-bold text-red-800 mb-2">库存预警</h3>
-              {stats.outOfStockProducts.length > 0 && (
+              {(stats.outOfStockProducts?.length ?? 0) > 0 && (
                 <p className="text-red-600 text-sm mb-1 flex items-center gap-1.5">
                   <AlertCircle className="w-3.5 h-3.5" />
-                  缺货商品：{stats.outOfStockProducts.map((p: any) => p.sku).join('、')}
+                  缺货商品：{(stats.outOfStockProducts ?? []).map((p: any) => p.sku).join('、')}
                 </p>
               )}
-              {stats.lowStockProducts.length > 0 && (
+              {(stats.lowStockProducts?.length ?? 0) > 0 && (
                 <p className="text-orange-600 text-sm flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  低库存（≤ {stats.stockAlertThreshold} 件）：{stats.lowStockProducts.map((p: any) => `${p.sku}(${p.stock})`).join('、')}
+                  低库存（≤ {stats.stockAlertThreshold} 件）：{(stats.lowStockProducts ?? []).map((p: any) => `${p.sku}(${p.stock})`).join('、')}
                 </p>
               )}
             </div>
@@ -208,7 +210,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {stats?.pendingOrders && stats.pendingOrders > 0 && (
+      {stats && stats.pendingOrders > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 mb-8">
           <div className="flex items-center justify-between">
             <div>

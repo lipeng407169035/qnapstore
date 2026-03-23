@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Image } from 'lucide-react';
+import { Image, Upload } from 'lucide-react';
 
 interface Banner {
   id: number;
@@ -207,7 +207,7 @@ export default function AdminBannersPage() {
                   <div>
                     <input ref={fileRef} type="file" accept=".png,.jpg,.jpeg,.webp,.svg" onChange={handleLocalUpload} className="hidden" id="banner-upload" />
                     <label htmlFor="banner-upload" className={`flex items-center justify-center gap-2 w-full border-2 border-dashed rounded-xl py-6 cursor-pointer hover:border-blue transition-colors ${uploading ? 'opacity-50' : ''}`}>
-                      {uploading ? '上传中...' : '📤 点击选择图片上传'}
+                      {uploading ? '上传中...' : <><Upload className="w-4 h-4" /> 点击选择图片上传</>}
                     </label>
                     <p className="text-xs text-gray-400 mt-1">支持 PNG、JPG、WEBP（最大 10MB）</p>
                   </div>

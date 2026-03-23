@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/admin-api';
 import { toast } from '@/components/ui/Toast';
+import { X } from 'lucide-react';
 
 interface FullReduction {
   id: string;
@@ -127,7 +128,7 @@ export default function AdminFullReductionsPage() {
           <div className="bg-white rounded-2xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{editing ? '编辑满减活动' : '新增满减活动'}</h2>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>

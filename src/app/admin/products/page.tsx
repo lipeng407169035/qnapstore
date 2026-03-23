@@ -58,6 +58,8 @@ export default function AdminProductsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Product>>({});
   const [specEntries, setSpecEntries] = useState<SpecEntry[]>([{ key: '', value: '' }]);
+  const [batchModalOpen, setBatchModalOpen] = useState(false);
+  const [batchItems, setBatchItems] = useState<{ productId: string; sku: string; name: string; stock: number; change: number }[]>([]);
 
   useEffect(() => {
     adminFetch('/api/admin/products')
@@ -149,9 +151,6 @@ export default function AdminProductsPage() {
       <SkeletonTable rows={10} cols={7} />
     </div>
   );
-
-  const [batchModalOpen, setBatchModalOpen] = useState(false);
-  const [batchItems, setBatchItems] = useState<{ productId: string; sku: string; name: string; stock: number; change: number }[]>([]);
 
   const handleBatchAdjust = (product: Product) => {
     setBatchItems(prev => {
@@ -267,7 +266,7 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">批量库存调整</h2>
-              <button onClick={() => { setBatchModalOpen(false); setBatchItems([]); }} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => { setBatchModalOpen(false); setBatchItems([]); }} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6">
               <p className="text-sm text-gray-500 mb-4">勾选要调整的商品，输入增减数量（正数为增加，负数为减少）</p>
@@ -320,7 +319,7 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{selectedProduct ? '编辑商品' : '新增商品'}</h2>
-              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -400,7 +399,7 @@ export default function AdminProductsPage() {
                         placeholder="规格值 (如：Intel Celeron N5105)"
                         className="flex-1 px-4 py-2 border rounded-xl text-sm"
                       />
-                      <button onClick={() => handleRemoveSpec(index)} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm">✕</button>
+                      <button onClick={() => handleRemoveSpec(index)} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm"><X className="w-4 h-4" /></button>
                     </div>
                   ))}
                   <button onClick={handleAddSpec} className="text-sm text-blue hover:underline">+ 新增规格</button>

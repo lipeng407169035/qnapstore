@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Package, Shield, Phone, Mail, RotateCcw, Headphones, Download, HelpCircle, MessageCircle, Building2, Clock } from 'lucide-react';
 
 export default function CustomerServicePage() {
   const [info, setInfo] = useState<any>({});
@@ -14,12 +15,12 @@ export default function CustomerServicePage() {
   }, []);
 
   const services = [
-    { icon: '📦', title: '订单查询', desc: '查询订单状态、物流信息', href: '/order-lookup', color: 'from-blue-500 to-blue-600' },
-    { icon: '🔄', title: '退换货政策', desc: '了解退换货流程与条件', href: '/rma', color: 'from-green-500 to-green-600' },
-    { icon: '🛡️', title: '质保服务', desc: '申请质保、维修服务', href: '/warranty', color: 'from-purple-500 to-purple-600' },
-    { icon: '🎧', title: '技术支持', desc: '提交技术支持工单', href: '/support', color: 'from-orange-500 to-orange-600' },
-    { icon: '📥', title: '下载中心', desc: '驱动、手册、固件下载', href: '/downloads', color: 'from-red-500 to-red-600' },
-    { icon: '❓', title: '常见问题', desc: 'FAQ 常见问题解答', href: '/faq', color: 'from-indigo-500 to-indigo-600' },
+    { Icon: Package, title: '订单查询', desc: '查询订单状态、物流信息', href: '/order-lookup', color: 'from-blue-500 to-blue-600' },
+    { Icon: RotateCcw, title: '退换货政策', desc: '了解退换货流程与条件', href: '/rma', color: 'from-green-500 to-green-600' },
+    { Icon: Shield, title: '质保服务', desc: '申请质保、维修服务', href: '/warranty', color: 'from-purple-500 to-purple-600' },
+    { Icon: Headphones, title: '技术支持', desc: '提交技术支持工单', href: '/support', color: 'from-orange-500 to-orange-600' },
+    { Icon: Download, title: '下载中心', desc: '驱动、手册、固件下载', href: '/downloads', color: 'from-red-500 to-red-600' },
+    { Icon: HelpCircle, title: '常见问题', desc: 'FAQ 常见问题解答', href: '/faq', color: 'from-indigo-500 to-indigo-600' },
   ];
 
   return (
@@ -36,8 +37,8 @@ export default function CustomerServicePage() {
           {services.map(s => (
             <Link key={s.href} href={s.href}>
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all h-full">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl mb-4 text-white`}>
-                  {s.icon}
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-4 text-white`}>
+                  <s.Icon className="w-6 h-6" />
                 </div>
                 <h3 className="font-bold text-lg mb-1">{s.title}</h3>
                 <p className="text-gray-500 text-sm">{s.desc}</p>
@@ -48,26 +49,26 @@ export default function CustomerServicePage() {
 
         <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
           <h2 className="font-barlow text-xl font-bold mb-6 flex items-center gap-2">
-            <span>📞</span> 联系方式
+            <Phone className="w-5 h-5 text-blue" /> 联系方式
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <span className="text-blue mt-0.5">📞</span>
+                <Phone className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-500">客服热线</p>
                   <p className="font-bold text-lg">{info.phone || '400-888-3600'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-blue mt-0.5">✉️</span>
+                <Mail className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-500">电子邮箱</p>
                   <p className="font-medium">{info.email || 'support_cn@qnap.com'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-blue mt-0.5">💬</span>
+                <MessageCircle className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-500">微信公众号</p>
                   <p className="font-medium">{info.wechat || 'QNAP-CN'}</p>
@@ -76,14 +77,14 @@ export default function CustomerServicePage() {
             </div>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <span className="text-blue mt-0.5">🏢</span>
+                <Building2 className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-500">公司地址</p>
                   <p className="font-medium">{info.address || '上海市浦东新区张江高科技园区碧波路 690 号'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-blue mt-0.5">🕐</span>
+                <Clock className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm text-gray-500">服务时间</p>
                   <p className="font-medium">{info.workHours || '周一至周五 09:00-18:00（节假日除外）'}</p>

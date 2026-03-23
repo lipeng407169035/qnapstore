@@ -3,6 +3,7 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { Mail, Package, CheckCircle2, Save } from 'lucide-react';
 
 interface EmailTemplate {
   subject: string;
@@ -67,10 +68,10 @@ export default function EmailTemplatesPage() {
         {Object.entries(form).map(([type, tmpl]) => (
           <div key={type} className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
             <div className="p-5 bg-gray-50 border-b">
-              <h2 className="font-bold text-lg">
-                {type === 'orderConfirmation' ? '📧 订单确认信' :
-                 type === 'orderShipped' ? '📦 出货通知' :
-                 type === 'orderDelivered' ? '✅ 收货确认' : type}
+              <h2 className="font-bold text-lg flex items-center gap-2">
+                {type === 'orderConfirmation' ? <><Mail className="w-5 h-5" /> 订单确认信</> :
+                 type === 'orderShipped' ? <><Package className="w-5 h-5" /> 出货通知</> :
+                 type === 'orderDelivered' ? <><CheckCircle2 className="w-5 h-5" /> 收货确认</> : type}
               </h2>
             </div>
             <div className="p-6 space-y-4">
@@ -110,7 +111,7 @@ export default function EmailTemplatesPage() {
                 disabled={saving === type}
                 className="bg-blue text-white px-8 py-2.5 rounded-xl font-medium hover:bg-blue-dark disabled:opacity-50"
               >
-                {saving === type ? '保存中...' : '💾 保存模板'}
+                {saving === type ? '保存中...' : <><Save className="w-4 h-4 inline mr-1" /> 保存模板</>}
               </button>
             </div>
           </div>

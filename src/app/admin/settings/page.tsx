@@ -3,6 +3,7 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { AlertTriangle } from 'lucide-react';
 
 interface Settings {
   siteName: string;
@@ -170,7 +171,7 @@ export default function AdminSettingsPage() {
               <p className="font-medium">admin@qnap.com</p>
             </div>
             <div className="p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-              <p className="text-sm text-yellow-800">⚠️ 如需修改管理员密码，请联系开发人员</p>
+              <p className="text-sm text-yellow-800 flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> 如需修改管理员密码，请联系开发人员</p>
             </div>
           </div>
         </div>

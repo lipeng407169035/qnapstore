@@ -4,6 +4,7 @@ import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { Star } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -86,7 +87,11 @@ export default function AdminReviewsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="font-semibold">{review.userName}</span>
-                      <span className="text-amber-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                      <span className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                        ))}
+                      </span>
                       <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString('zh-TW')}</span>
                     </div>
                     <p className="text-sm text-gray-700">{review.comment}</p>
@@ -116,7 +121,11 @@ export default function AdminReviewsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="font-semibold">{review.userName}</span>
-                      <span className="text-amber-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                      <span className="flex items-center gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                        ))}
+                      </span>
                       <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString('zh-TW')}</span>
                       <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">已通过</span>
                     </div>

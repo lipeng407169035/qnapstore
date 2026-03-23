@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { CheckCircle2 } from 'lucide-react';
 
 interface Submission {
   id: string;
@@ -89,7 +90,7 @@ export default function WarrantyPage() {
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             {submitted && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5 text-center">
-                <div className="text-3xl mb-2">✅</div>
+                <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
                 <p className="font-bold text-green-700">提交成功！</p>
                 <p className="text-sm text-green-600 mt-1">我们将尽快与您联系，请保持电话畅通</p>
               </div>

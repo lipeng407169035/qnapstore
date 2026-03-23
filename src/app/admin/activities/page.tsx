@@ -3,6 +3,7 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { Product } from '@/types';
+import { X } from 'lucide-react';
 
 interface Activity {
   id: string;
@@ -149,7 +150,7 @@ export default function ActivitiesPage() {
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{editing ? '编辑活动' : '新增活动'}</h2>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>

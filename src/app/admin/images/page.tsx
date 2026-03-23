@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ImageFile } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { X, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminImagesPage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function AdminImagesPage() {
     adminFetch('/api/admin/products')
       .then(res => res.json())
       .then(data => {
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : (data.data || []));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -210,7 +211,7 @@ export default function AdminImagesPage() {
       {selectedSku ? (
         images.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm p-20 text-center">
-            <div className="text-5xl mb-4">📷</div>
+            <div className="mb-4"><ImageIcon className="w-12 h-12 mx-auto text-gray-300" /></div>
             <p className="text-gray-400">尚无图片，请上传图片</p>
           </div>
         ) : (
@@ -225,7 +226,7 @@ export default function AdminImagesPage() {
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
-                      target.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-gray-400 text-4xl">📷</div>`;
+                      target.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>`;
                     }}
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
@@ -255,10 +256,10 @@ export default function AdminImagesPage() {
           </div>
         )
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm p-20 text-center">
-          <div className="text-5xl mb-4">🖼️</div>
-          <p className="text-gray-400">请选择一个型号以管理图片</p>
-        </div>
+          <div className="bg-white rounded-2xl shadow-sm p-20 text-center">
+            <div className="mb-4 flex justify-center"><ImageIcon className="w-12 h-12 text-gray-300" /></div>
+            <p className="text-gray-400">请选择一个型号以管理图片</p>
+          </div>
       )}
 
       {/* Add SKU Modal */}
@@ -267,7 +268,7 @@ export default function AdminImagesPage() {
           <div className="bg-white rounded-2xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">新增型号</h2>
-              <button onClick={() => setShowAddSku(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setShowAddSku(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -312,7 +313,7 @@ export default function AdminImagesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6">
             <div className="text-center">
-              <div className="text-5xl mb-4">⚠️</div>
+              <div className="mb-4 flex justify-center"><AlertTriangle className="w-12 h-12 text-yellow-500" /></div>
               <h2 className="text-xl font-bold mb-2">确定要删除型号吗？</h2>
               <p className="text-gray-500 mb-1">
                 型号：<span className="font-mono font-bold">{confirmDelete.sku}</span>

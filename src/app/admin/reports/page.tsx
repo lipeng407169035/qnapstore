@@ -29,9 +29,11 @@ export default function AdminReportsPage() {
 
   if (loading || !report) return <div className="text-center py-20">加载中...</div>;
 
-  const revenueData = report.revenueByDay.map(([day, revenue]) => ({ day: day.slice(5), revenue }));
-  const ordersData = report.revenueByDay.map(([day]) => ({ day: day.slice(5), count: report.ordersByDay.find(([d]: any) => d === day)?.[1] || 0 }));
-  const categoryData = Object.entries(report.revenueByCategory).map(([name, value]) => ({ name, value }));
+  const revenueData = report.revenueByDay?.map(([day, revenue]) => ({ day: day.slice(5), revenue: revenue as number })) ?? [];
+  const ordersData = report.revenueByDay?.map(([day]) => ({ day: day.slice(5), count: report.ordersByDay?.find(([d]: any) => d === day)?.[1] || 0 })) ?? [];
+  const categoryData = report.revenueByCategory
+    ? Object.entries(report.revenueByCategory).map(([name, value]) => ({ name, value }))
+    : [];
   const PAYMENT_COLORS = ['#006ebd', '#f7941d', '#10b981', '#8b5cf6', '#ef4444'];
 
   return (

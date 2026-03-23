@@ -8,12 +8,14 @@ import { useRecentlyViewedStore } from '@/store';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
+import { Heart, Package, X, Flame } from 'lucide-react';
 
 function WishlistContent() {
   const { items, removeItem } = useWishlistStore();
   const { addItem } = useCartStore();
   const [popularSearches, setPopularSearches] = useState<string[]>([]);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     Promise.all([
@@ -26,6 +28,20 @@ function WishlistContent() {
     });
   }, []);
 
+  useEffect(() => {
+    if (items.length === 0) return;
+    const skus = items.map(i => i.product.sku);
+    fetch('/api/images/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skus }),
+    }).then(r => r.json()).then(imgs => {
+      const map: Record<string, string> = {};
+      items.forEach(i => { if (imgs[i.product.sku]) map[i.productId] = imgs[i.product.sku]; });
+      setProductImages(map);
+    }).catch(() => {});
+  }, [items]);
+
   const handleAddToCart = (item: any) => {
     addItem(item.product);
     removeItem(item.productId);
@@ -36,7 +52,7 @@ function WishlistContent() {
     return (
       <div className="container mx-auto px-4 md:px-6 py-5 md:py-7">
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">❤️</div>
+          <div className="mb-4"><Heart className="w-14 h-14 text-gray-300 mx-auto" /></div>
           <h2 className="text-xl font-bold mb-2">收藏夹是空的</h2>
           <p className="text-muted mb-6">快去收藏心仪的商品吧！</p>
           <Link href="/products">
@@ -46,7 +62,7 @@ function WishlistContent() {
         
         {popularSearches.length > 0 && (
           <div className="bg-white rounded-xl p-4 border border-gray-200 mt-6">
-            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">🔥 热门搜索</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" /> 热门搜索</h3>
             <div className="flex flex-wrap gap-2">
               {popularSearches.slice(0, 12).map((word, i) => (
                 <Link key={i} href={`/products?search=${encodeURIComponent(word)}`}
@@ -65,7 +81,7 @@ function WishlistContent() {
               {recommendations.map(p => (
                 <Link key={p.id} href={`/products/${p.sku}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-all">
                   <div className="h-28 flex items-center justify-center" style={{ background: p.color }}>
-                    <span className="text-3xl text-white/80">📦</span>
+                    <Package className="w-7 h-7 text-white/80" />
                   </div>
                   <div className="p-3">
                     <p className="text-sm font-medium line-clamp-1 mb-1">{p.name}</p>
@@ -83,7 +99,7 @@ function WishlistContent() {
   return (
     <div className="container mx-auto px-4 md:px-6 py-5 md:py-7">
       <div className="flex items-center justify-between mb-4 md:mb-6">
-        <h1 className="font-barlow text-xl md:text-2xl font-extrabold">❤️ 我的收藏</h1>
+        <h1 className="font-barlow text-xl md:text-2xl font-extrabold flex items-center gap-2"><Heart className="w-5 h-5 text-red-400" /> 我的收藏</h1>
         <span className="text-xs md:text-sm text-gray-500">{items.length} 件商品</span>
       </div>
       
@@ -92,14 +108,13 @@ function WishlistContent() {
           <div key={item.productId} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2 md:gap-4 p-3 md:p-4">
               <Link href={`/products/${item.product.sku}`} className="flex-shrink-0">
-                <div className="w-14 md:w-20 h-12 md:h-16 rounded-lg flex items-center justify-center" 
+                <div className="w-14 md:w-20 h-12 md:h-16 rounded-lg flex items-center justify-center overflow-hidden"
                   style={{ background: item.product.color }}>
-                  <img
-                    src={`/images/products/${item.product.sku}/1.svg`}
-                    alt={item.product.name}
-                    className="w-full h-full object-contain p-1"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                  {productImages[item.productId] ? (
+                    <img src={productImages[item.productId]} alt={item.product.name} className="w-full h-full object-contain" />
+                  ) : (
+                    <Package className="w-6 h-6 text-white/60" />
+                  )}
                 </div>
               </Link>
               <div className="flex-1 min-w-0">
@@ -137,7 +152,7 @@ function WishlistContent() {
                   onClick={() => removeItem(item.productId)}
                   className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>

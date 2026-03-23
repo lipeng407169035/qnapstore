@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/Toast';
+import { Medal, Award, Target, PartyPopper } from 'lucide-react';
 
 const STEPS = ['公司信息', '合作意向', '公司简介', '确认信息', '提交结果'];
 
@@ -153,9 +154,9 @@ export default function PartnershipApplyPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">期望合作等级 *</label>
                 <div className="grid grid-cols-3 gap-4">
-                  {[{ key: 'silver', icon: '🥈', label: '银级', desc: '年采购 ¥50 万起' }, { key: 'gold', icon: '🥇', label: '金级', desc: '年采购 ¥200 万起' }, { key: 'platinum', icon: '💎', label: '白金', desc: '年采购 ¥500 万起' }].map(t => (
+                  {[{ key: 'silver', Icon: Medal, label: '银级', desc: '年采购 ¥50 万起' }, { key: 'gold', Icon: Award, label: '金级', desc: '年采购 ¥200 万起' }, { key: 'platinum', Icon: Target, label: '白金', desc: '年采购 ¥500 万起' }].map(t => (
                     <div key={t.key} onClick={() => updateField('tier', t.key)} className={`cursor-pointer rounded-xl border-2 p-4 text-center transition-all ${form.tier === t.key ? `border-blue bg-blue-50 ${TIER_COLORS[t.key].split(' ')[0]}/10` : 'border-gray-100 hover:border-blue/50'}`}>
-                      <div className="text-3xl mb-1">{t.icon}</div>
+                      <div className="mb-1 flex justify-center"><t.Icon className="w-8 h-8 text-blue" /></div>
                       <p className="font-bold text-sm">{t.label}</p>
                       <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
                     </div>
@@ -246,7 +247,7 @@ export default function PartnershipApplyPage() {
             <div className="text-center py-8">
               {submitted ? (
                 <>
-                  <div className="text-6xl mb-4">🎉</div>
+                  <div className="mb-4 flex justify-center"><PartyPopper className="w-16 h-16 text-yellow-500" /></div>
                   <h2 className="font-barlow text-2xl font-bold mb-3">申请已提交！</h2>
                   <p className="text-gray-500 mb-8 max-w-md mx-auto">
                     您的合作申请已收到，QNAP 业务团队将在 <strong>3 个工作日</strong> 内与您联系，请保持电话畅通。

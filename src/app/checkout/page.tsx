@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCartStore, useUserStore, usePointsStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
+import {
+  Mail, Star, AlertTriangle, CheckCircle2, Check, CreditCard,
+  Truck, Package, Building, Lightbulb
+} from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,6 +27,21 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'success' | 'failed' | null>(null);
   const [paymentQR, setPaymentQR] = useState<string | null>(null);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    const skus = items.map(i => i.product.sku);
+    fetch('/api/images/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skus }),
+    }).then(r => r.json()).then(imgs => {
+      const map: Record<string, string> = {};
+      items.forEach(i => { if (imgs[i.product.sku]) map[i.productId] = imgs[i.product.sku]; });
+      setProductImages(map);
+    }).catch(() => {});
+  }, []);
 
   const subtotal = getTotal();
   const shipping = subtotal >= 3000 ? 0 : 150;
@@ -175,10 +194,10 @@ export default function CheckoutPage() {
             <h2 className="font-barlow font-bold text-lg mb-5">付款方式</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {[
-                { value: 'alipay', label: '支付宝 Alipay', desc: '中国大陆首选', icon: '💙' },
-                { value: 'wechat', label: '微信支付 WeChat Pay', desc: '中国大陆首选', icon: '💚' },
-                { value: 'unionpay', label: '🏦 银联支付', desc: '银行卡直接支付', icon: '🏦' },
-                { value: 'cod', label: '📦 货到付款', desc: '送货上门后再付款', icon: '📦' },
+                { value: 'alipay', label: '支付宝 Alipay', desc: '中国大陆首选', icon: CreditCard, color: 'text-blue-500' },
+                { value: 'wechat', label: '微信支付 WeChat Pay', desc: '中国大陆首选', icon: Package, color: 'text-green-500' },
+                { value: 'unionpay', label: '银联支付', desc: '银行卡直接支付', icon: Building, color: 'text-gray-600' },
+                { value: 'cod', label: '货到付款', desc: '送货上门后再付款', icon: Truck, color: 'text-gray-600' },
               ].map(method => (
                 <label key={method.value} className={`border rounded-xl p-3 cursor-pointer flex items-center gap-3 text-sm transition-all ${
                   form.paymentMethod === method.value ? 'border-blue bg-blue-50 ring-2 ring-blue' : 'border-gray-200 hover:border-blue'
@@ -188,6 +207,7 @@ export default function CheckoutPage() {
                     onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                     className="accent-blue"
                   />
+                  <method.icon className={`w-5 h-5 ${method.color} flex-shrink-0`} />
                   <div>
                     <p className="font-medium">{method.label}</p>
                     <p className="text-xs text-gray-400">{method.desc}</p>
@@ -199,7 +219,6 @@ export default function CheckoutPage() {
             {(form.paymentMethod === 'alipay' || form.paymentMethod === 'wechat') && (
               <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">{form.paymentMethod === 'alipay' ? '💙' : '💚'}</span>
                   <div>
                     <p className="font-bold text-blue-800">{form.paymentMethod === 'alipay' ? '支付宝 Alipay' : '微信支付 WeChat Pay'}</p>
                     <p className="text-xs text-blue-600">扫描下方 QR Code 完成付款</p>
@@ -207,8 +226,8 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex gap-4 items-center">
                   <div className="bg-white rounded-xl p-3 border border-gray-200">
-                    <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-5xl">
-                      {form.paymentMethod === 'alipay' ? '💙' : '💚'}
+                    <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <CreditCard className="w-10 h-10 text-gray-400" />
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-2">扫码支付</p>
                   </div>
@@ -237,7 +256,13 @@ export default function CheckoutPage() {
             <div className="space-y-3 max-h-48 overflow-y-auto">
               {items.map((item) => (
                 <div key={item.productId} className="flex items-center gap-3 pb-3 border-b border-gray-50 last:border-0">
-                  <div className="w-12 h-10 rounded" style={{ background: item.product.color }} />
+                  <div className="w-12 h-10 rounded flex items-center justify-center overflow-hidden" style={{ background: item.product.color }}>
+                    {productImages[item.productId] ? (
+                      <img src={productImages[item.productId]} alt={item.product.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Package className="w-5 h-5 text-white/60" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{item.product.name}</p>
                     <p className="text-xs text-muted">x{item.quantity}</p>
@@ -258,9 +283,9 @@ export default function CheckoutPage() {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-400 space-y-1">
-              <p>📧 订单确认信将发送至您的 Email</p>
-              <p>⭐ 消费 ¥{pointsEarned * 100} 可获得 {pointsEarned} 点积分</p>
-              <p>💡 积分 1 点 = ¥1 可折抵</p>
+              <p className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> 订单确认信将发送至您的 Email</p>
+              <p className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> 消费 ¥{pointsEarned * 100} 可获得 {pointsEarned} 点积分</p>
+              <p className="flex items-center gap-1.5"><Lightbulb className="w-3.5 h-3.5" /> 积分 1 点 = ¥1 可折抵</p>
             </div>
           </div>
         </div>
@@ -271,7 +296,9 @@ export default function CheckoutPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full text-center">
             <div className="p-8">
-              <div className="text-6xl mb-4">{paymentQR === 'alipay-qr' ? '💙' : '💚'}</div>
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="w-10 h-10 text-blue-500" />
+              </div>
               <h2 className="text-2xl font-bold mb-2">
                 {paymentQR === 'alipay-qr' ? '支付宝付款' : '微信支付'}
               </h2>
@@ -283,7 +310,7 @@ export default function CheckoutPage() {
               <div className="bg-gray-50 rounded-xl p-4 inline-block mb-6">
                 <div className="w-48 h-48 bg-white rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 mx-auto">
                   <div className="text-center">
-                    <div className="text-5xl mb-2">{paymentQR === 'alipay-qr' ? '💙' : '💚'}</div>
+                    <CreditCard className="w-10 h-10 text-gray-300 mx-auto mb-2" />
                     <p className="text-xs text-gray-400">
                       {paymentQR === 'alipay-qr' ? '支付宝 QR Code' : '微信支付 QR Code'}
                     </p>
@@ -292,15 +319,15 @@ export default function CheckoutPage() {
                 </div>
               </div>
               <div className="space-y-2 mb-6 text-sm text-gray-500">
-                <p>⚠️ 请在 <strong>30 分钟</strong>内完成付款</p>
-                <p>✅ 付款成功后，系统将自动发送确认邮件</p>
+                <p className="flex items-center justify-center gap-1.5"><AlertTriangle className="w-4 h-4 text-amber-500" /> 请在 <strong>30 分钟</strong>内完成付款</p>
+                <p className="flex items-center justify-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-green-500" /> 付款成功后，系统将自动发送确认邮件</p>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => { setPaymentStatus(null); setPaymentQR(null); router.push('/orders'); }}
-                  className="flex-1 bg-green-500 text-white py-3 rounded-xl font-medium hover:bg-green-600"
+                  className="flex-1 bg-green-500 text-white py-3 rounded-xl font-medium hover:bg-green-600 flex items-center justify-center gap-2"
                 >
-                  我已付款 ✅
+                  <Check className="w-4 h-4" /> 我已付款
                 </button>
                 <button
                   onClick={() => { setPaymentStatus(null); setPaymentQR(null); }}

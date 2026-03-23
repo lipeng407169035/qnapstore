@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useUserStore } from '@/store';
 import { Button } from '@/components/ui/Button';
+import { Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 
 function LoginForm() {
@@ -64,8 +65,9 @@ function LoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {!isLogin && (
           <div>
-            <label className="block text-sm font-medium mb-1.5">姓名</label>
+            <label htmlFor="login-name" className="block text-sm font-medium mb-1.5">姓名</label>
             <input
+              id="login-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -75,8 +77,9 @@ function LoginForm() {
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium mb-1.5">电子邮箱</label>
+          <label htmlFor="login-email" className="block text-sm font-medium mb-1.5">电子邮箱</label>
           <input
+            id="login-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -85,9 +88,10 @@ function LoginForm() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1.5">密码</label>
+          <label htmlFor="login-password" className="block text-sm font-medium mb-1.5">密码</label>
           <div className="relative">
             <input
+              id="login-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -99,7 +103,7 @@ function LoginForm() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
             >
-              {showPassword ? '🙈' : '👁'}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>

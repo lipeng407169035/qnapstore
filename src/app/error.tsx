@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -10,7 +11,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   return (
     <div className="min-h-[400px] flex items-center justify-center p-8">
       <div className="text-center max-w-md">
-        <div className="text-5xl mb-4">⚠️</div>
+        <AlertTriangle className="w-12 h-12 text-orange-500 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-gray-800 mb-2">发生错误</h2>
         <p className="text-gray-500 text-sm mb-4">
           {error.message || '加载页面时发生未预期的错误'}

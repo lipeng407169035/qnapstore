@@ -16,24 +16,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setMounted(true);
+    if (pathname === '/admin/login') return;
     const admin = localStorage.getItem('admin_user');
     if (!admin) {
       router.push('/admin/login');
     } else {
       try { setAdminUser(JSON.parse(admin)); } catch {}
     }
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_user');
     router.push('/admin/login');
   };
 
-  const isLoginPage = pathname === '/admin/login';
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {!isLoginPage && (
+      {pathname !== '/admin/login' && (
         <div className="flex">
           <AdminSidebar />
           <div className="flex-1 flex flex-col min-h-screen">
@@ -67,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
       )}
-      {isLoginPage && children}
+      {pathname === '/admin/login' && children}
       <ToastContainer />
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 interface FAQItem { id: number; category: string; question: string; answer: string; sortOrder: number; }
 
@@ -41,7 +42,7 @@ export default function FAQPage() {
                         className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
                       >
                         <span className="font-medium text-sm pr-4">{item.question}</span>
-                        <span className={`text-gray-400 text-lg transition-transform flex-shrink-0 ${openId === item.id ? 'rotate-180' : ''}`}>▼</span>
+                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${openId === item.id ? 'rotate-180' : ''}`} />
                       </button>
                       {openId === item.id && (
                         <div className="px-4 pb-4 text-sm text-gray-600 leading-relaxed border-t bg-gray-50">

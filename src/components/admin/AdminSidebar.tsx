@@ -49,7 +49,7 @@ type MenuGroup = {
 
 const menuGroups: MenuGroup[] = [
   {
-    title: '📊 数据概览',
+    title: '数据概览',
     items: [
       { href: '/admin/dashboard', label: '控制台', icon: LayoutDashboard },
       { href: '/admin/reports', label: '销售报表', icon: BarChart3 },
@@ -57,7 +57,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '📦 商品管理',
+    title: '商品管理',
     items: [
       { href: '/admin/products', label: '商品列表', icon: Package },
       { href: '/admin/products/import', label: 'CSV 导入', icon: FileUp },
@@ -68,7 +68,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '🛒 订单管理',
+    title: '订单管理',
     items: [
       { href: '/admin/orders', label: '订单列表', icon: ShoppingCart },
       { href: '/admin/batch-ship', label: '批量发货', icon: Truck },
@@ -76,7 +76,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '💰 营销管理',
+    title: '营销管理',
     items: [
       { href: '/admin/coupons', label: '优惠券', icon: Ticket },
       { href: '/admin/activities', label: '限时特卖', icon: Zap },
@@ -86,7 +86,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '👥 客户管理',
+    title: '客户管理',
     items: [
       { href: '/admin/customers', label: '客户列表', icon: Users },
       { href: '/admin/customers/rfm', label: 'RFM 分析', icon: TrendingUp },
@@ -94,7 +94,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '⭐ 内容管理',
+    title: '内容管理',
     items: [
       { href: '/admin/news', label: '新闻管理', icon: Newspaper },
       { href: '/admin/reviews', label: '评论管理', icon: Star },
@@ -104,7 +104,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '🎫 服务管理',
+    title: '服务管理',
     items: [
       { href: '/admin/support-tickets', label: '客服工单', icon: MessageSquare },
       { href: '/admin/warranty-submissions', label: '售后申请', icon: Shield },
@@ -114,7 +114,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    title: '🔧 系统设置',
+    title: '系统设置',
     items: [
       { href: '/admin/settings', label: '基础设置', icon: Settings },
       { href: '/admin/shipping', label: '物流管理', icon: Truck },

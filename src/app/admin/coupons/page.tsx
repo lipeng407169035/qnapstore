@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
+import { X } from 'lucide-react';
 
 interface Coupon {
   id: number;
@@ -201,7 +202,7 @@ export default function AdminCouponsPage() {
           <div className="bg-white rounded-2xl max-w-lg w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{formData.id ? '编辑优惠券' : '新增优惠券'}</h2>
-              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>

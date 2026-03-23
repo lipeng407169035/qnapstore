@@ -4,6 +4,7 @@ import { adminFetch } from '@/lib/admin-api';
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { toast } from '@/components/ui/Toast';
+import { CheckCircle2, AlertTriangle, Download, RefreshCw } from 'lucide-react';
 
 export default function ProductImportPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -53,7 +54,7 @@ export default function ProductImportPage() {
             <li>• <strong>rating / reviews / stock</strong>：数字</li>
           </ul>
           <a href="/api/admin/products/export" className="inline-block mt-4 text-sm text-blue hover:underline">
-            📥 下载当前商品 CSV 模板
+            <Download className="w-4 h-4 inline mr-1" /> 下载当前商品 CSV 模板
           </a>
         </div>
 
@@ -74,11 +75,11 @@ export default function ProductImportPage() {
           {result && (
             <div className={`mt-6 p-4 rounded-xl ${result.errors.length > 0 ? 'bg-orange-50 border border-orange-200' : 'bg-green-50 border border-green-200'}`}>
               <p className="font-bold mb-2">导入结果</p>
-              <p className="text-sm">✅ 新增：{result.created} 项</p>
-              <p className="text-sm">🔄 更新：{result.updated} 项</p>
+              <p className="text-sm flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-green-600" /> 新增：{result.created} 项</p>
+              <p className="text-sm flex items-center gap-1"><RefreshCw className="w-4 h-4" /> 更新：{result.updated} 项</p>
               {result.errors.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm text-red-600">⚠️ 错误：{result.errors.length} 项</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> 错误：{result.errors.length} 项</p>
                   <ul className="text-xs text-red-500 mt-1 space-y-0.5">
                     {result.errors.slice(0, 5).map((e, i) => <li key={i}>{e}</li>)}
                     {result.errors.length > 5 && <li>...还有 {result.errors.length - 5} 项错误</li>}

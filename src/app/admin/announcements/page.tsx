@@ -3,6 +3,7 @@
 import { adminFetch } from '@/lib/admin-api';
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
+import { X } from 'lucide-react';
 
 interface Announcement {
   id: number;
@@ -130,7 +131,7 @@ export default function AdminAnnouncementsPage() {
           <div className="bg-white rounded-2xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">{formData.id ? '编辑公告' : '新增公告'}</h2>
-              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setIsEditing(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>
@@ -140,7 +141,7 @@ export default function AdminAnnouncementsPage() {
                   onChange={(e) => setFormData({...formData, text: e.target.value})}
                   className="w-full px-4 py-2 border rounded-xl text-sm"
                   rows={3}
-                  placeholder="例如：🚚 全国包邮（订单满 ¥3,000）"
+                  placeholder="例如：全国包邮（订单满 ¥3,000）"
                 />
               </div>
               <div>

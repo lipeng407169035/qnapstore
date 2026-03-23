@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUserStore, usePointsStore, useRecentlyViewedStore } from '@/store';
+import { Package, Heart, Star, Lightbulb, FileText } from 'lucide-react';
 
 export default function AccountPage() {
   const router = useRouter();
@@ -11,6 +13,7 @@ export default function AccountPage() {
   const { points, history } = usePointsStore();
   const { items: recentItems } = useRecentlyViewedStore();
   const [activeTab, setActiveTab] = useState('info');
+  const [recentImages, setRecentImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user) {
@@ -18,16 +21,27 @@ export default function AccountPage() {
     }
   }, [user, router]);
 
+  useEffect(() => {
+    if (activeTab === 'recent' && recentItems.length > 0) {
+      const skus = recentItems.map(p => p.sku);
+      fetch('/api/images/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skus }),
+      }).then(r => r.json()).then(imgs => setRecentImages(imgs)).catch(() => {});
+    }
+  }, [activeTab, recentItems]);
+
   if (!user) {
     return <div className="py-20 text-center">加载中...</div>;
   }
 
   const tabs = [
-    { key: 'info', label: '📋 账户' },
-    { key: 'orders', label: '📦 订单' },
-    { key: 'wishlist', label: '❤️ 收藏' },
-    { key: 'points', label: '⭐ 积分' },
-    { key: 'recent', label: '🕐 浏览' },
+    { key: 'info', label: '账户' },
+    { key: 'orders', label: '订单', Icon: Package },
+    { key: 'wishlist', label: '收藏', Icon: Heart },
+    { key: 'points', label: '积分', Icon: Star },
+    { key: 'recent', label: '浏览' },
   ];
 
   return (
@@ -41,7 +55,7 @@ export default function AccountPage() {
               activeTab === tab.key ? 'bg-blue text-white' : 'bg-white border border-gray-200 text-gray-600'
             }`}
           >
-            {tab.label}
+            {tab.Icon ? <tab.Icon className="w-3.5 h-3.5 inline mr-1 -mt-0.5" /> : null}{tab.label}
           </button>
         ))}
       </div>
@@ -50,7 +64,7 @@ export default function AccountPage() {
         <aside className="hidden md:block w-56 flex-shrink-0">
           <div className="bg-white border border-gray-200 rounded-xl p-5 sticky top-20">
             <div className="w-16 h-16 bg-gradient-to-br from-blue to-blue-dark rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-3">
-              {user.name.charAt(0)}
+              {(user.name || user.email || 'U').charAt(0)}
             </div>
             <p className="text-center font-semibold text-sm mb-0.5">{user.name}</p>
             <p className="text-center text-xs text-gray-400 mb-4">{user.email}</p>
@@ -67,7 +81,7 @@ export default function AccountPage() {
                       activeTab === tab.key ? 'bg-blue text-white' : 'hover:bg-gray-50'
                     }`}
                   >
-                    {tab.label}
+                    {tab.Icon ? <tab.Icon className="w-4 h-4 inline mr-2 -mt-0.5" /> : null}{tab.label}
                   </button>
                 </li>
               ))}
@@ -102,7 +116,7 @@ export default function AccountPage() {
                 )}
               </div>
               <div className="mt-6 pt-5 border-t border-gray-100 space-y-2">
-                <Link href="/invoice" className="block text-sm text-blue hover:underline">📄 申请发票</Link>
+                <Link href="/invoice" className="block text-sm text-blue hover:underline"><FileText className="w-4 h-4 inline mr-1" /> 申请发票</Link>
                 <button onClick={() => { setUser(null); router.push('/'); }} className="text-sm text-red-500 hover:underline">
                   退出登录
                 </button>
@@ -150,7 +164,7 @@ export default function AccountPage() {
                 </div>
               )}
               <div className="mt-4 p-4 bg-blue-50 rounded-xl text-sm text-blue-800">
-                <p className="mb-1">💡 积分规则：</p>
+                <p className="mb-1"><Lightbulb className="w-4 h-4 inline mr-1" /> 积分规则：</p>
                 <p>• 每消费 ¥100 可获得 1 积分</p>
                 <p>• 1 积分 = ¥1，下次购物可直接抵扣</p>
                 <p>• 积分永久有效，不设过期</p>
@@ -170,13 +184,12 @@ export default function AccountPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {recentItems.map(p => (
                     <Link key={p.id} href={`/products/${p.sku}`} className="border border-gray-100 rounded-xl p-3 hover:shadow-md transition-shadow">
-                      <div className="h-16 rounded-lg flex items-center justify-center mb-2" style={{ background: p.color }}>
-                        <img
-                          src={`/images/products/${p.sku}/1.svg`}
-                          alt={p.name}
-                          className="w-full h-full object-contain p-1"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
+                      <div className="h-16 rounded-lg flex items-center justify-center mb-2 overflow-hidden" style={{ background: p.color }}>
+                        {recentImages[p.sku] ? (
+                          <img src={recentImages[p.sku]} alt={p.name} className="w-full h-full object-contain" />
+                        ) : (
+                          <Package className="w-6 h-6 text-white/60" />
+                        )}
                       </div>
                       <p className="text-xs font-medium line-clamp-1">{p.name}</p>
                       <p className="text-xs font-bold text-orange">¥ {p.price.toLocaleString()}</p>

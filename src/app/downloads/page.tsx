@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FileText, HardDrive, Package, Download } from 'lucide-react';
 
 interface Download {
   id: string;
@@ -60,7 +61,7 @@ export default function DownloadsPage() {
           <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-4 border-blue border-t-transparent mx-auto" /></div>
         ) : Object.keys(grouped).length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <div className="text-5xl mb-4">📥</div>
+            <div className="mb-4"><Package className="w-12 h-12 text-gray-300 mx-auto" /></div>
             <p className="text-lg">暂无下载文件</p>
           </div>
         ) : (
@@ -88,7 +89,7 @@ export default function DownloadsPage() {
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-2">
                               <span className="text-lg">
-                                {f.fileType === 'PDF' ? '📄' : f.fileType === 'BIN' ? '💾' : '📦'}
+                                {f.fileType === 'PDF' ? <FileText className="w-5 h-5 text-blue" /> : f.fileType === 'BIN' ? <HardDrive className="w-5 h-5 text-blue" /> : <Package className="w-5 h-5 text-blue" />}
                               </span>
                               <span className="font-medium">{f.fileName}</span>
                             </div>

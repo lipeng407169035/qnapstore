@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { Star, Lock, Leaf, Handshake } from 'lucide-react';
 
 export default function AboutPage() {
   const milestones = [
@@ -11,15 +12,15 @@ export default function AboutPage() {
     { year: '2015', text: 'NAS 全球市占率前三，员工超过 1,500 人' },
     { year: '2018', text: '推出 QTS 4.4 操作系统，AI 智能管理' },
     { year: '2020', text: '推出 QuTS hero，ZFS 数据保护方案' },
-    { year: '2023', text: '推出 QuTScloud 云端 NAS，实现混合云部署' },
-    { year: '2025', text: 'AI NAS 智能存储，开创新世代数据管理' },
+    { year: '2024', text: '推出 QuTScloud 云端 NAS，实现混合云部署' },
+    { year: '2026', text: 'AI NAS 智能存储，开创新世代数据管理' },
   ];
 
   const values = [
-    { icon: '🏆', title: '品质优先', desc: '以最高标准打造每项产品，通过 ISO 9001 品质认证' },
-    { icon: '🔒', title: '安全可信', desc: '军规级数据加密，保护用户数据安全是我们的核心使命' },
-    { icon: '🌱', title: '永续创新', desc: '节能减碳设计，2025 年达成碳中和工厂认证' },
-    { icon: '🤝', title: '伙伴共赢', desc: '与全球超过 3,000 家经销商建立长期合作关系' },
+    { Icon: Star, title: '品质优先', desc: '以最高标准打造每项产品，通过 ISO 9001 品质认证' },
+    { Icon: Lock, title: '安全可信', desc: '军规级数据加密，保护用户数据安全是我们的核心使命' },
+    { Icon: Leaf, title: '永续创新', desc: '节能减碳设计，2025 年达成碳中和工厂认证' },
+    { Icon: Handshake, title: '伙伴共赢', desc: '与全球超过 3,000 家经销商建立长期合作关系' },
   ];
 
   return (
@@ -36,7 +37,7 @@ export default function AboutPage() {
           </h1>
           <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
             QNAP 成立于 2004 年，专注于网络存储设备（NAS）、网络交换机及周边软硬件的研发与制造。
-            二十年来，我们持续以创新技术，为全球超过 100 万企业与家庭用户，打造安全可靠的数据存储解决方案。
+            二十二年来，我们持续以创新技术，为全球超过 100 万企业与家庭用户，打造安全可靠的数据存储解决方案。
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/products"><Button variant="primary" size="lg">探索产品</Button></Link>
@@ -50,7 +51,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
-              { num: '20+', label: '年专业经验' },
+              { num: '22+', label: '年专业经验' },
               { num: '100万+', label: '全球用户' },
               { num: '180+', label: '国家与地区' },
               { num: '3,000+', label: '合作经销商' },
@@ -71,7 +72,9 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((v, i) => (
               <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all">
-                <div className="text-4xl mb-4">{v.icon}</div>
+                <div className="w-12 h-12 bg-blue-light rounded-xl flex items-center justify-center mb-4">
+                  <v.Icon className="w-6 h-6 text-blue" />
+                </div>
                 <h3 className="font-bold text-lg mb-2">{v.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{v.desc}</p>
               </div>

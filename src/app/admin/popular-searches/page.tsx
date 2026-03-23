@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/admin-api';
 import { toast } from '@/components/ui/Toast';
+import { X } from 'lucide-react';
 
 export default function AdminPopularSearchesPage() {
   const [searches, setSearches] = useState<string[]>([]);
@@ -32,7 +33,7 @@ export default function AdminPopularSearchesPage() {
             <div key={i} className="flex items-center gap-1 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full text-sm">
               <span className="text-blue-600">{i + 1}</span>
               <span>{word}</span>
-              <button onClick={() => setSearches(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 ml-1">✕</button>
+              <button onClick={() => setSearches(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 ml-1"><X className="w-3.5 h-3.5" /></button>
             </div>
           ))}
         </div>

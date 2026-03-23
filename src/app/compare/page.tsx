@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Product } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { Scale, Star, Package } from 'lucide-react';
 
 function parseSpecs(specs: string | Record<string, string | number> | undefined): Record<string, string> {
   if (!specs) return {};
@@ -19,15 +20,29 @@ function CompareInner() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const initialSkus = searchParams.getAll('s');
     setSelected(initialSkus);
     fetch('/api/products')
       .then(r => r.json())
-      .then(data => {
+      .then(async (data: Product[]) => {
         setProducts(data);
         setLoading(false);
+
+        const skus = data.map(p => p.sku);
+        if (skus.length > 0) {
+          try {
+            const res = await fetch('/api/images/batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ skus }),
+            });
+            const imgs = await res.json();
+            setProductImages(imgs);
+          } catch {}
+        }
       });
   }, []);
 
@@ -94,13 +109,16 @@ function CompareInner() {
                   : 'border-gray-200 hover:border-blue-300'
               }`}
             >
-              <div className="h-12 md:h-16 rounded-lg flex items-center justify-center mb-1 md:mb-2" style={{ background: p.color }}>
-                <img
-                  src={`/images/products/${p.sku}/1.svg`}
-                  alt={p.name}
-                  className="w-full h-full object-contain p-1"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
+              <div className="h-12 md:h-16 rounded-lg flex items-center justify-center mb-1 md:mb-2 overflow-hidden" style={{ background: p.color }}>
+                {productImages[p.sku] ? (
+                  <img
+                    src={productImages[p.sku]}
+                    alt={p.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <Package className="w-6 h-6 text-white/60" />
+                )}
               </div>
               <p className="text-[10px] md:text-xs font-medium line-clamp-1">{p.name}</p>
               <p className="text-[10px] md:text-xs font-bold text-orange">¥ {p.price.toLocaleString()}</p>
@@ -130,13 +148,16 @@ function CompareInner() {
                   <td className="p-4 text-sm font-medium text-gray-500 bg-gray-50">图片</td>
                   {compareProducts.map(p => (
                     <td key={p.id} className="p-4 text-center">
-                      <div className="w-24 h-20 rounded-lg mx-auto flex items-center justify-center" style={{ background: p.color }}>
-                        <img
-                          src={`/images/products/${p.sku}/1.svg`}
-                          alt={p.name}
-                          className="w-full h-full object-contain p-1"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
+                      <div className="w-24 h-20 rounded-lg mx-auto flex items-center justify-center overflow-hidden" style={{ background: p.color }}>
+                        {productImages[p.sku] ? (
+                          <img
+                            src={productImages[p.sku]}
+                            alt={p.name}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <Package className="w-8 h-8 text-white/60" />
+                        )}
                       </div>
                     </td>
                   ))}
@@ -156,8 +177,11 @@ function CompareInner() {
                   <td className="p-4 text-sm font-medium text-gray-500 bg-gray-50">评分</td>
                   {compareProducts.map(p => (
                     <td key={p.id} className="p-4 text-center">
-                      <span className="text-amber-500">★</span> <span className="font-bold">{p.rating}</span>
-                      <span className="text-gray-400 text-xs ml-1">({p.reviews}条)</span>
+                      <div className="flex items-center justify-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span className="font-bold">{p.rating}</span>
+                      </div>
+                      <span className="text-gray-400 text-xs">({p.reviews}条)</span>
                     </td>
                   ))}
                 </tr>
@@ -215,7 +239,9 @@ function CompareInner() {
 
       {compareProducts.length === 0 && (
         <div className="bg-white rounded-xl md:rounded-2xl p-12 md:p-20 text-center">
-          <div className="text-4xl md:text-5xl mb-3 md:mb-4">⚖️</div>
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Scale className="w-8 h-8 text-gray-400" />
+          </div>
           <p className="text-gray-400 text-sm">请选择商品进行比较</p>
         </div>
       )}

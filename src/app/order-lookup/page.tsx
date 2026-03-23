@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Search } from 'lucide-react';
 
 interface Order {
   orderNo: string;
@@ -88,7 +89,7 @@ export default function OrderLookupPage() {
           <div className="text-center py-12"><div className="animate-spin rounded-full h-10 w-10 border-4 border-blue border-t-transparent mx-auto" /></div>
         ) : searched && orders.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
-            <div className="text-5xl mb-4">🔍</div>
+            <div className="mb-4 flex justify-center"><Search className="w-16 h-16 text-gray-300" /></div>
             <p className="text-gray-500 mb-2">未找到相关订单</p>
             <p className="text-sm text-gray-400">请确认订单号或手机号是否正确</p>
           </div>

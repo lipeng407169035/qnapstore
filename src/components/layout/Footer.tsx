@@ -17,16 +17,16 @@ export function Footer() {
               QNAP（威联通科技）是中国大陆领先的网络存储设备品牌，成立于 2004 年，致力于提供高品质的存储与网络解决方案。
             </p>
             <div className="flex gap-2">
-              <a href="#" aria-label="Facebook" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
+              <a href="https://www.facebook.com/QNAP/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
                 <Facebook className="w-4 h-4" />
               </a>
-              <a href="#" aria-label="X (Twitter)" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
+              <a href="https://twitter.com/qnap/" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" aria-label="LinkedIn" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
+              <a href="https://www.linkedin.com/company/qnap/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" aria-label="YouTube" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
+              <a href="https://www.youtube.com/user/QNAPchannel/" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="w-8 h-8 bg-white/8 rounded-lg flex items-center justify-center text-sm hover:bg-blue hover:text-white transition-colors">
                 <Youtube className="w-4 h-4" />
               </a>
             </div>
@@ -95,7 +95,7 @@ export function Footer() {
 
       <div className="border-t border-white/8 py-3 md:py-4">
         <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row justify-between items-center text-xs gap-2 md:gap-0">
-          <span>© 2025 QNAP Systems, Inc. 版权所有 | 统一社会信用代码：12345678</span>
+          <span>© 2026 QNAP Systems, Inc. 版权所有 | 统一社会信用代码：12345678</span>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-white transition-colors">隐私政策</Link>
             <Link href="/terms" className="hover:text-white transition-colors">服务条款</Link>

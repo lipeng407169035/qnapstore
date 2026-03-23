@@ -12,8 +12,27 @@ import {
   Zap, Shield, Cloud, Brain,
   Package, Server, HardDrive, Network, Building,
   Tv, Box, Cpu, Globe, Router, Eye, Star,
-  Truck, ShieldCheck, CreditCard, Headphones
+  Truck, ShieldCheck, CreditCard, Headphones,
+  ChevronLeft, ChevronRight, Flame, Search,
+  Database, Building2, Monitor, Wifi, Wrench,
+  Disc, Plug, Video, Battery, Rocket, Key, Clock
 } from 'lucide-react';
+
+const emojiMap: Record<string, React.ElementType> = {
+  'home-nas': Database, 'business-nas': Building2, 'rackmount-nas': Monitor, 'all-flash': HardDrive,
+  'switch': Wifi, 'router': Globe, 'nvr-hardware': Video, 'expansion': HardDrive,
+  'network-card': Network, 'software': Package, 'warranty': Shield, 'memory': Database,
+  'storage-card': HardDrive, 'm2-card': Cpu, 'fiber-card': Network, 'hdd-dock': HardDrive,
+};
+
+function stripEmoji(text: string) {
+  return text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+}
+
+function CategoryIcon({ slug, className }: { slug: string; className?: string }) {
+  const Icon = emojiMap[slug] || Package;
+  return <Icon className={className} />;
+}
 
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,6 +46,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const { addItem } = useCartStore();
   const { items: recentItems } = useRecentlyViewedStore();
+  const [recentImages, setRecentImages] = useState<Record<string, string>>({});
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -56,6 +76,18 @@ export default function HomePage() {
           });
           const imgs = await res.json();
           setProductImages(imgs);
+        } catch {}
+      }
+
+      if (recentItems.length > 0) {
+        try {
+          const res2 = await fetch('/api/images/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skus: recentItems.map(p => p.sku) }),
+          });
+          const imgs2 = await res2.json();
+          setRecentImages(imgs2);
         } catch {}
       }
     });
@@ -109,8 +141,8 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-        <button aria-label="上一张" onClick={() => setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)} className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white text-xl cursor-pointer transition-all hover:bg-white/35 hover:scale-110">❮</button>
-        <button aria-label="下一张" onClick={() => setCurrentSlide((prev) => (prev + 1) % banners.length)} className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white text-xl cursor-pointer transition-all hover:bg-white/35 hover:scale-110">❯</button>
+        <button aria-label="上一张" onClick={() => setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)} className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white cursor-pointer transition-all hover:bg-white/35 hover:scale-110 flex items-center justify-center"><ChevronLeft className="w-6 h-6" /></button>
+        <button aria-label="下一张" onClick={() => setCurrentSlide((prev) => (prev + 1) % banners.length)} className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white cursor-pointer transition-all hover:bg-white/35 hover:scale-110 flex items-center justify-center"><ChevronRight className="w-6 h-6" /></button>
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2" role="tablist" aria-label="轮播指示">
           {banners.map((_, idx) => (
             <button role="tab" aria-selected={idx === currentSlide} aria-label={`投影片 ${idx + 1}`} key={idx} onClick={() => setCurrentSlide(idx)} className={`rounded-full transition-all ${idx === currentSlide ? 'w-8 bg-white' : 'w-2 h-2 bg-white/40 hover:bg-white/60'}`} />
@@ -123,7 +155,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="flex gap-8 animate-scroll whitespace-nowrap">
             {announcements.map((ann) => (
-              <span key={ann.id} className="text-xs text-blue-dark font-medium flex items-center gap-2">{ann.text}</span>
+              <span key={ann.id} className="text-xs text-blue-dark font-medium flex items-center gap-2">{stripEmoji(ann.text)}</span>
             ))}
           </div>
         </div>
@@ -135,7 +167,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2 md:gap-3">
             {categories.map((cat) => (
               <Link key={cat.id} href={`/products?category=${cat.slug}`} className="bg-white border border-gray-200 rounded-xl p-2 md:p-4 text-center hover:border-blue hover:shadow-lg hover:-translate-y-1 transition-all duration-200">
-                <span className="text-2xl md:text-3xl mb-1 md:mb-2 block">{cat.icon}</span>
+                <CategoryIcon slug={cat.slug} className="text-2xl md:text-3xl mb-1 md:mb-2 block mx-auto" />
                 <h3 className="text-xs md:text-sm font-semibold text-gray-900 mb-0.5">{cat.name}</h3>
                 <p className="text-[9px] md:text-[10px] text-muted line-clamp-2 hidden sm:block">{cat.desc}</p>
               </Link>
@@ -149,7 +181,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-barlow text-2xl font-bold text-gray-900 flex items-center gap-3">
-              <span className="text-xl">🔥</span>
+              <Flame className="w-5 h-5 text-orange-500" />
               热销商品
               <span className="block w-12 h-1 bg-orange rounded" />
             </h2>
@@ -186,7 +218,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="font-barlow text-lg md:text-2xl font-bold text-gray-900 flex items-center gap-2 md:gap-3">
-              <span className="text-base md:text-xl">⭐</span>
+              <span className="text-base md:text-xl"><Star className="w-5 h-5 md:w-6 md:h-6 fill-amber-400 text-amber-400" /></span>
               精选商品
               <span className="block w-8 md:w-12 h-0.5 md:h-1 bg-orange rounded" />
             </h2>
@@ -237,7 +269,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center mb-10">
             <h2 className="font-barlow text-2xl md:text-3xl font-bold mb-3">为什么选择 QNAP？</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">二十年专业经验，为超过 100 万用户提供安全可靠的数据存储解决方案</p>
+            <p className="text-gray-500 max-w-xl mx-auto">二十二年专业经验，为超过 100 万用户提供安全可靠的数据存储解决方案</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
@@ -328,7 +360,7 @@ export default function HomePage() {
             <h2 className="font-barlow text-2xl md:text-3xl font-extrabold mb-3">订阅电子报</h2>
             <p className="text-white/70 mb-6 max-w-md mx-auto text-sm">第一时间获得新产品发布、限时优惠与技术文章的独家资讯</p>
             <form className="flex gap-3 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-              <input type="email" placeholder="输入您的电子邮件" aria-label="电子邮件地址" className="flex-1 px-5 py-3 rounded-xl text-gray-900 text-sm outline-none" />
+              <input type="email" id="newsletter-email" name="email" placeholder="输入您的电子邮件" aria-label="电子邮件地址" className="flex-1 px-5 py-3 rounded-xl text-gray-900 text-sm outline-none" />
               <button type="submit" aria-label="订阅电子报" className="bg-orange text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-dark transition-colors whitespace-nowrap">订阅</button>
             </form>
             <p className="text-white/40 text-xs mt-3">我们重视您的隐私，不会发送垃圾邮件</p>
@@ -386,7 +418,7 @@ export default function HomePage() {
         <section className="py-8 bg-white border-t border-gray-100">
           <div className="container mx-auto px-4 md:px-6">
             <h2 className="font-barlow text-lg font-bold mb-4 flex items-center gap-2">
-              <span>🔥</span> 热门搜索
+              <Flame className="w-5 h-5 text-orange-500" /> 热门搜索
             </h2>
             <div className="flex flex-wrap gap-2">
               {popularSearches.map((word, i) => (
@@ -409,15 +441,19 @@ export default function HomePage() {
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-barlow text-lg font-bold flex items-center gap-2">
-                <span>🕐</span> 最近浏览
+                <Clock className="w-4 h-4" /> 最近浏览
               </h2>
               <Link href="/recently-viewed" className="text-sm text-blue hover:underline">查看全部 →</Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {recentItems.slice(0, 6).map(p => (
                 <Link key={p.id} href={`/products/${p.sku}`} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all">
-                  <div className="h-20 flex items-center justify-center" style={{ background: p.color }}>
-                    <span className="text-2xl text-white/80">📦</span>
+                  <div className="h-20 flex items-center justify-center overflow-hidden" style={{ background: p.color }}>
+                    {recentImages[p.sku] ? (
+                      <img src={recentImages[p.sku]} alt={p.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <Package className="w-6 h-6 text-white/80" />
+                    )}
                   </div>
                   <div className="p-2">
                     <p className="text-xs font-medium line-clamp-1 mb-0.5">{p.name}</p>

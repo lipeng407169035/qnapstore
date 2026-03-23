@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCartStore, useUserStore } from '@/store';
 import { Button } from '@/components/ui/Button';
+import { ShoppingCart, Truck, ShieldCheck, CreditCard, X as XIcon, Package } from 'lucide-react';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal, clearCart } = useCartStore();
@@ -12,6 +13,21 @@ export default function CartPage() {
   const [discount, setDiscount] = useState(0);
   const [couponLabel, setCouponLabel] = useState('');
   const [couponError, setCouponError] = useState('');
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    const skus = items.map(i => i.product.sku);
+    fetch('/api/images/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skus }),
+    }).then(r => r.json()).then(imgs => {
+    const map: Record<string, string> = {};
+    items.forEach(i => { if (imgs[i.product.sku]) map[String(i.productId)] = imgs[i.product.sku]; });
+      setProductImages(map);
+    }).catch(() => {});
+  }, [items]);
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) return;
@@ -46,7 +62,9 @@ export default function CartPage() {
     return (
       <div className="container mx-auto px-6 py-20">
         <div className="text-center">
-          <div className="text-6xl mb-4">🛒</div>
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingCart className="w-10 h-10 text-gray-400" />
+          </div>
           <h2 className="text-xl font-bold mb-2">购物车是空的</h2>
           <p className="text-muted mb-6">快去选购心仪的商品吧！</p>
           <Link href="/products">
@@ -71,10 +89,16 @@ export default function CartPage() {
             </div>
             {items.map((item) => (
               <div key={item.productId} className="p-3 md:p-5 border-b border-gray-50 flex items-center gap-3 md:gap-4 hover:bg-gray-50 transition-colors">
-                <div 
-                  className="w-16 md:w-20 h-12 md:h-16 rounded-lg flex items-center justify-center flex-shrink-0"
+                <div
+                  className="w-16 md:w-20 h-12 md:h-16 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
                   style={{ background: item.product.color, boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-                />
+                >
+                  {productImages[item.productId] ? (
+                    <img src={productImages[item.productId]} alt={item.product.name} className="w-full h-full object-contain" />
+                  ) : (
+                    <Package className="w-6 h-6 text-white/60" />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <Link href={`/products/${item.product.sku}`} className="font-semibold text-xs md:text-sm hover:text-blue block truncate">{item.product.name}</Link>
                   <p className="text-[10px] md:text-xs text-muted mt-0.5">{item.product.sku}</p>
@@ -88,7 +112,7 @@ export default function CartPage() {
                 <div className="text-right w-24 md:w-28 flex-shrink-0 hidden md:block">
                   <p className="font-barlow font-bold text-orange">¥ {(item.product.price * item.quantity).toLocaleString()}</p>
                 </div>
-                <button onClick={() => removeItem(item.productId)} className="text-muted hover:text-red-500 p-1 flex-shrink-0" aria-label="移除商品">✕</button>
+                <button onClick={() => removeItem(item.productId)} className="text-muted hover:text-red-500 p-1 flex-shrink-0" aria-label="移除商品"><XIcon className="w-4 h-4" /></button>
               </div>
             ))}
           </div>
@@ -138,9 +162,9 @@ export default function CartPage() {
             </Link>
 
             <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-muted space-y-1">
-              <p>🚚 满 ¥3,000 免运</p>
-              <p>🛡️ 原厂质保</p>
-              <p>💳 花呗/白条分期</p>
+              <p className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5" /> 满 ¥3,000 免运</p>
+              <p className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> 原厂质保</p>
+              <p className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" /> 花呗/白条分期</p>
             </div>
           </div>
         </div>

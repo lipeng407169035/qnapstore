@@ -1,13 +1,13 @@
 'use client';
 
 import { adminFetch } from '@/lib/admin-api';
-import { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { SkeletonTable } from '@/components/ui/Skeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Search, X, Download } from 'lucide-react';
+import { Search, X, Download, CreditCard, Building, Package } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -76,10 +76,10 @@ function OrdersContent() {
   };
 
   const getPaymentBadge = (method: string) => {
-    const map: Record<string, string> = {
-      credit: '💳 信用卡',
-      atm: '🏦 ATM 转账',
-      cod: '📦 货到付款',
+    const map: Record<string, React.ReactNode> = {
+      credit: <span className="flex items-center gap-1"><CreditCard className="w-4 h-4" /> 信用卡</span>,
+      atm: <span className="flex items-center gap-1"><Building className="w-4 h-4" /> ATM 转账</span>,
+      cod: <span className="flex items-center gap-1"><Package className="w-4 h-4" /> 货到付款</span>,
     };
     return map[method] || method;
   };
@@ -207,7 +207,7 @@ function OrdersContent() {
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">订单详情</h2>
-                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
               </div>
             </div>
             <div className="p-6 space-y-4">

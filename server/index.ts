@@ -641,7 +641,13 @@ app.get('/api/images/:sku', (req, res) => {
   }
   const files = fs.readdirSync(skuDir)
     .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
-    .sort()
+    .sort((a, b) => {
+      const aIsPng = /\.(png|jpg|jpeg|webp)$/i.test(a);
+      const bIsPng = /\.(png|jpg|jpeg|webp)$/i.test(b);
+      if (aIsPng && !bIsPng) return -1;
+      if (!aIsPng && bIsPng) return 1;
+      return a.localeCompare(b);
+    })
     .map(f => ({
       name: f,
       url: `/images/products/${req.params.sku}/${f}`,

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Newspaper } from 'lucide-react';
 
 interface NewsItem {
   id: number;
@@ -159,7 +160,7 @@ export default function NewsPage() {
 
             {!loading && news.length === 0 && (
               <div className="text-center py-20 text-gray-400">
-                <div className="text-5xl mb-4">📰</div>
+                <div className="mb-4 flex justify-center"><Newspaper className="w-16 h-16 text-gray-300" /></div>
                 <p className="text-lg">暂无新闻</p>
               </div>
             )}

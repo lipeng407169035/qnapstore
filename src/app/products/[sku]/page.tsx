@@ -8,6 +8,10 @@ import { api } from '@/lib/api';
 import { useCartStore, useWishlistStore, useRecentlyViewedStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/Toast';
+import {
+  Heart, Scale, ShoppingCart, Bell, Truck, Package, ShieldCheck,
+  CreditCard, Star, CheckCircle2
+} from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -17,15 +21,13 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [relatedImages, setRelatedImages] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [productImages, setProductImages] = useState<string[]>([]);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  const displayImages = productImages.length > 0
-    ? productImages
-    : imagesLoaded ? [] : Array.from({ length: 6 }, (_, i) => `/images/products/${sku}/${i + 1}.svg`);
+  const displayImages = productImages;
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewName, setReviewName] = useState('');
@@ -42,13 +44,27 @@ export default function ProductDetailPage() {
       api.getProductBySku(sku),
       api.getProducts({}),
       fetch(`/api/images/${sku}`).then(r => r.json()),
-    ]).then(([prod, allProds, images]) => {
+    ]).then(async ([prod, allProds, images]) => {
       setProduct(prod as Product);
       const p = prod as Product;
       const all = allProds as Product[];
-      setRelatedProducts(all.filter(pr => pr.categoryId === p.categoryId && pr.sku !== sku).slice(0, 4));
+      const related = all.filter(pr => pr.categoryId === p.categoryId && pr.sku !== sku).slice(0, 4);
+      setRelatedProducts(related);
       setProductImages(Array.isArray(images) ? images.map((f: { url: string }) => f.url) : []);
-      setImagesLoaded(true);
+
+      const relatedSkus = related.map(r => r.sku);
+      if (relatedSkus.length > 0) {
+        try {
+          const res = await fetch('/api/images/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ skus: relatedSkus }),
+          });
+          const imgs = await res.json();
+          setRelatedImages(imgs);
+        } catch {}
+      }
+
       api.getProductReviews(p.id).then((data) => setReviews(data as Review[]));
       addToRecent(p);
       setLoading(false);
@@ -146,14 +162,21 @@ export default function ProductDetailPage() {
 
       <div className="container mx-auto px-4 md:px-6 py-5 md:py-7">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 mb-8 md:mb-12">
-            <div className="space-y-3 md:space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-8 aspect-square flex items-center justify-center">
+          <div className="space-y-3 md:space-y-4">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-8 aspect-square flex items-center justify-center">
+              {displayImages.length > 0 ? (
                 <img
                   src={displayImages[selectedImageIndex]}
                   alt={`${product.name} - 图片 ${selectedImageIndex + 1}`}
                   className="max-w-full max-h-full object-contain"
                 />
-              </div>
+              ) : (
+                <div className="w-48 h-32 rounded-xl flex items-center justify-center" style={{ background: `linear-gradient(145deg, ${product.color} 0%, ${product.color}cc 100%)`, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+                  <Package className="w-12 h-12 text-white/60" />
+                </div>
+              )}
+            </div>
+            {displayImages.length > 0 && (
               <div className="grid grid-cols-6 gap-1.5 md:gap-2">
                 {displayImages.map((img, idx) => (
                   <button
@@ -166,7 +189,8 @@ export default function ProductDetailPage() {
                     <img src={img} alt={`缩图 ${idx + 1}`} className="w-full h-full object-contain" />
                   </button>
                 ))}
-            </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -175,7 +199,9 @@ export default function ProductDetailPage() {
             
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center gap-1 text-amber-500">
-                {'★'.repeat(Math.floor(product.rating))}{'☆'.repeat(5 - Math.floor(product.rating))}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                ))}
                 <span className="text-muted ml-1">({product.reviews} 则评论)</span>
               </div>
             </div>
@@ -192,9 +218,9 @@ export default function ProductDetailPage() {
                 <p className="text-red-500 font-medium mb-2">缺货</p>
                 <button
                   onClick={() => toast.success('到货提醒已订阅！到货后我们会通过短信和邮件通知您')}
-                  className="px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
+                  className="px-4 py-2 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors flex items-center gap-2"
                 >
-                  🔔 到货通知
+                  <Bell className="w-4 h-4" /> 到货通知
                 </button>
               </div>
             ) : product.stock < 20 ? (
@@ -211,7 +237,7 @@ export default function ProductDetailPage() {
               <span className="text-sm font-medium">数量：</span>
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-12 h-10 bg-gray-50 font-bold hover:bg-gray-100 transition-colors">-</button>
-                <input type="text" value={quantity} readOnly className="w-14 h-10 text-center border-none outline-none font-semibold" />
+                <input type="text" id="product-quantity" value={quantity} readOnly className="w-14 h-10 text-center border-none outline-none font-semibold" />
                 <button onClick={() => setQuantity(Math.min(quantity + 1, product.stock))} className="w-12 h-10 bg-gray-50 font-bold hover:bg-gray-100 transition-colors">+</button>
               </div>
             </div>
@@ -222,18 +248,19 @@ export default function ProductDetailPage() {
               </Button>
               <button
                 onClick={handleWishlistToggle}
-                className={`w-12 h-12 border rounded-xl flex items-center justify-center text-xl transition-all ${
-                  inWishlist ? 'border-red-300 bg-pink-50 text-red-500' : 'border-gray-200 hover:border-red-300 text-gray-400'
+                className={`w-12 h-12 border rounded-xl flex items-center justify-center transition-all ${
+                  inWishlist ? 'border-red-300 bg-red-50 text-red-500' : 'border-gray-200 hover:border-red-300 text-gray-400'
                 }`}
+                title={inWishlist ? '取消收藏' : '添加收藏'}
               >
-                {inWishlist ? '❤️' : '🤍'}
+                <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
               </button>
               <button
                 onClick={() => router.push('/compare')}
-                className="w-12 h-12 border border-gray-200 rounded-xl flex items-center justify-center text-lg hover:border-blue hover:text-blue transition-all"
+                className="w-12 h-12 border border-gray-200 rounded-xl flex items-center justify-center hover:border-blue hover:text-blue transition-all"
                 title="商品对比"
               >
-                ⚖️
+                <Scale className="w-5 h-5" />
               </button>
             </div>
 
@@ -272,7 +299,11 @@ export default function ProductDetailPage() {
                         </div>
                         <span className="text-xs text-muted">{new Date(review.createdAt).toLocaleDateString('zh-CN')}</span>
                       </div>
-                      <div className="text-amber-500 mb-2">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
+                      <div className="flex items-center gap-0.5 mb-2">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                        ))}
+                      </div>
                       <p className="text-sm text-gray-600 leading-relaxed">{review.comment}</p>
                     </div>
                   ))}
@@ -285,7 +316,9 @@ export default function ProductDetailPage() {
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 {reviewSuccess ? (
                   <div className="text-center py-8">
-                    <div className="text-5xl mb-3">✅</div>
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle2 className="w-8 h-8 text-green-500" />
+                    </div>
                     <p className="text-green-600 font-medium">评论已提交，等待管理员审核！</p>
                   </div>
                 ) : (
@@ -308,9 +341,9 @@ export default function ProductDetailPage() {
                           <button
                             key={star}
                             onClick={() => setReviewRating(star)}
-                            className={`text-2xl transition-colors ${star <= reviewRating ? 'text-amber-400' : 'text-gray-300'}`}
+                            className="transition-colors"
                           >
-                            ★
+                            <Star className={`w-7 h-7 ${star <= reviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
                           </button>
                         ))}
                         <span className="ml-2 text-sm text-muted self-center">
@@ -342,18 +375,24 @@ export default function ProductDetailPage() {
             <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-5">
               <h3 className="font-bold text-sm mb-3">配送信息</h3>
               <div className="space-y-2 text-sm text-muted">
-                <p>🚚 满 ¥3,000 免运</p>
-                <p>📦 现货 1-2 个工作天出货</p>
-                <p>🛡️ 原厂质保 2 年</p>
-                <p>💳 花呗/白条分期</p>
+                <p className="flex items-center gap-2"><Truck className="w-4 h-4" /> 满 ¥3,000 免运</p>
+                <p className="flex items-center gap-2"><Package className="w-4 h-4" /> 现货 1-2 个工作天出货</p>
+                <p className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> 原厂质保 2 年</p>
+                <p className="flex items-center gap-2"><CreditCard className="w-4 h-4" /> 花呗/白条分期</p>
               </div>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-5">
               <h3 className="font-bold text-sm mb-3">热销排行</h3>
               {relatedProducts.slice(0, 3).map(p => (
                 <Link key={p.id} href={`/products/${p.sku}`} className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 -mx-2 transition-colors">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: p.color }}>
-                    <img src={`/images/products/${p.sku}/1.svg`} alt={p.name} className="w-full h-full object-contain p-1" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-gray-50">
+                    {relatedImages[p.sku] ? (
+                      <img src={relatedImages[p.sku]} alt={p.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ background: p.color }}>
+                        <Package className="w-5 h-5 text-white/60" />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs font-medium line-clamp-1">{p.name}</p>
@@ -371,13 +410,21 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               {relatedProducts.map((p) => (
                 <Link key={p.id} href={`/products/${p.sku}`} className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue hover:shadow-lg transition-all">
-                  <div className="h-32 flex items-center justify-center mb-3 p-2">
-                    <img src={`/images/products/${p.sku}/1.svg`} alt={p.name} className="max-w-full max-h-full object-contain" />
+                  <div className="h-32 flex items-center justify-center mb-3 p-2 bg-gray-50 rounded-lg">
+                    {relatedImages[p.sku] ? (
+                      <img src={relatedImages[p.sku]} alt={p.name} className="max-w-full max-h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center" style={{ background: p.color }}>
+                        <Package className="w-8 h-8 text-white/60" />
+                      </div>
+                    )}
                   </div>
                   <h3 className="text-sm font-semibold line-clamp-2 mb-2">{p.name}</h3>
                   <div className="flex items-center justify-between">
                     <p className="text-lg font-barlow font-extrabold text-orange">¥ {p.price.toLocaleString()}</p>
-                    <span className="text-amber-500 text-xs">★ {p.rating}</span>
+                    <span className="flex items-center gap-0.5 text-amber-500 text-xs">
+                      <Star className="w-3 h-3 fill-amber-400" /> {p.rating}
+                    </span>
                   </div>
                 </Link>
               ))}

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { adminFetch } from '@/lib/admin-api';
 import { StaffMember } from '@/types';
+import { X } from 'lucide-react';
 
 export default function AdminStaffPage() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -78,7 +79,7 @@ export default function AdminStaffPage() {
           <div className="bg-white rounded-2xl max-w-md w-full">
             <div className="p-6 border-b flex items-center justify-between">
               <h2 className="text-xl font-bold">新增员工</h2>
-              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X className="w-4 h-4" /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>

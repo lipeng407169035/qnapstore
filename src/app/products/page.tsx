@@ -7,6 +7,24 @@ import { api } from '@/lib/api';
 import { ProductCard } from '@/components/product/ProductCard';
 import { useCartStore } from '@/store';
 import { toast } from '@/components/ui/Toast';
+import { SkeletonCard } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Flame, Star, X as XIcon, Menu, SlidersHorizontal, ArrowUpDown,
+  Search, Package, Building2, Monitor, HardDrive, Wifi, Shield,
+  Globe, Network, Video, Cloud, Sliders, Battery, Zap, Smartphone,
+  Laptop, Disc, Camera, Wrench, Cpu, Home, Printer, Plug, Settings,
+  Lock, Database, Gamepad2, Lightbulb, Microscope, Brain, BarChart3, Key,
+  Rocket, ShoppingCart, ArrowUp, ArrowDown
+} from 'lucide-react';
+
+const categoryIconMap: Record<string, LucideIcon> = {
+  'home-nas': Home, 'business-nas': Building2, 'rackmount-nas': Monitor, 'all-flash': HardDrive,
+  'switch': Wifi, 'router': Globe, 'nvr-hardware': Video, 'expansion': HardDrive,
+  'network-card': Network, 'software': Package, 'warranty': Shield, 'memory': Database,
+  'storage-card': HardDrive, 'm2-card': Cpu, 'fiber-card': Network, 'hdd-dock': HardDrive,
+};
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -84,21 +102,25 @@ function ProductsContent() {
         <h3 className="font-bold text-sm mb-3 text-gray-900">商品分类</h3>
         <div className="space-y-1">
           <a href="/products" className={`block py-1.5 text-[13px] ${!category ? 'text-blue font-semibold' : 'text-gray-600 hover:text-blue'}`}>全部商品</a>
-          {categories.map((cat) => (
-            <a key={cat.id} href={`/products?category=${cat.slug}`} className={`block py-1.5 text-[13px] ${category === cat.slug ? 'text-blue font-semibold' : 'text-gray-600 hover:text-blue'}`}>
-              {cat.icon} {cat.name}
-            </a>
-          ))}
+          {categories.map((cat) => {
+            const Icon = categoryIconMap[cat.slug] || Package;
+            return (
+              <a key={cat.id} href={`/products?category=${cat.slug}`} className={`flex items-center gap-2 py-1.5 text-[13px] ${category === cat.slug ? 'text-blue font-semibold' : 'text-gray-600 hover:text-blue'}`}>
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{cat.name}</span>
+              </a>
+            );
+          })}
         </div>
       </div>
       <div className="pt-4 border-t border-gray-100">
         <h3 className="font-bold text-xs text-gray-400 uppercase tracking-wide mb-3">筛选</h3>
         <div className="space-y-2">
           <a href="/products?badge=sale" className="flex items-center gap-2 text-[13px] text-gray-600 hover:text-blue">
-            🔥 特价商品
+            <Flame className="w-3.5 h-3.5 text-orange-500" /> 特价商品
           </a>
           <a href="/products?sort=rating" className={`flex items-center gap-2 text-[13px] ${sort === 'rating' ? 'text-blue font-semibold' : 'text-gray-600 hover:text-blue'}`}>
-            ⭐ 评价最高
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> 评价最高
           </a>
         </div>
       </div>
@@ -107,12 +129,17 @@ function ProductsContent() {
         <div className="space-y-2">
           {[4, 3, 2, 1].map(stars => (
             <a key={stars} href={`/products?rating=${stars}`} className={`flex items-center gap-2 text-[13px] hover:text-blue ${rating === String(stars) ? 'text-blue font-semibold' : 'text-gray-600'}`}>
-              {'★'.repeat(stars)}{'☆'.repeat(5 - stars)} <span className="text-xs text-gray-400">{stars}星以上</span>
+              <div className="flex gap-0.5">
+                {Array.from({ length: 5 }).map((_, si) => (
+                  <Star key={si} className={`w-3 h-3 ${si < stars ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`} />
+                ))}
+              </div>
+              <span className="text-xs text-gray-400">{stars}星以上</span>
             </a>
           ))}
           {rating && (
             <a href="/products" className="flex items-center gap-2 text-[13px] text-red-500 hover:text-red-600">
-              ✕ 清除筛选
+              <XIcon className="w-3.5 h-3.5" /> 清除筛选
             </a>
           )}
         </div>
@@ -139,16 +166,16 @@ function ProductsContent() {
             onClick={() => setSidebarOpen(true)}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm whitespace-nowrap"
           >
-            ☰ 筛选
+            <Menu className="w-4 h-4" /> 筛选
           </button>
-              <button onClick={() => navigateTo(buildUrl({ sort: 'price_asc' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_asc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-                价格↑
+              <button onClick={() => navigateTo(buildUrl({ sort: 'price_asc' }))} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_asc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                <ArrowUp className="w-3.5 h-3.5" /> 价格
               </button>
-              <button onClick={() => navigateTo(buildUrl({ sort: 'price_desc' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_desc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-                价格↓
+              <button onClick={() => navigateTo(buildUrl({ sort: 'price_desc' }))} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'price_desc' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                <ArrowDown className="w-3.5 h-3.5" /> 价格
               </button>
-              <button onClick={() => navigateTo(buildUrl({ sort: 'rating' }))} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'rating' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
-                ⭐评价
+              <button onClick={() => navigateTo(buildUrl({ sort: 'rating' }))} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm whitespace-nowrap ${sort === 'rating' ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
+                <Star className="w-3.5 h-3.5" /> 评价
               </button>
               <button onClick={() => navigateTo('/products')} className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap ${!sort ? 'bg-blue text-white' : 'bg-white border border-gray-200'}`}>
                 默认
@@ -170,7 +197,7 @@ function ProductsContent() {
               <div className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl overflow-y-auto">
                 <div className="p-4 border-b flex items-center justify-between bg-blue text-white">
                   <span className="font-bold">筛选</span>
-                  <button onClick={() => setSidebarOpen(false)}>✕</button>
+                  <button onClick={() => setSidebarOpen(false)}><XIcon className="w-5 h-5" /></button>
                 </div>
                 <div className="p-5">
                   <Sidebar />
@@ -200,14 +227,16 @@ function ProductsContent() {
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white border border-gray-200 rounded-xl h-72 md:h-80 animate-pulse" />
+                  <SkeletonCard key={i} />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-16 md:py-20">
-                <p className="text-gray-500 text-base md:text-lg mb-3">找不到符合的商品</p>
-                <a href="/products" className="text-blue hover:underline text-sm">回全部商品</a>
-              </div>
+              <EmptyState
+                icon={Search}
+                title="找不到符合的商品"
+                description="试试调整筛选条件或浏览全部商品"
+                action={{ label: '回全部商品', href: '/products' }}
+              />
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {products.map((product) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CheckCircle2, Phone, Mail, Building2, MapPin, Clock, Printer } from 'lucide-react';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -14,7 +15,7 @@ export default function ContactPage() {
   const offices = [
     {
       city: '上海总部',
-      icon: '🏢',
+      Icon: Building2,
       address: '上海市浦东新区张江高科技园区科苑路88号',
       phone: '400-888-3600',
       fax: '021-2600-1918',
@@ -22,7 +23,7 @@ export default function ContactPage() {
     },
     {
       city: '北京办事处',
-      icon: '🏬',
+      Icon: Building2,
       address: '北京市海淀区中关村大街1号 8楼',
       phone: '400-888-3600',
       fax: '010-3600-1918',
@@ -30,7 +31,7 @@ export default function ContactPage() {
     },
     {
       city: '深圳办事处',
-      icon: '🏗️',
+      Icon: Building2,
       address: '深圳市南山区科技园南区高新南七道 12号 12楼',
       phone: '400-888-3600',
       fax: '0755-3600-1918',
@@ -53,8 +54,8 @@ export default function ContactPage() {
           <div>
             <h2 className="font-barlow text-xl font-bold mb-6">发送消息</h2>
             {submitted ? (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-                <div className="text-5xl mb-4">✅</div>
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
+                <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
                 <h3 className="font-bold text-xl mb-2">消息已发出！</h3>
                 <p className="text-gray-500 mb-4">感谢您的来信，我们将在 <strong>1-2 个工作天</strong>内回复您</p>
                 <button onClick={() => setSubmitted(false)} className="text-blue text-sm font-medium hover:underline">
@@ -108,14 +109,14 @@ export default function ContactPage() {
               {offices.map((o, i) => (
                 <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{o.icon}</span>
+                    <o.Icon className="w-6 h-6 text-blue" />
                     <h3 className="font-bold">{o.city}</h3>
                   </div>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p>📍 {o.address}</p>
-                    <p>📞 <a href={`tel:${o.phone}`} className="text-blue hover:underline">{o.phone}</a></p>
-                    <p>📠 传真：{o.fax}</p>
-                    <p>🕒 {o.hours}</p>
+                    <p><MapPin className="w-4 h-4 inline mr-1 text-gray-400" />{o.address}</p>
+                    <p><Phone className="w-4 h-4 inline mr-1 text-blue" /> <a href={`tel:${o.phone}`} className="text-blue hover:underline">{o.phone}</a></p>
+                    <p><Printer className="w-4 h-4 inline mr-1 text-gray-400" />传真：{o.fax}</p>
+                    <p><Clock className="w-4 h-4 inline mr-1 text-gray-400" />{o.hours}</p>
                   </div>
                 </div>
               ))}
@@ -124,10 +125,10 @@ export default function ContactPage() {
             <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
               <h3 className="font-bold mb-3">快速联络</h3>
               <div className="space-y-2 text-sm">
-                <p>📧 <a href="mailto:store@qnap.com" className="text-blue hover:underline">store@qnap.com</a> 网上商城</p>
-                <p>📧 <a href="mailto:support@qnap.com" className="text-blue hover:underline">support@qnap.com</a> 技术支持</p>
-                <p>📧 <a href="mailto:partner@qnap.com" className="text-blue hover:underline">partner@qnap.com</a> 商务合作</p>
-                <p>📧 <a href="mailto:hr@qnap.com" className="text-blue hover:underline">hr@qnap.com</a> 人资招募</p>
+                <p><Mail className="w-4 h-4 inline mr-1 text-blue" /> <a href="mailto:store@qnap.com" className="text-blue hover:underline">store@qnap.com</a> 网上商城</p>
+                <p><Mail className="w-4 h-4 inline mr-1 text-blue" /> <a href="mailto:support@qnap.com" className="text-blue hover:underline">support@qnap.com</a> 技术支持</p>
+                <p><Mail className="w-4 h-4 inline mr-1 text-blue" /> <a href="mailto:partner@qnap.com" className="text-blue hover:underline">partner@qnap.com</a> 商务合作</p>
+                <p><Mail className="w-4 h-4 inline mr-1 text-blue" /> <a href="mailto:hr@qnap.com" className="text-blue hover:underline">hr@qnap.com</a> 人资招募</p>
               </div>
             </div>
           </div>

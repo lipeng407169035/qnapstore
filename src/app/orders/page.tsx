@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store';
 import { Button } from '@/components/ui/Button';
 import { TrackingInfo } from '@/types';
+import { Package, Truck } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -81,7 +82,7 @@ export default function OrdersPage() {
       
       {orders.length === 0 ? (
         <div className="text-center py-16 md:py-20 bg-white border border-gray-200 rounded-xl">
-          <div className="text-5xl md:text-6xl mb-3 md:mb-4">📦</div>
+          <div className="mb-3 md:mb-4"><Package className="w-12 h-12 md:w-16 md:h-16 text-gray-300 mx-auto" /></div>
           <h2 className="text-lg md:text-xl font-bold mb-2">暂无订单</h2>
           <p className="text-muted text-sm mb-6">快去选购心仪的商品吧！</p>
           <Link href="/products">
@@ -115,7 +116,7 @@ export default function OrdersPage() {
               {selectedTracking === order.id && trackingMap[order.id] && (
                 <div className="p-4 border-t border-gray-100 bg-blue-50">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-blue-800">🚚 快递追踪：{trackingMap[order.id].trackingNo}</p>
+                    <p className="text-sm font-semibold text-blue-800"><Truck className="w-4 h-4 inline mr-1" /> 快递追踪：{trackingMap[order.id].trackingNo}</p>
                     <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">{trackingMap[order.id].status}</span>
                   </div>
                   <div className="space-y-3">
