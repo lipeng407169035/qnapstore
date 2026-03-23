@@ -189,8 +189,12 @@ export default function HomePage() {
             {[
               { icon: '🗄️', name: '家用 NAS', slug: 'home-nas', desc: '2-4 槽家庭存储', color: 'from-blue-400 to-blue-600' },
               { icon: '🏢', name: '企业 NAS', slug: 'business-nas', desc: '高性价比企业存储', color: 'from-purple-400 to-purple-600' },
-              { icon: '🌐', name: '网络交换机', slug: 'switch', desc: '2.5G/10G 高速', color: 'from-green-400 to-green-600' },
-              { icon: '🧠', name: '内存', slug: 'memory', desc: 'DDR4/DDR5 原厂', color: 'from-orange-400 to-orange-600' },
+              { icon: '🚀', name: '全快闪 NAS', slug: 'all-flash', desc: 'U.2 NVMe 全闪存', color: 'from-cyan-400 to-blue-600' },
+              { icon: '📶', name: '路由器', slug: 'router', desc: 'Wi-Fi 6 / SD-WAN', color: 'from-indigo-400 to-purple-600' },
+              { icon: '📹', name: 'QVR 专用机', slug: 'nvr-hardware', desc: 'AI 智能录像机', color: 'from-red-400 to-orange-600' },
+              { icon: '💾', name: '扩展设备', slug: 'expansion', desc: 'JBOD 存储扩展', color: 'from-teal-400 to-green-600' },
+              { icon: '⚡', name: 'M.2 SSD 卡', slug: 'm2-card', desc: 'NVMe 扩展加速', color: 'from-amber-400 to-orange-600' },
+              { icon: '🌐', name: '网络交换机', slug: 'switch', desc: '2.5G/10G 高速', color: 'from-emerald-400 to-teal-600' },
             ].map((cat) => (
               <Link key={cat.slug} href={`/products?category=${cat.slug}`}
                 className={`bg-gradient-to-br ${cat.color} rounded-2xl p-6 text-white hover:shadow-lg hover:-translate-y-1 transition-all`}>

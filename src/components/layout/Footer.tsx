@@ -28,8 +28,14 @@ export function Footer() {
               <li><Link href="/products?category=home-nas" className="hover:text-white transition-colors">家用 NAS</Link></li>
               <li><Link href="/products?category=business-nas" className="hover:text-white transition-colors">企业 NAS</Link></li>
               <li><Link href="/products?category=rackmount-nas" className="hover:text-white transition-colors">机架式 NAS</Link></li>
+              <li><Link href="/products?category=all-flash" className="hover:text-white transition-colors">全快闪 NAS</Link></li>
               <li><Link href="/products?category=switch" className="hover:text-white transition-colors">网络交换机</Link></li>
+              <li><Link href="/products?category=router" className="hover:text-white transition-colors">路由器</Link></li>
+              <li><Link href="/products?category=nvr-hardware" className="hover:text-white transition-colors">QVR Pro 专用机</Link></li>
+              <li><Link href="/products?category=expansion" className="hover:text-white transition-colors">扩展设备</Link></li>
               <li><Link href="/products?category=network-card" className="hover:text-white transition-colors">网络配件</Link></li>
+              <li><Link href="/products?category=storage-card" className="hover:text-white transition-colors">存储扩展卡</Link></li>
+              <li><Link href="/products?category=m2-card" className="hover:text-white transition-colors">M.2 SSD 扩展卡</Link></li>
               <li><Link href="/products?category=software" className="hover:text-white transition-colors">软件授权</Link></li>
             </ul>
           </div>
