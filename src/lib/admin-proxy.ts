@@ -1,11 +1,12 @@
 import { API_BASE } from '@/lib/api-base';
 import { NextRequest } from 'next/server';
 
+const ADMIN_AUTH = Buffer.from(`${process.env.NEXT_PUBLIC_ADMIN_USER || 'admin'}:${process.env.NEXT_PUBLIC_ADMIN_PASS || 'admin123'}`).toString('base64');
+
 export async function proxyToAdmin(req: NextRequest, path: string, method?: string): Promise<Response> {
-  const auth = Buffer.from('admin:admin123').toString('base64');
   const fetchOptions: RequestInit = {
     headers: {
-      'Authorization': `Basic ${auth}`,
+      'Authorization': `Basic ${ADMIN_AUTH}`,
       'Content-Type': 'application/json',
     },
   };
@@ -18,5 +19,5 @@ export async function proxyToAdmin(req: NextRequest, path: string, method?: stri
 }
 
 export function adminAuthHeader(): string {
-  return `Basic ${Buffer.from('admin:admin123').toString('base64')}`;
+  return `Basic ${ADMIN_AUTH}`;
 }

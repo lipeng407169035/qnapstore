@@ -9,7 +9,14 @@ const app = express();
 const imagesDir = path.join(process.cwd(), 'public', 'images', 'products');
 const PORT = 3001;
 
-app.use(cors());
+// CORS 配置
+const corsOptions = {
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -19,7 +26,7 @@ const ADMIN_USER_NAME = process.env.ADMIN_USER || 'admin';
 const ADMIN_USER_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_USER = {
   email: 'admin@qnap.com',
-  password: 'admin123',
+  password: ADMIN_USER_PASS,
   name: '系统管理员',
   role: 'admin'
 };
@@ -29,7 +36,13 @@ const ADMIN_USER = {
 function getProductImage(sku) {
   const skuDir = path.join(imagesDir, sku);
   if (fs.existsSync(skuDir)) {
-    const files = fs.readdirSync(skuDir).filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f)).sort();
+    const files = fs.readdirSync(skuDir).filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f)).sort((a, b) => {
+      // Front.png 排在第一位
+      if (a === 'Front.png') return -1;
+      if (b === 'Front.png') return 1;
+      // 其他文件按字母顺序
+      return a.localeCompare(b);
+    });
     if (files.length > 0) return `/images/products/${sku}/${files[0]}`;
   }
   return '';
@@ -432,7 +445,7 @@ app.post('/api/admin/products/import', upload.single('file'), (req, res) => {
   res.json({ success: true, ...results });
 });
 
-app.post('/api/admin/products', (req, res) => {
+app.post('/api/admin/products', requireAdmin, (req, res) => {
   const db = loadDB();
   const { sku, name, series, categoryId, categorySlug, categoryName, price, originalPrice, description, specs, badge, color, rating, reviews, stock } = req.body;
   
@@ -460,7 +473,7 @@ app.post('/api/admin/products', (req, res) => {
   res.json(product);
 });
 
-app.put('/api/admin/products/:id', (req, res) => {
+app.put('/api/admin/products/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.products.findIndex(p => p.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Product not found' });
@@ -470,7 +483,7 @@ app.put('/api/admin/products/:id', (req, res) => {
   res.json(db.products[index]);
 });
 
-app.delete('/api/admin/products/:id', (req, res) => {
+app.delete('/api/admin/products/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const index = db.products.findIndex(p => p.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Product not found' });
@@ -482,6 +495,74 @@ app.delete('/api/admin/products/:id', (req, res) => {
   }
   
   db.products.splice(index, 1);
+  saveDB(db);
+  res.json({ success: true });
+});
+
+// ============ Cart ============
+
+app.get('/api/cart/:userId', (req, res) => {
+  const db = loadDB();
+  const userId = req.params.userId;
+  const cartItems = (db.cartItems || []).filter(c => c.userId === userId);
+  const enriched = cartItems.map(item => ({
+    ...item,
+    product: db.products.find(p => p.id === item.productId)
+  }));
+  res.json(enriched);
+});
+
+app.post('/api/cart', (req, res) => {
+  const db = loadDB();
+  const { userId, productId, quantity = 1 } = req.body;
+  if (!userId || !productId) {
+    return res.status(400).json({ error: 'userId 和 productId 必填' });
+  }
+  if (!db.cartItems) db.cartItems = [];
+
+  const existing = db.cartItems.findIndex(c => c.userId === userId && c.productId === productId);
+  if (existing >= 0) {
+    db.cartItems[existing].quantity += quantity;
+    saveDB(db);
+    return res.json(db.cartItems[existing]);
+  }
+
+  const cartItem = {
+    id: `cart_${Date.now()}`,
+    userId,
+    productId,
+    quantity,
+    addedAt: new Date().toISOString()
+  };
+  db.cartItems.push(cartItem);
+  saveDB(db);
+  res.json(cartItem);
+});
+
+app.put('/api/cart/:id', (req, res) => {
+  const db = loadDB();
+  const { quantity } = req.body;
+  const index = (db.cartItems || []).findIndex(c => c.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Cart item not found' });
+  db.cartItems[index].quantity = quantity;
+  saveDB(db);
+  res.json(db.cartItems[index]);
+});
+
+app.delete('/api/cart/:id', (req, res) => {
+  const db = loadDB();
+  if (!db.cartItems) return res.status(404).json({ error: 'Cart not found' });
+  const index = db.cartItems.findIndex(c => c.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Cart item not found' });
+  db.cartItems.splice(index, 1);
+  saveDB(db);
+  res.json({ success: true });
+});
+
+app.delete('/api/cart/user/:userId', (req, res) => {
+  const db = loadDB();
+  if (!db.cartItems) return res.json({ success: true });
+  db.cartItems = db.cartItems.filter(c => c.userId !== req.params.userId);
   saveDB(db);
   res.json({ success: true });
 });
@@ -642,10 +723,17 @@ app.get('/api/images/:sku', (req, res) => {
   const files = fs.readdirSync(skuDir)
     .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
     .sort((a, b) => {
-      const aIsPng = /\.(png|jpg|jpeg|webp)$/i.test(a);
-      const bIsPng = /\.(png|jpg|jpeg|webp)$/i.test(b);
-      if (aIsPng && !bIsPng) return -1;
-      if (!aIsPng && bIsPng) return 1;
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      // Front.png 排在第一位
+      if (a === 'Front.png') return -1;
+      if (b === 'Front.png') return 1;
+      // 包含 front 或 正面 的文件排在前面的位置
+      const aFront = aLower.includes('front') || aLower.includes('正面');
+      const bFront = bLower.includes('front') || bLower.includes('正面');
+      if (aFront && !bFront) return -1;
+      if (bFront && !aFront) return 1;
+      // 其他文件按字母顺序
       return a.localeCompare(b);
     })
     .map(f => ({
@@ -664,7 +752,20 @@ app.get('/api/admin/images/:sku', requireAdmin, (req, res) => {
   }
   const files = fs.readdirSync(skuDir)
     .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
-    .sort()
+    .sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      // Front.png 排在第一位
+      if (a === 'Front.png') return -1;
+      if (b === 'Front.png') return 1;
+      // 包含 front 或 正面 的文件排在前面的位置
+      const aFront = aLower.includes('front') || aLower.includes('正面');
+      const bFront = bLower.includes('front') || bLower.includes('正面');
+      if (aFront && !bFront) return -1;
+      if (bFront && !aFront) return 1;
+      // 其他文件按字母顺序
+      return a.localeCompare(b);
+    })
     .map(f => ({
       name: f,
       url: `/images/products/${req.params.sku}/${f}`,
@@ -848,6 +949,16 @@ app.get('/api/admin/product-views', requireAdmin, (req, res) => {
     stock: p.stock,
   })).sort((a, b) => b.views - a.views);
   res.json(enriched);
+});
+
+app.post('/api/admin/product-views', (req, res) => {
+  const db = loadDB();
+  const { productId } = req.body;
+  if (!productId) return res.status(400).json({ error: 'productId 必填' });
+  if (!db.productViews) db.productViews = {};
+  db.productViews[productId] = (db.productViews[productId] || 0) + 1;
+  saveDB(db);
+  res.json({ views: db.productViews[productId] });
 });
 
 // ============ Batch Stock Adjustment ============
@@ -1719,6 +1830,17 @@ app.put('/api/admin/settings/customer-service-info', requireAdmin, (req, res) =>
   db.customer_service_info = { ...db.customer_service_info, ...req.body };
   saveDB(db);
   res.json(db.customer_service_info);
+});
+
+// 全局错误处理中间件 (必须放在所有路由之后)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Server Error:', err);
+  res.status(500).json({ error: '服务器内部错误', message: err.message });
+});
+
+// 404处理
+app.use((req, res) => {
+  res.status(404).json({ error: 'API路由不存在' });
 });
 
 app.listen(PORT, () => {

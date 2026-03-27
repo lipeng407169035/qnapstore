@@ -12,6 +12,7 @@ build/
 # Database
 server/db.json
 server/db/
+server/db.json.backup.*
 
 # Environment
 .env
