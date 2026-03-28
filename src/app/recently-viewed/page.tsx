@@ -54,13 +54,13 @@ export default function RecentlyViewedPage() {
                 )}
               </div>
               <div className="p-3">
-                {p.badge && (
+                {p.badges && p.badges.length > 0 && (
                   <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold mb-1 ${
-                    p.badge === '热销' ? 'bg-orange-100 text-orange-700' :
-                    p.badge === '新品' ? 'bg-green-100 text-green-700' :
-                    p.badge === '特价' ? 'bg-red-100 text-red-700' :
+                    p.badges.includes('热销') ? 'bg-orange-100 text-orange-700' :
+                    p.badges.includes('新品') ? 'bg-green-100 text-green-700' :
+                    p.badges.includes('特价') ? 'bg-red-100 text-red-700' :
                     'bg-blue-100 text-blue-700'
-                  }`}>{p.badge}</span>
+                  }`}>{p.badges[0]}</span>
                 )}
                 <p className="text-sm font-medium line-clamp-2 mb-1">{p.name}</p>
                 <p className="text-xs text-gray-400 mb-2">{p.sku}</p>

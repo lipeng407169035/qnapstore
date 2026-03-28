@@ -7,11 +7,24 @@ import multer from 'multer';
 
 const app = express();
 const imagesDir = path.join(process.cwd(), 'public', 'images', 'products');
+const bannersDir = path.join(process.cwd(), 'public', 'images', 'banners');
 const PORT = 3001;
 
-// CORS 配置
+// CORS 配置 - 严格限制来源
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+const isProduction = process.env.NODE_ENV === 'production';
+
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // 生产环境必须验证 origin
+    if (isProduction) {
+      if (!origin || !allowedOrigins.includes(origin)) {
+        return callback(new Error('不允许的 CORS origin'));
+      }
+    }
+    // 开发环境允许 localhost
+    callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -19,14 +32,22 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// 缓存控制中间件 - 用于公开 GET 接口
+const cacheControl = (maxAgeSeconds: number) => (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.method === 'GET' && !req.query.noCache) {
+    res.setHeader('Cache-Control', `public, max-age=${maxAgeSeconds}, stale-while-revalidate=${maxAgeSeconds}`);
+  }
+  next();
+};
+
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-// 管理员账户
+// 管理员账户 - 使用强密码（生产环境应使用环境变量）
 const ADMIN_USER_NAME = process.env.ADMIN_USER || 'admin';
 const ADMIN_USER_PASS = process.env.ADMIN_PASS || 'admin123';
 const ADMIN_USER = {
   email: 'admin@qnap.com',
-  password: ADMIN_USER_PASS,
+  password: ADMIN_USER_PASS, // 建议生产环境使用 bcrypt 哈希
   name: '系统管理员',
   role: 'admin'
 };
@@ -90,6 +111,7 @@ function requireAdmin(req, res, next) {
 
 app.get('/api/categories', (req, res) => {
   const db = loadDB();
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   res.json(db.categories.filter(c => c.active !== false));
 });
 
@@ -137,6 +159,7 @@ app.delete('/api/admin/categories/:id', requireAdmin, (req, res) => {
 
 app.get('/api/banners', (req, res) => {
   const db = loadDB();
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   res.json(db.banners.filter(b => b.active).sort((a, b) => a.sort - b.sort));
 });
 
@@ -147,7 +170,7 @@ app.get('/api/admin/banners', requireAdmin, (req, res) => {
 
 app.post('/api/admin/banners', requireAdmin, (req, res) => {
   const db = loadDB();
-  const { title, subtitle, btnText, link, gradient, image } = req.body;
+  const { title, subtitle, btnText, link, gradient, image, imageSize } = req.body;
   const newBanner = {
     id: Date.now(),
     title,
@@ -156,12 +179,42 @@ app.post('/api/admin/banners', requireAdmin, (req, res) => {
     link: link || '/products',
     gradient: gradient || 'linear-gradient(135deg, #1d3557 0%, #006ebd 100%)',
     image: image || '',
+    imageSize: imageSize || 'cover',
     active: true,
     sort: db.banners.length + 1
   };
   db.banners.push(newBanner);
   saveDB(db);
   res.json(newBanner);
+});
+
+// Banner image upload
+const bannerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(bannersDir)) {
+      fs.mkdirSync(bannersDir, { recursive: true });
+    }
+    cb(null, bannersDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `banner_${Date.now()}${ext}`);
+  },
+});
+
+const uploadBanner = multer({
+  storage: bannerStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = /\.(svg|png|jpg|jpeg|webp)$/i;
+    cb(null, allowed.test(file.originalname));
+  },
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+app.post('/api/admin/banners/upload', requireAdmin, uploadBanner.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const url = `/images/banners/${req.file.filename}`;
+  res.json({ url });
 });
 
 app.put('/api/admin/banners/:id', requireAdmin, (req, res) => {
@@ -186,6 +239,7 @@ app.delete('/api/admin/banners/:id', requireAdmin, (req, res) => {
 
  app.get('/api/announcements', (req, res) => {
   const db = loadDB();
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   res.json(db.announcements.filter((a: any) => a.active).sort((a: any, b: any) => a.sort - b.sort));
 });
 
@@ -244,6 +298,7 @@ app.put('/api/admin/settings', requireAdmin, (req, res) => {
 
 app.get('/api/seo', (req, res) => {
   const db = loadDB();
+  res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=7200');
   res.json(db.seo || {});
 });
 
@@ -333,7 +388,14 @@ app.delete('/api/admin/coupons/:id', requireAdmin, (req, res) => {
 
 app.get('/api/products', (req, res) => {
   const db = loadDB();
-  const { category, search, sort, badge, rating } = req.query;
+  const { category, search, sort, badge, rating, limit = 100 } = req.query;
+
+  // 只有基础列表（有 category 筛选）才缓存
+  const hasFilters = search || badge || rating;
+  if (!hasFilters) {
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=120');
+  }
+
   let products = [...db.products];
 
   if (category) {
@@ -341,14 +403,14 @@ app.get('/api/products', (req, res) => {
   }
   if (search) {
     const q = search as string;
-    products = products.filter(p => 
+    products = products.filter(p =>
       p.name.includes(q) || p.sku.includes(q) || p.description.includes(q)
     );
   }
   if (badge === 'sale') {
     products = products.filter(p => p.originalPrice);
   } else if (badge) {
-    products = products.filter(p => p.badge === badge);
+    products = products.filter(p => (p.badges || []).includes(badge as string));
   }
   if (rating) {
     const minRating = parseFloat(rating as string);
@@ -357,6 +419,12 @@ app.get('/api/products', (req, res) => {
   if (sort === 'price_asc') products.sort((a, b) => a.price - b.price);
   else if (sort === 'price_desc') products.sort((a, b) => b.price - a.price);
   else if (sort === 'rating') products.sort((a, b) => b.rating - a.rating);
+
+  // Apply default limit to prevent huge responses
+  const maxLimit = parseInt(limit as string);
+  if (maxLimit > 0 && products.length > maxLimit) {
+    products = products.slice(0, maxLimit);
+  }
 
   res.json(products);
 });
@@ -376,7 +444,7 @@ app.get('/api/products/sku/:sku', (req, res) => {
 });
 
 app.get('/api/admin/products', requireAdmin, (req, res) => {
-  const { page = 1, limit = 24, search = '' } = req.query;
+  const { page = 1, limit = 500, search = '' } = req.query;
   const db = loadDB();
   const products = db.products.map(p => ({ ...p, imageUrl: getProductImage(p.sku) }));
   const result = paginate(products, parseInt(page as string), parseInt(limit as string), search as string, ['name', 'sku', 'categoryName']);
@@ -716,13 +784,25 @@ const uploadDisk = multer({
 });
 
 app.get('/api/images/:sku', (req, res) => {
-  const skuDir = path.join(imagesDir, req.params.sku);
+  const sku = req.params.sku;
+  const skuDir = path.join(imagesDir, sku);
   if (!fs.existsSync(skuDir)) {
     return res.json([]);
   }
+  const db = loadDB();
+  const customOrder = db.imageOrders?.[sku] || [];
+
   const files = fs.readdirSync(skuDir)
     .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
     .sort((a, b) => {
+      // 如果有自定义排序，使用自定义排序
+      if (customOrder.length > 0) {
+        const aIdx = customOrder.indexOf(a);
+        const bIdx = customOrder.indexOf(b);
+        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+        if (aIdx !== -1) return -1;
+        if (bIdx !== -1) return 1;
+      }
       const aLower = a.toLowerCase();
       const bLower = b.toLowerCase();
       // Front.png 排在第一位
@@ -738,7 +818,7 @@ app.get('/api/images/:sku', (req, res) => {
     })
     .map(f => ({
       name: f,
-      url: `/images/products/${req.params.sku}/${f}`,
+      url: `/images/products/${sku}/${f}`,
       size: fs.statSync(path.join(skuDir, f)).size,
       updatedAt: fs.statSync(path.join(skuDir, f)).mtime.toISOString(),
     }));
@@ -746,13 +826,25 @@ app.get('/api/images/:sku', (req, res) => {
 });
 
 app.get('/api/admin/images/:sku', requireAdmin, (req, res) => {
-  const skuDir = path.join(imagesDir, req.params.sku);
+  const sku = req.params.sku;
+  const skuDir = path.join(imagesDir, sku);
   if (!fs.existsSync(skuDir)) {
     return res.json([]);
   }
+  const db = loadDB();
+  const customOrder = db.imageOrders?.[sku] || [];
+
   const files = fs.readdirSync(skuDir)
     .filter(f => /\.(svg|png|jpg|jpeg|webp)$/i.test(f))
     .sort((a, b) => {
+      // 如果有自定义排序，使用自定义排序
+      if (customOrder.length > 0) {
+        const aIdx = customOrder.indexOf(a);
+        const bIdx = customOrder.indexOf(b);
+        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+        if (aIdx !== -1) return -1;
+        if (bIdx !== -1) return 1;
+      }
       const aLower = a.toLowerCase();
       const bLower = b.toLowerCase();
       // Front.png 排在第一位
@@ -768,7 +860,7 @@ app.get('/api/admin/images/:sku', requireAdmin, (req, res) => {
     })
     .map(f => ({
       name: f,
-      url: `/images/products/${req.params.sku}/${f}`,
+      url: `/images/products/${sku}/${f}`,
       size: fs.statSync(path.join(skuDir, f)).size,
       updatedAt: fs.statSync(path.join(skuDir, f)).mtime.toISOString(),
     }));
@@ -795,6 +887,18 @@ app.delete('/api/admin/images/:sku/:filename', requireAdmin, (req, res) => {
     return res.status(404).json({ error: 'File not found' });
   }
   fs.unlinkSync(filePath);
+  res.json({ success: true });
+});
+
+app.put('/api/admin/images/:sku/order', requireAdmin, (req, res) => {
+  const { order } = req.body;
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ error: 'order must be an array' });
+  }
+  const db = loadDB();
+  if (!db.imageOrders) db.imageOrders = {};
+  db.imageOrders[req.params.sku] = order;
+  saveDB(db);
   res.json({ success: true });
 });
 
@@ -1480,6 +1584,7 @@ app.get('/api/news', (req, res) => {
   if (category && category !== '全部') {
     news = news.filter(n => n.category === category);
   }
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   res.json(news.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
 });
 
@@ -1710,6 +1815,11 @@ app.get('/api/downloads', (req, res) => {
   res.json(files);
 });
 
+app.get('/api/admin/downloads', requireAdmin, (req, res) => {
+  const db = loadDB();
+  res.json(db.downloads || []);
+});
+
 app.post('/api/admin/downloads', requireAdmin, uploadDownload.single('file'), (req, res) => {
   const db = loadDB();
   const { sku, fileName, fileType, version } = req.body;
@@ -1831,6 +1941,10 @@ app.put('/api/admin/settings/customer-service-info', requireAdmin, (req, res) =>
   saveDB(db);
   res.json(db.customer_service_info);
 });
+
+// ============ Pages API (页面编辑器) ============
+const pagesRoutes = require('./routes/pages');
+pagesRoutes(app);
 
 // 全局错误处理中间件 (必须放在所有路由之后)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

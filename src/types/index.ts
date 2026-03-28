@@ -10,11 +10,12 @@ export interface Product {
   originalPrice: number | null;
   description: string;
   specs: string | Record<string, string | number>;
-  badge: string | null;
+  badges: string[];
   color: string;
   rating: number;
   reviews: number;
   stock: number;
+  imageUrl?: string;
 }
 
 export interface CartItem {
@@ -54,6 +55,8 @@ export interface Banner {
   link: string;
   gradient: string;
   btnText?: string;
+  image?: string;
+  imageSize?: 'cover' | 'contain' | 'left' | 'right';
 }
 
 export interface Announcement {

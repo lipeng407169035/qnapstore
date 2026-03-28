@@ -61,37 +61,30 @@ export default function HomePage() {
       setCategories(cats as Category[]);
       const allProducts = prods as Product[];
       setProducts(allProducts.slice(0, 8));
-      setHotProducts(allProducts.filter(p => p.badge === '热销' || p.rating >= 4.8).slice(0, 4));
+      setHotProducts(allProducts.filter(p => (p.badges || []).includes('热销') || p.rating >= 4.8).slice(0, 4));
       setAnnouncements(announcementsData);
       setBanners(bannersData);
       setPopularSearches(searches as string[]);
 
-      const featuredSkus = [...allProducts.slice(0, 8), ...allProducts.filter(p => p.badge === '热销' || p.rating >= 4.8).slice(0, 4)].map(p => p.sku);
-      if (featuredSkus.length > 0) {
+      // Collect all SKUs for batch image fetch
+      const featuredSkus = [...allProducts.slice(0, 8), ...allProducts.filter(p => (p.badges || []).includes('热销') || p.rating >= 4.8).slice(0, 4)].map(p => p.sku);
+      const recentSkus = recentItems.map(p => p.sku);
+      const allSkus = [...new Set([...featuredSkus, ...recentSkus])];
+
+      if (allSkus.length > 0) {
         try {
           const res = await fetch('/api/images/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ skus: [...new Set(featuredSkus)] }),
+            body: JSON.stringify({ skus: allSkus }),
           });
           const imgs = await res.json();
           setProductImages(imgs);
-        } catch {}
-      }
-
-      if (recentItems.length > 0) {
-        try {
-          const res2 = await fetch('/api/images/batch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ skus: recentItems.map(p => p.sku) }),
-          });
-          const imgs2 = await res2.json();
-          setRecentImages(imgs2);
+          setRecentImages(imgs);
         } catch {}
       }
     });
-  }, []);
+  }, [recentItems]);
 
   useEffect(() => {
     if (banners.length === 0) return;
@@ -115,10 +108,19 @@ export default function HomePage() {
       {/* Hero Slider */}
       <section className="relative overflow-hidden h-64 sm:h-80 md:h-[420px] lg:h-[480px] bg-gray-900" aria-label="精选活动轮播">
         <div className="flex h-full transition-transform duration-700 ease-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-          {banners.map((banner) => (
-            <div key={banner.id} className="min-w-full h-full flex items-center" style={{ background: banner.gradient }}>
-              <div className="container mx-auto px-6 flex items-center justify-between w-full">
-                <div className="text-white max-w-lg z-10 px-4 md:pl-4">
+          {banners.map((banner) => {
+            const imageSize = banner.imageSize || 'cover';
+            const bgStyle = banner.image ? {
+              backgroundImage: `url(${banner.image})`,
+              backgroundSize: imageSize === 'cover' ? 'cover' : imageSize === 'contain' ? 'contain' : 'cover',
+              backgroundPosition: imageSize === 'left' ? 'left center' : imageSize === 'right' ? 'right center' : 'center',
+            } : { background: banner.gradient };
+            return (
+            <div key={banner.id} className="min-w-full h-full flex items-center relative" style={bgStyle}>
+              {banner.image && imageSize === 'cover' && <div className="absolute inset-0 bg-black/40" />}
+              {banner.image && imageSize !== 'cover' && <div className="absolute inset-0 bg-black/20" />}
+              <div className="container mx-auto px-6 flex items-center justify-between w-full relative z-10">
+                <div className={`text-white max-w-lg px-4 md:pl-4 ${imageSize === 'right' ? 'ml-auto' : ''}`}>
                   <span className="inline-block bg-orange text-white text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wide">限时优惠</span>
                   <h2 className="font-barlow text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-3 md:mb-4">{banner.title}</h2>
                   <p className="text-xs sm:text-sm md:text-base opacity-90 leading-relaxed mb-4 md:mb-8 max-w-md">{banner.subtitle}</p>
@@ -126,20 +128,10 @@ export default function HomePage() {
                     <Button variant="primary" size="md" md-size="lg" className="shadow-lg">{banner.btnText}</Button>
                   </Link>
                 </div>
-                <div className="hidden lg:flex items-center justify-center w-[360px] pr-4">
-                  <div className="w-48 h-32 rounded-2xl flex flex-col items-center justify-center gap-3" style={{ background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)', boxShadow: '0 25px 80px rgba(0,0,0,0.6)' }}>
-                    <div className="w-36 h-5 bg-black/30 rounded-lg flex items-center px-2 gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
-                      <div className="flex-1 h-2 bg-black/30 rounded" />
-                    </div>
-                    <span className="text-[10px] text-white/30 font-mono font-bold tracking-widest">NAS UNIT</span>
-                  </div>
-                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         <button aria-label="上一张" onClick={() => setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length)} className="absolute top-1/2 -translate-y-1/2 left-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white cursor-pointer transition-all hover:bg-white/35 hover:scale-110 flex items-center justify-center"><ChevronLeft className="w-6 h-6" /></button>
         <button aria-label="下一张" onClick={() => setCurrentSlide((prev) => (prev + 1) % banners.length)} className="absolute top-1/2 -translate-y-1/2 right-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur border-none text-white cursor-pointer transition-all hover:bg-white/35 hover:scale-110 flex items-center justify-center"><ChevronRight className="w-6 h-6" /></button>

@@ -74,20 +74,20 @@ export const ProductCard = memo(function ProductCard({ product, onAddToCart, ima
 
   return (
     <div className="group bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-blue/50 flex flex-col relative">
-      {product.badge && (
+      {product.badges && product.badges.length > 0 && (
         <span
           className={clsx(
             'absolute top-3 left-3 z-20 text-xs font-bold px-3 py-1 rounded-full text-white shadow-sm',
             {
-              'bg-orange': product.badge === '热销' || product.badge === '热销',
-              'bg-green-500': product.badge === '新品',
-              'bg-red-500': product.badge === '特价' || product.badge === '限时',
-              'bg-purple-600': product.badge === '旗舰',
+              'bg-orange': product.badges.includes('热销'),
+              'bg-green-500': product.badges.includes('新品'),
+              'bg-red-500': product.badges.includes('特价') || product.badges.includes('限时'),
+              'bg-purple-600': product.badges.includes('旗舰'),
             }
           )}
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
         >
-          {product.badge}
+          {product.badges[0]}
         </span>
       )}
       <Link href={`/products/${product.sku}`}>

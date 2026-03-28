@@ -9,7 +9,7 @@ import { SkeletonTable } from '@/components/ui/Skeleton';
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { Search, X } from 'lucide-react';
+import { Search, X, Check, Edit2 } from 'lucide-react';
 
 interface SpecEntry {
   key: string;
@@ -28,7 +28,7 @@ const CATEGORIES = [
   { slug: 'memory', name: '内存' },
 ];
 
-const BADGE_OPTIONS = ['', '热销', '新品', '特价', '旗舰'];
+const BADGES = ['热销', '新品', '特价', '旗舰'];
 
 function parseSpecs(specs: string | Record<string, string | number> | undefined): SpecEntry[] {
   if (!specs) return [{ key: '', value: '' }];
@@ -60,12 +60,22 @@ export default function AdminProductsPage() {
   const [specEntries, setSpecEntries] = useState<SpecEntry[]>([{ key: '', value: '' }]);
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [batchItems, setBatchItems] = useState<{ productId: string; sku: string; name: string; stock: number; change: number }[]>([]);
+  const [inlineEdit, setInlineEdit] = useState<string | null>(null);
+  const [inlinePrice, setInlinePrice] = useState<number>(0);
+  const [inlineStock, setInlineStock] = useState<number>(0);
+  const [inlineBadges, setInlineBadges] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    adminFetch('/api/admin/products')
+    adminFetch('/api/admin/products?limit=500')
       .then(res => res.json())
       .then(data => {
-        setProducts(Array.isArray(data) ? data : (data.data || []));
+        const products = Array.isArray(data) ? data : (data.data || []);
+        // Normalize old badge to new badges array
+        setProducts(products.map((p: any) => ({
+          ...p,
+          badges: p.badges || (p.badge ? [p.badge] : [])
+        })));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -73,7 +83,7 @@ export default function AdminProductsPage() {
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product);
-    setFormData({ ...product });
+    setFormData({ ...product, badges: (product as any).badges || ((product as any).badge ? [(product as any).badge] : []) });
     setSpecEntries(parseSpecs(product.specs));
     setIsEditing(true);
   };
@@ -102,6 +112,33 @@ export default function AdminProductsPage() {
     setSelectedProduct(null);
   };
 
+  const startInlineEdit = (product: Product) => {
+    setInlineEdit(product.id);
+    setInlinePrice(product.price);
+    setInlineStock(product.stock);
+    setInlineBadges(product.badges || []);
+  };
+
+  const saveInlineEdit = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const res = await adminFetch(`/api/admin/products/${productId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...product, price: inlinePrice, stock: inlineStock, badges: inlineBadges }),
+    });
+
+    const updated = await res.json();
+    setProducts(prev => prev.map(p => p.id === updated.id ? { ...updated, badges: updated.badges || inlineBadges } : p));
+    setInlineEdit(null);
+    toast.success('已更新价格、库存和标签');
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineEdit(null);
+  };
+
   const handleAdd = () => {
     setSelectedProduct(null);
     setFormData({
@@ -114,7 +151,7 @@ export default function AdminProductsPage() {
       price: 0,
       originalPrice: null,
       description: '',
-      badge: null,
+      badges: [],
       color: '#006ebd',
       rating: 0,
       reviews: 0,
@@ -197,6 +234,23 @@ export default function AdminProductsPage() {
       </div>
 
       <div className="bg-white rounded-2xl overflow-hidden">
+        <div className="p-4 border-b">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="搜索商品名称..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue/20 focus:border-blue"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -211,12 +265,16 @@ export default function AdminProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => {
+            {products.filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((product) => {
               const stockStatus = getStockStatus(product.stock);
               return (
                 <tr key={product.id} className="border-t hover:bg-gray-50">
                   <td className="p-4">
-                    <div className="w-12 h-12 rounded-lg" style={{ background: product.color }} />
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.name} className="w-12 h-12 object-contain rounded-lg" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg" style={{ background: product.color }} />
+                    )}
                   </td>
                   <td className="p-4 font-mono text-sm">{product.sku}</td>
                   <td className="p-4">
@@ -225,33 +283,96 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="p-4 text-sm">{product.categoryName}</td>
                   <td className="p-4">
-                    <div className="font-semibold">¥ {product.price.toLocaleString()}</div>
+                    {inlineEdit === product.id ? (
+                      <input
+                        type="number"
+                        value={inlinePrice}
+                        onChange={(e) => setInlinePrice(parseInt(e.target.value) || 0)}
+                        className="w-24 px-2 py-1 border rounded text-sm"
+                      />
+                    ) : (
+                      <div className="font-semibold">¥ {product.price.toLocaleString()}</div>
+                    )}
                     {product.originalPrice && (
                       <div className="text-xs text-gray-400 line-through">¥ {product.originalPrice.toLocaleString()}</div>
                     )}
                   </td>
                   <td className="p-4">
-                    <div className="text-sm font-medium">{product.stock}</div>
+                    {inlineEdit === product.id ? (
+                      <input
+                        type="number"
+                        value={inlineStock}
+                        onChange={(e) => setInlineStock(parseInt(e.target.value) || 0)}
+                        className="w-20 px-2 py-1 border rounded text-sm"
+                      />
+                    ) : (
+                      <div className="text-sm font-medium">{product.stock}</div>
+                    )}
                     <span className={`px-2 py-0.5 rounded-full text-xs ${stockStatus.color}`}>
                       {stockStatus.label}
                     </span>
                   </td>
                   <td className="p-4">
-                    {product.badge && (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        product.badge === '热销' ? 'bg-orange-100 text-orange-700' :
-                        product.badge === '新品' ? 'bg-green-100 text-green-700' :
-                        product.badge === '特价' ? 'bg-red-100 text-red-700' :
-                        'bg-purple-100 text-purple-700'
-                      }`}>
-                        {product.badge}
-                      </span>
+                    {inlineEdit === product.id ? (
+                      <div className="flex flex-wrap gap-1">
+                        {BADGES.map(badge => (
+                          <button
+                            key={badge}
+                            onClick={() => {
+                              if (inlineBadges.includes(badge)) {
+                                setInlineBadges(inlineBadges.filter(b => b !== badge));
+                              } else {
+                                setInlineBadges([...inlineBadges, badge]);
+                              }
+                            }}
+                            className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                              inlineBadges.includes(badge)
+                                ? badge === '热销' ? 'bg-orange-500 text-white' :
+                                  badge === '新品' ? 'bg-green-500 text-white' :
+                                  badge === '特价' ? 'bg-red-500 text-white' :
+                                  'bg-purple-500 text-white'
+                                : 'bg-gray-100 text-gray-400'
+                            }`}
+                          >
+                            {badge}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1">
+                        {(product.badges || []).map(badge => (
+                          <span key={badge} className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            badge === '热销' ? 'bg-orange-100 text-orange-700' :
+                            badge === '新品' ? 'bg-green-100 text-green-700' :
+                            badge === '特价' ? 'bg-red-100 text-red-700' :
+                            'bg-purple-100 text-purple-700'
+                          }`}>
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </td>
                   <td className="p-4">
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEdit(product)} className="text-blue text-sm hover:underline">编辑</button>
-                      <button onClick={() => handleDelete(product.id)} className="text-red-500 text-sm hover:underline">删除</button>
+                    <div className="flex gap-2 items-center">
+                      {inlineEdit === product.id ? (
+                        <>
+                          <button onClick={() => saveInlineEdit(product.id)} className="p-1.5 bg-green-500 text-white rounded hover:bg-green-600" title="保存">
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button onClick={cancelInlineEdit} className="p-1.5 bg-gray-400 text-white rounded hover:bg-gray-500" title="取消">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => startInlineEdit(product)} className="p-1.5 text-blue bg-blue-50 rounded hover:bg-blue-100" title="快速编辑">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleEdit(product)} className="text-blue text-sm hover:underline">编辑</button>
+                          <button onClick={() => handleDelete(product.id)} className="text-red-500 text-sm hover:underline">删除</button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -353,10 +474,33 @@ export default function AdminProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm text-gray-500 block mb-1">标签</label>
-                  <select value={formData.badge || ''} onChange={(e) => setFormData({ ...formData, badge: e.target.value || null })} className="w-full px-4 py-2 border rounded-xl text-sm">
-                    {BADGE_OPTIONS.map(b => <option key={b} value={b}>{b || '无'}</option>)}
-                  </select>
+                  <label className="text-sm text-gray-500 block mb-1">标签（可多选）</label>
+                  <div className="flex flex-wrap gap-2">
+                    {BADGES.map(badge => (
+                      <button
+                        key={badge}
+                        type="button"
+                        onClick={() => {
+                          const currentBadges = formData.badges || [];
+                          if (currentBadges.includes(badge)) {
+                            setFormData({ ...formData, badges: currentBadges.filter(b => b !== badge) });
+                          } else {
+                            setFormData({ ...formData, badges: [...currentBadges, badge] });
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          (formData.badges || []).includes(badge)
+                            ? badge === '热销' ? 'bg-orange-500 text-white' :
+                              badge === '新品' ? 'bg-green-500 text-white' :
+                              badge === '特价' ? 'bg-red-500 text-white' :
+                              'bg-purple-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {badge}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="text-sm text-gray-500 block mb-1">库存数量</label>

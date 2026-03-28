@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ImageFile } from '@/types';
 import { toast } from '@/components/ui/Toast';
-import { X, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { X, AlertTriangle, Image as ImageIcon, Search, GripVertical } from 'lucide-react';
 
 export default function AdminImagesPage() {
   const router = useRouter();
@@ -24,6 +24,11 @@ export default function AdminImagesPage() {
 
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ sku: string; name: string } | null>(null);
+  const [searchSku, setSearchSku] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [localImages, setLocalImages] = useState<ImageFile[]>([]);
+  const [hasReordered, setHasReordered] = useState(false);
 
   const fetchProducts = useCallback(() => {
     adminFetch('/api/admin/products')
@@ -38,8 +43,15 @@ export default function AdminImagesPage() {
   const fetchImages = useCallback((sku: string) => {
     adminFetch(`/api/images/${sku}`)
       .then(res => res.json())
-      .then(data => setImages(data))
-      .catch(() => setImages([]));
+      .then(data => {
+        setImages(data);
+        setLocalImages(data);
+        setHasReordered(false);
+      })
+      .catch(() => {
+        setImages([]);
+        setLocalImages([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -140,6 +152,10 @@ export default function AdminImagesPage() {
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
   };
 
+  const filteredProducts = searchSku
+    ? products.filter(p => p.sku.toLowerCase().includes(searchSku.toLowerCase()) || p.name.toLowerCase().includes(searchSku.toLowerCase()))
+    : products;
+
   if (loading) return <div className="text-center py-20">加载中...</div>;
 
   return (
@@ -158,18 +174,35 @@ export default function AdminImagesPage() {
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1">
             <label className="text-sm text-gray-500 block mb-2">选择型号</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchSku}
+                onChange={(e) => setSearchSku(e.target.value)}
+                placeholder="搜索型号或名称..."
+                className="w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm"
+              />
+            </div>
             <select
               value={selectedSku}
               onChange={(e) => setSelectedSku(e.target.value)}
-              className="w-full px-4 py-2.5 border rounded-xl text-sm"
+              className="w-full px-4 py-2.5 border rounded-xl text-sm mt-2"
+              size={filteredProducts.length > 10 ? 10 : filteredProducts.length}
             >
               <option value="">-- 请选择型号 --</option>
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <option key={p.id} value={p.sku}>
                   {p.sku} - {p.name}
                 </option>
               ))}
             </select>
+            {searchSku && filteredProducts.length === 0 && (
+              <p className="text-sm text-gray-400 mt-2">未找到匹配型号</p>
+            )}
+            {searchSku && filteredProducts.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">找到 {filteredProducts.length} 个匹配型号</p>
+            )}
           </div>
           {selectedSku && (
             <div className="flex items-end gap-2 pb-0.5">
@@ -215,45 +248,107 @@ export default function AdminImagesPage() {
             <p className="text-gray-400">尚无图片，请上传图片</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {images.map((img) => (
-              <div key={img.name} className="bg-white rounded-2xl overflow-hidden shadow-sm group">
-                <div className="relative aspect-square bg-gray-50">
-                  <img
-                    src={img.url}
-                    alt={img.name}
-                    className="w-full h-full object-contain p-2"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>`;
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                    <a
-                      href={img.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-white text-gray-800 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-100"
-                    >
-                      查看大图
-                    </a>
-                    <button
-                      onClick={() => handleDeleteImage(img.name)}
-                      disabled={deleting === img.name}
-                      className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600 disabled:opacity-50"
-                    >
-                      {deleting === img.name ? '删除中...' : '删除'}
-                    </button>
+          <>
+            {hasReordered && (
+              <div className="mb-4 flex justify-end">
+                <button
+                  onClick={async () => {
+                    try {
+                      await adminFetch(`/api/admin/images/${selectedSku}/order`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ order: localImages.map(img => img.name) }),
+                      });
+                      setImages(localImages);
+                      setHasReordered(false);
+                      toast.success('排序已保存');
+                    } catch {
+                      toast.error('保存失败，请重试');
+                    }
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-green-700"
+                >
+                  保存排序
+                </button>
+              </div>
+            )}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {localImages.map((img, idx) => (
+                <div
+                  key={img.name}
+                  draggable
+                  onDragStart={() => {
+                    setDraggedIndex(idx);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOverIndex(idx);
+                  }}
+                  onDragEnd={() => {
+                    if (draggedIndex !== null && dragOverIndex !== null && draggedIndex !== dragOverIndex) {
+                      const newImages = [...localImages];
+                      const [removed] = newImages.splice(draggedIndex, 1);
+                      newImages.splice(dragOverIndex, 0, removed);
+                      setLocalImages(newImages);
+                      setHasReordered(true);
+                    }
+                    setDraggedIndex(null);
+                    setDragOverIndex(null);
+                  }}
+                  className={`bg-white rounded-2xl overflow-hidden shadow-sm group transition-all ${
+                    draggedIndex === idx ? 'opacity-50 scale-95' : ''
+                  } ${dragOverIndex === idx && draggedIndex !== idx ? 'ring-2 ring-blue ring-offset-2' : ''}`}
+                >
+                  <div className="relative aspect-square bg-gray-50">
+                    <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-black/50 text-white p-1.5 rounded-lg cursor-grab active:cursor-grabbing">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                    </div>
+                    {dragOverIndex === idx && draggedIndex !== idx && (
+                      <div className="absolute inset-0 bg-blue/20 flex items-center justify-center z-20">
+                        <div className="bg-blue text-white text-xs px-2 py-1 rounded">
+                          拖放到这里
+                        </div>
+                      </div>
+                    )}
+                    <img
+                      src={img.url}
+                      alt={img.name}
+                      className="w-full h-full object-contain p-2"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = `<div class="flex items-center justify-center w-full h-full text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>`;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                      <a
+                        href={img.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white text-gray-800 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-gray-100"
+                      >
+                        查看大图
+                      </a>
+                      <button
+                        onClick={() => handleDeleteImage(img.name)}
+                        disabled={deleting === img.name}
+                        className="bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-red-600 disabled:opacity-50"
+                      >
+                        {deleting === img.name ? '删除中...' : '删除'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <p className="text-xs font-mono text-gray-600 truncate" title={img.name}>{img.name}</p>
+                    <p className="text-xs text-gray-400">{formatSize(img.size)}</p>
+                    <p className="text-xs text-blue font-medium mt-1">#{idx + 1}</p>
                   </div>
                 </div>
-                <div className="p-3">
-                  <p className="text-xs font-mono text-gray-600 truncate" title={img.name}>{img.name}</p>
-                  <p className="text-xs text-gray-400">{formatSize(img.size)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )
       ) : (
           <div className="bg-white rounded-2xl shadow-sm p-20 text-center">

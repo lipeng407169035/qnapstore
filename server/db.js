@@ -3,6 +3,62 @@ const path = require('path');
 
 const dbPath = path.join(__dirname, 'db.json');
 
+// In-memory cache to reduce disk I/O
+let dbCache = null;
+let dbCacheTime = 0;
+const DB_CACHE_TTL = 30000; // 30 second cache TTL for read operations (was 1s)
+
+function loadDB() {
+  // Use cache if fresh enough
+  if (dbCache && (Date.now() - dbCacheTime) < DB_CACHE_TTL) {
+    return dbCache;
+  }
+
+  if (!fs.existsSync(dbPath)) {
+    fs.writeFileSync(dbPath, JSON.stringify(defaultData, null, 2));
+    dbCache = defaultData;
+    dbCacheTime = Date.now();
+    return defaultData;
+  }
+  const data = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
+  if (!data.settings) data.settings = defaultData.settings;
+  if (!data.banners) data.banners = defaultData.banners;
+  if (!data.announcements) data.announcements = defaultData.announcements;
+  if (!data.coupons) data.coupons = defaultData.coupons;
+  if (!data.seo) data.seo = defaultData.seo;
+  if (typeof data.settings.stockAlertThreshold !== 'number') data.settings.stockAlertThreshold = 20;
+  if (!data.emailTemplates) data.emailTemplates = defaultData.settings.emailTemplates;
+  if (!data.productViews) data.productViews = {};
+  if (!data.activities) data.activities = [];
+  if (!data.customers) data.customers = defaultData.customers;
+  if (!data.invoices) data.invoices = defaultData.invoices;
+  if (!data.staffMembers) data.staffMembers = defaultData.staffMembers;
+  if (!data.auditLogs) data.auditLogs = defaultData.auditLogs;
+  if (!data.popularSearches) data.popularSearches = defaultData.popularSearches;
+  if (!data.shippingCompanies) data.shippingCompanies = defaultData.shippingCompanies;
+  if (!data.fullReductions) data.fullReductions = defaultData.fullReductions;
+  if (!data.news) data.news = defaultData.news;
+  if (!data.partnershipApps) data.partnershipApps = defaultData.partnershipApps;
+  if (!data.warrantySubs) data.warrantySubs = defaultData.warrantySubs;
+  if (!data.supportTickets) data.supportTickets = defaultData.supportTickets;
+  if (!data.downloads) data.downloads = defaultData.downloads;
+  if (!data.faq) data.faq = defaultData.faq;
+  if (!data.rma_policy) data.rma_policy = defaultData.rma_policy;
+  if (!data.customer_service_info) data.customer_service_info = defaultData.customer_service_info;
+  if (!data.imageOrders) data.imageOrders = {};
+
+  dbCache = data;
+  dbCacheTime = Date.now();
+  return data;
+}
+
+function saveDB(data) {
+  // Invalidate cache on write
+  dbCache = null;
+  dbCacheTime = 0;
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+}
+
 const defaultData = {
   users: [],
   coupons: [
@@ -387,41 +443,4 @@ const defaultData = {
   },
 };
 
-function loadDB() {
-  if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify(defaultData, null, 2));
-    return defaultData;
-  }
-  const data = JSON.parse(fs.readFileSync(dbPath, 'utf-8'));
-  if (!data.settings) data.settings = defaultData.settings;
-  if (!data.banners) data.banners = defaultData.banners;
-  if (!data.announcements) data.announcements = defaultData.announcements;
-  if (!data.coupons) data.coupons = defaultData.coupons;
-  if (!data.seo) data.seo = defaultData.seo;
-  if (typeof data.settings.stockAlertThreshold !== 'number') data.settings.stockAlertThreshold = 20;
-  if (!data.emailTemplates) data.emailTemplates = defaultData.settings.emailTemplates;
-  if (!data.productViews) data.productViews = {};
-  if (!data.activities) data.activities = [];
-  if (!data.customers) data.customers = defaultData.customers;
-  if (!data.invoices) data.invoices = defaultData.invoices;
-  if (!data.staffMembers) data.staffMembers = defaultData.staffMembers;
-  if (!data.auditLogs) data.auditLogs = defaultData.auditLogs;
-  if (!data.popularSearches) data.popularSearches = defaultData.popularSearches;
-  if (!data.shippingCompanies) data.shippingCompanies = defaultData.shippingCompanies;
-  if (!data.fullReductions) data.fullReductions = defaultData.fullReductions;
-  if (!data.news) data.news = defaultData.news;
-  if (!data.partnershipApps) data.partnershipApps = defaultData.partnershipApps;
-  if (!data.warrantySubs) data.warrantySubs = defaultData.warrantySubs;
-  if (!data.supportTickets) data.supportTickets = defaultData.supportTickets;
-  if (!data.downloads) data.downloads = defaultData.downloads;
-  if (!data.faq) data.faq = defaultData.faq;
-  if (!data.rma_policy) data.rma_policy = defaultData.rma_policy;
-  if (!data.customer_service_info) data.customer_service_info = defaultData.customer_service_info;
-  return data;
-}
-
-function saveDB(data) {
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-}
-
-module.exports = { loadDB, saveDB, defaultData };
+module.exports = { loadDB, saveDB, defaultData, invalidateCache: () => { dbCache = null; dbCacheTime = 0; } };
